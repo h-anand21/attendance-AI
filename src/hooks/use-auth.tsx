@@ -6,6 +6,7 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useMemo,
 } from 'react';
 import {
   onAuthStateChanged,
@@ -80,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: 'Could not sign in with Google. Please try again.',
       });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -97,16 +98,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const authContextValue = useMemo(() => ({
+      user,
+      userRole,
+      loading,
+      signInWithGoogle,
+      signOut,
+  }), [user, userRole, loading]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        userRole,
-        loading,
-        signInWithGoogle,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
