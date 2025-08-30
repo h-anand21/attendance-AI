@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -27,7 +27,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
-        {children}
+        <div className="relative min-h-screen w-full">
+          <div className="absolute top-0 left-0 -z-10 h-full w-full bg-background">
+            <div className="absolute bottom-auto left-auto right-0 top-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-[rgba(255,0,168,0.15)] opacity-50 blur-[80px]"></div>
+          </div>
+          {children}
+        </div>
         <Toaster />
       </body>
     </html>

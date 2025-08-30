@@ -78,7 +78,7 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-semibold tracking-tight">
             Select a Class
           </h2>
-          <Button asChild variant="outline">
+          <Button asChild>
             <Link href="/registration">
               <PlusCircle className="mr-2 h-4 w-4" />
               New Class
@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls) => (
               <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                <Card className="hover:border-primary hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
+                <Card className="hover:border-primary/50 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col hover:shadow-primary/20">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{cls.name}</CardTitle>
