@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls) => (
               <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                <Card className="hover:border-primary/50 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col hover:shadow-primary/20">
+                <Card className="hover:border-primary/80 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col hover:shadow-primary/20">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{cls.name}</CardTitle>
