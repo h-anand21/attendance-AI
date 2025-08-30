@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
 import { useStudents } from '@/hooks/use-students';
+import { useAttendance } from '@/hooks/use-attendance';
 
 type AttendanceClientProps = {
   currentClass: Class;
@@ -30,8 +31,9 @@ export function AttendanceClient({
 }: AttendanceClientProps) {
   const { toast } = useToast();
   const { studentsByClass, loading } = useStudents();
+  const { addAttendanceRecords } = useAttendance();
   const [students, setStudents] = useState<Student[]>([]);
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [attendance, setAttendance] = useState<Omit<AttendanceRecord, 'date' | 'classId'>[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
   
   useEffect(() => {
@@ -70,11 +72,18 @@ export function AttendanceClient({
   };
 
   const handleConfirmAttendance = () => {
-    // Here you would typically save the data to a local DB (IndexedDB) and sync with server
-    console.log('Confirmed Attendance:', attendance);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const recordsToSave: AttendanceRecord[] = attendance.map(record => ({
+      ...record,
+      date: today,
+      classId: currentClass.id,
+    }));
+    
+    addAttendanceRecords(recordsToSave);
+
     toast({
       title: 'Attendance Confirmed!',
-      description: `Attendance for ${currentClass.name} has been saved.`,
+      description: `Attendance for ${currentClass.name} on ${today} has been saved.`,
     });
   };
 
@@ -91,7 +100,7 @@ export function AttendanceClient({
         <CardHeader>
           <CardTitle>Take Attendance</CardTitle>
           <CardDescription>
-            Use one of the methods below for {currentClass.name}.
+            Use one of the methods below for {currentClass.name}. Today's date is {new Date().toLocaleDateString()}.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">

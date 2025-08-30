@@ -16,4 +16,6 @@ export type AttendanceStatus = 'present' | 'absent' | 'late';
 export type AttendanceRecord = {
   studentId: string;
   status: AttendanceStatus;
+  date: string; // ISO date string (e.g., "2023-10-27")
+  classId: string;
 };

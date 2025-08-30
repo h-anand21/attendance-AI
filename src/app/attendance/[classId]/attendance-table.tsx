@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 type AttendanceTableProps = {
   students: Student[];
-  attendance: AttendanceRecord[];
+  attendance: Omit<AttendanceRecord, 'date' | 'classId'>[];
   onStatusChange: (studentId: string, status: AttendanceStatus) => void;
   loading: boolean;
 };

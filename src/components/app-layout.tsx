@@ -83,7 +83,7 @@ function AppSidebar() {
               isActive={pathname === "/reports"}
               tooltip={{ children: "Reports" }}
             >
-              <Link href="#">
+              <Link href="/reports">
                 <Download />
                 <span>Reports</span>
               </Link>
