@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScanFace, UserCheck, UserX } from 'lucide-react';
 import type { Student } from '@/types';
+import { useToast } from '@/hooks/use-toast';
+import { recognizeFaces } from '@/ai/flows/recognize-faces';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 type FaceScanModalProps = {
   isOpen: boolean;
@@ -27,47 +31,116 @@ export function FaceScanModal({
   students,
   onScanComplete,
 }: FaceScanModalProps) {
+  const { toast } = useToast();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isScanning, setScanning] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [recognizedCount, setRecognizedCount] = useState(0);
   const [unrecognizedCount, setUnrecognizedCount] = useState(0);
+  const [hasCameraPermission, setHasCameraPermission] = useState<
+    boolean | undefined
+  >(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setScanning(false);
-      setProgress(0);
       setRecognizedCount(0);
       setUnrecognizedCount(0);
-    }
-  }, [isOpen]);
+      setHasCameraPermission(undefined);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isScanning && progress < 100) {
-      timer = setTimeout(() => {
-        setProgress((prev) => prev + 2);
-      }, 80);
-    } else if (isScanning && progress >= 100) {
-      setScanning(false);
-      const recognized: string[] = [];
-      students.forEach((student) => {
-        if (Math.random() > 0.3) {
-          recognized.push(student.id);
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          setHasCameraPermission(true);
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description:
+              'Please enable camera permissions in your browser settings to use this app.',
+          });
         }
+      };
+
+      getCameraPermission();
+    } else {
+      // Turn off camera when modal is closed
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [isOpen, toast]);
+
+  const captureFrame = (): string | null => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg');
+      }
+    }
+    return null;
+  };
+
+  const handleStartScan = async () => {
+    setScanning(true);
+    setIsLoading(true);
+    const frame = captureFrame();
+
+    if (!frame) {
+      toast({
+        variant: 'destructive',
+        title: 'Scan Failed',
+        description: 'Could not capture a frame from the camera.',
       });
-      setRecognizedCount(recognized.length);
-      setUnrecognizedCount(students.length - recognized.length);
+      setScanning(false);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const studentPhotos = students.map((s) => ({
+        studentId: s.id,
+        photoDataUri: s.avatar,
+      }));
+
+      const result = await recognizeFaces({
+        scenePhotoDataUri: frame,
+        studentPhotos,
+      });
+
+      const recognizedIds = result.recognizedStudentIds;
+      setRecognizedCount(recognizedIds.length);
+      setUnrecognizedCount(students.length - recognizedIds.length);
 
       setTimeout(() => {
-        onScanComplete(recognized);
+        onScanComplete(recognizedIds);
         onOpenChange(false);
+        setIsLoading(false);
       }, 1500);
+    } catch (error) {
+      console.error('Face recognition error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Recognition Failed',
+        description: 'An error occurred during face recognition.',
+      });
+      setScanning(false);
+      setIsLoading(false);
     }
-    return () => clearTimeout(timer);
-  }, [isScanning, progress, onScanComplete, students, onOpenChange]);
-
-  const handleStartScan = () => {
-    setScanning(true);
   };
 
   return (
@@ -76,60 +149,74 @@ export function FaceScanModal({
         <DialogHeader>
           <DialogTitle>Face Scan Attendance</DialogTitle>
           <DialogDescription>
-            The camera will activate to scan students' faces. Please ensure good
-            lighting.
+            Position students in front of the camera and press start.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col items-center justify-center space-y-4 py-8">
-          {isScanning || progress > 0 ? (
-            <div className="w-full space-y-4">
-              <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-                <ScanFace className="h-24 w-24 text-muted-foreground/50" />
-                <div className="absolute top-0 left-0 w-full h-1 bg-primary/50 animate-scan-line"></div>
+          <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+            <video
+              ref={videoRef}
+              className="w-full aspect-video rounded-md"
+              autoPlay
+              muted
+              playsInline
+            />
+            {hasCameraPermission === undefined && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
+                <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-              <Progress value={progress} className="w-full" />
+            )}
+          </div>
+          {hasCameraPermission === false && (
+            <Alert variant="destructive">
+              <AlertTitle>Camera Access Required</AlertTitle>
+              <AlertDescription>
+                Please allow camera access to use this feature.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isScanning && (
+            <div className="w-full space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Scanning... {progress}%</span>
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
                     <UserCheck className="h-4 w-4 text-primary" />{' '}
-                    {recognizedCount}
+                    {recognizedCount} Recognized
                   </span>
                   <span className="flex items-center gap-1">
                     <UserX className="h-4 w-4 text-destructive" />{' '}
-                    {unrecognizedCount}
+                    {unrecognizedCount} Unrecognized
                   </span>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center space-y-4">
-              <ScanFace className="mx-auto h-24 w-24 text-muted-foreground" />
-              <p>Ready to start scanning.</p>
             </div>
           )}
         </div>
 
         <DialogFooter>
-          {progress === 0 && !isScanning && (
-            <Button
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-              onClick={handleStartScan}
-            >
-              Start Scanning
-            </Button>
-          )}
-          {isScanning && (
-            <Button className="w-full" disabled>
-              Scanning in progress...
-            </Button>
-          )}
-          {progress >= 100 && !isScanning && (
-            <Button className="w-full" disabled>
-              Finalizing...
-            </Button>
-          )}
+          <Button
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={handleStartScan}
+            disabled={
+              isLoading ||
+              isScanning ||
+              hasCameraPermission === false ||
+              hasCameraPermission === undefined
+            }
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ScanFace className="mr-2 h-4 w-4" />
+            )}
+            {isLoading
+              ? 'Scanning...'
+              : isScanning
+              ? 'Scan Complete'
+              : 'Start Scan'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
