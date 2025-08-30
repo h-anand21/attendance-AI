@@ -1,9 +1,19 @@
+
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Bell, Download, Home, ScanFace, Users, UserPlus } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Bell,
+  Home,
+  ScanFace,
+  Users,
+  UserPlus,
+  LogOut,
+  Info,
+  LineChart,
+} from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -26,9 +36,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 function AppSidebar() {
   const pathname = usePathname();
+  const { user, userRole, signOut } = useAuth();
+
   return (
     <Sidebar collapsible="icon" side="left" variant="floating">
       <SidebarHeader className="justify-center">
@@ -65,27 +79,43 @@ function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          {userRole === 'admin' && (
+            <>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/registration"}
+                  tooltip={{ children: "Registration" }}
+                >
+                  <Link href="/registration">
+                    <UserPlus />
+                    <span>Registration</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/reports"}
+                  tooltip={{ children: "Reports" }}
+                >
+                  <Link href="/reports">
+                    <LineChart />
+                    <span>Reports</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/registration"}
-              tooltip={{ children: "Registration" }}
+              isActive={pathname === "/about"}
+              tooltip={{ children: "About" }}
             >
-              <Link href="/registration">
-                <UserPlus />
-                <span>Registration</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/reports"}
-              tooltip={{ children: "Reports" }}
-            >
-              <Link href="/reports">
-                <Download />
-                <span>Reports</span>
+              <Link href="/about">
+                <Info />
+                <span>About</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -101,30 +131,34 @@ function AppSidebar() {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src="https://picsum.photos/seed/teacher/40/40"
-                    alt="Teacher"
+                    src={user?.photoURL || "https://picsum.photos/seed/user/40/40"}
+                    alt={user?.displayName || "User"}
                     data-ai-hint="person"
                   />
-                  <AvatarFallback>T</AvatarFallback>
+                  <AvatarFallback>
+                    {user?.displayName?.[0] || 'U'}
+                  </AvatarFallback>
                 </Avatar>
-                <span className="truncate">Teacher</span>
+                <span className="truncate">{user?.displayName || "User"}</span>
               </SidebarMenuButton>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Teacher</p>
+                <p className="text-sm font-medium leading-none">
+                  {user?.displayName}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  teacher@school.com
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onClick={signOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
@@ -152,6 +186,23 @@ export function AppLayout({
   children: React.ReactNode;
   pageTitle: string;
 }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
