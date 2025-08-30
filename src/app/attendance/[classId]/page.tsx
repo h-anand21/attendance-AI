@@ -1,18 +1,27 @@
-import { classes, students as initialStudents } from '@/lib/data';
+'use client';
+
 import { AppLayout } from '@/components/app-layout';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { AttendanceClient } from './attendance-client';
+import { useClasses } from '@/hooks/use-classes';
+import { Loader2 } from 'lucide-react';
 
-type AttendancePageProps = {
-  params: {
-    classId: string;
-  };
-};
+export default function AttendancePage() {
+  const params = useParams();
+  const classId = params.classId as string;
+  const { classes, loading: classesLoading } = useClasses();
 
-export default function AttendancePage({ params }: AttendancePageProps) {
-  const { classId } = params;
   const currentClass = classes.find((c) => c.id === classId);
-  const classStudents = initialStudents[classId] || [];
+
+  if (classesLoading) {
+    return (
+       <AppLayout pageTitle="Loading Attendance...">
+        <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    )
+  }
 
   if (!currentClass) {
     notFound();
@@ -20,7 +29,7 @@ export default function AttendancePage({ params }: AttendancePageProps) {
 
   return (
     <AppLayout pageTitle={`Attendance: ${currentClass.name}`}>
-      <AttendanceClient currentClass={currentClass} initialStudents={classStudents} />
+      <AttendanceClient currentClass={currentClass} />
     </AppLayout>
   );
 }

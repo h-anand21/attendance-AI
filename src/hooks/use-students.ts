@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Student, Class } from '@/types';
+import type { Student } from '@/types';
 import { students as initialStudentsData } from '@/lib/data';
 
 const STUDENT_STORAGE_KEY = 'attendease_students';
 
-export function useStudents(initialStudents: Student[] = []) {
+export function useStudents() {
   const [studentsByClass, setStudentsByClass] = useState<Record<string, Student[]>>({});
   const [loading, setLoading] = useState(true);
 
@@ -18,19 +18,20 @@ export function useStudents(initialStudents: Student[] = []) {
       } else {
         // If nothing is in local storage, use the initial mock data
         setStudentsByClass(initialStudentsData);
+        localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(initialStudentsData));
       }
     } catch (error) {
       console.error("Failed to read students from localStorage", error);
-      // Fallback to initial data
       setStudentsByClass(initialStudentsData);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const addStudent = useCallback((student: Omit<Student, 'id'>, classId: string) => {
+  const addStudent = useCallback(async (student: Omit<Student, 'id'>, classId: string) => {
     setStudentsByClass(prev => {
-      const newId = `${classId.split('-')[0].toUpperCase()}-${Date.now()}`;
+      const classPrefix = classId.split('-')[0].toUpperCase();
+      const newId = `${classPrefix}-${Date.now()}`;
       const newStudent = { ...student, id: newId };
 
       const updatedClassStudents = [...(prev[classId] || []), newStudent];

@@ -5,8 +5,9 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useStudents } from '@/hooks/use-students';
+import { useClasses } from '@/hooks/use-classes';
 import { useToast } from '@/hooks/use-toast';
-import type { Class, Student } from '@/types';
+import type { Student } from '@/types';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,33 +43,69 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, UserPlus, Loader2 } from 'lucide-react';
+import { Camera, UserPlus, Loader2, PlusCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
 
-const formSchema = z.object({
+const studentFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   classId: z.string({ required_error: 'Please select a class.' }),
 });
 
-type RegistrationClientProps = {
-  classes: Class[];
-  initialStudents: Record<string, Student[]>;
-};
+const classFormSchema = z.object({
+  name: z
+    .string()
+    .min(3, { message: 'Class name must be at least 3 characters.' }),
+  section: z.string().min(1, { message: 'Section is required.' }),
+});
 
-export function RegistrationClient({ classes, initialStudents }: RegistrationClientProps) {
+export function RegistrationClient() {
   const { toast } = useToast();
-  const { studentsByClass, addStudent, loading } = useStudents(initialStudents);
+  const { studentsByClass, addStudent, loading: studentsLoading } = useStudents();
+  const { classes, addClass, loading: classesLoading } = useClasses();
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
+  const [hasCameraPermission, setHasCameraPermission] = useState<
+    boolean | undefined
+  >(undefined);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<string>(classes[0]?.id || '');
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [isClassDialogOpen, setClassDialogOpen] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  useEffect(() => {
+    if (classes.length > 0 && !selectedClass) {
+      setSelectedClass(classes[0].id);
+    }
+  }, [classes, selectedClass]);
+
+  const studentForm = useForm<z.infer<typeof studentFormSchema>>({
+    resolver: zodResolver(studentFormSchema),
     defaultValues: {
       name: '',
-      classId: classes[0]?.id || '',
+      classId: '',
+    },
+  });
+
+  useEffect(() => {
+    if (classes.length > 0) {
+      studentForm.setValue('classId', classes[0].id);
+    }
+  }, [classes, studentForm]);
+
+  const classForm = useForm<z.infer<typeof classFormSchema>>({
+    resolver: zodResolver(classFormSchema),
+    defaultValues: {
+      name: '',
+      section: '',
     },
   });
 
@@ -95,7 +132,7 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
       }
     };
   }, [setupCamera]);
-  
+
   const handleCapture = () => {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
@@ -110,7 +147,7 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onStudentSubmit = async (values: z.infer<typeof studentFormSchema>) => {
     if (!capturedImage) {
       toast({
         variant: 'destructive',
@@ -121,30 +158,38 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
     }
 
     setIsSubmitting(true);
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    addStudent({ name: values.name, avatar: capturedImage }, values.classId);
-
+    await addStudent({ name: values.name, avatar: capturedImage }, values.classId);
     toast({
       title: 'Student Registered',
       description: `${values.name} has been added to the class.`,
     });
-    
-    form.reset();
+    studentForm.reset();
+    studentForm.setValue('classId', values.classId);
     setCapturedImage(null);
     setIsSubmitting(false);
   };
-  
+
+  const onClassSubmit = async (values: z.infer<typeof classFormSchema>) => {
+    await addClass(values);
+    toast({
+      title: 'Class Created',
+      description: `${values.name} - Section ${values.section} has been created.`,
+    });
+    classForm.reset();
+    setClassDialogOpen(false);
+  };
+
   const currentStudents = studentsByClass[selectedClass] || [];
+  const loading = studentsLoading || classesLoading;
 
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       <Card className="lg:col-span-1">
         <CardHeader>
           <CardTitle>Register New Student</CardTitle>
-          <CardDescription>Fill in the details and capture a photo.</CardDescription>
+          <CardDescription>
+            Fill in the details and capture a photo.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
@@ -155,14 +200,18 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
               muted
               playsInline
             />
-             {hasCameraPermission === undefined && (
+            {hasCameraPermission === undefined && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             )}
             {capturedImage && (
               <div className="absolute inset-0">
-                <img src={capturedImage} alt="Captured student" className="w-full h-full object-cover" />
+                <img
+                  src={capturedImage}
+                  alt="Captured student"
+                  className="w-full h-full object-cover"
+                />
               </div>
             )}
           </div>
@@ -171,7 +220,8 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
             <Alert variant="destructive">
               <AlertTitle>Camera Access Required</AlertTitle>
               <AlertDescription>
-                Please allow camera access to use this feature. You may need to refresh the page.
+                Please allow camera access to use this feature. You may need to
+                refresh the page.
               </AlertDescription>
             </Alert>
           )}
@@ -187,10 +237,13 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
             </Button>
           </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <Form {...studentForm}>
+            <form
+              onSubmit={studentForm.handleSubmit(onStudentSubmit)}
+              className="space-y-4"
+            >
               <FormField
-                control={form.control}
+                control={studentForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -203,12 +256,16 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                 )}
               />
               <FormField
-                control={form.control}
+                control={studentForm.control}
                 name="classId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Class</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={classes.length === 0}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a class" />
@@ -217,7 +274,7 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                       <SelectContent>
                         {classes.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
-                            {c.name}
+                            {c.name} - Section {c.section}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -226,11 +283,15 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || !capturedImage || classes.length === 0}
+              >
                 {isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
+                  <UserPlus className="mr-2 h-4 w-4" />
                 )}
                 Register Student
               </Button>
@@ -248,18 +309,93 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                 Showing students in the selected class.
               </CardDescription>
             </div>
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Select a class to view" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedClass}
+                onValueChange={setSelectedClass}
+                disabled={classes.length === 0}
+              >
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Select a class to view" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name} - Section {c.section}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Dialog
+                open={isClassDialogOpen}
+                onOpenChange={setClassDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Class
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Class</DialogTitle>
+                    <DialogDescription>
+                      Enter the details for the new class.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...classForm}>
+                    <form
+                      onSubmit={classForm.handleSubmit(onClassSubmit)}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={classForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Class Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. Mathematics 101"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={classForm.control}
+                        name="section"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Section</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. A" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="ghost">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                          type="submit"
+                          disabled={classForm.formState.isSubmitting}
+                        >
+                          {classForm.formState.isSubmitting && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Create Class
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -284,11 +420,19 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                     <TableRow key={student.id}>
                       <TableCell>
                         <Avatar>
-                          <AvatarImage src={student.avatar} alt={student.name} data-ai-hint="person portrait" />
-                          <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage
+                            src={student.avatar}
+                            alt={student.name}
+                            data-ai-hint="person portrait"
+                          />
+                          <AvatarFallback>
+                            {student.name.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                       </TableCell>
-                      <TableCell className="font-medium">{student.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {student.name}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {student.id}
                       </TableCell>
@@ -297,7 +441,9 @@ export function RegistrationClient({ classes, initialStudents }: RegistrationCli
                 ) : (
                   <TableRow>
                     <TableCell colSpan={3} className="h-24 text-center">
-                      No students registered for this class yet.
+                      {classes.length === 0
+                        ? 'Create a class to begin registering students.'
+                        : 'No students registered for this class yet.'}
                     </TableCell>
                   </TableRow>
                 )}

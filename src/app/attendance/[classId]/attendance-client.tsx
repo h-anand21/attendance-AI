@@ -23,15 +23,13 @@ import { useStudents } from '@/hooks/use-students';
 
 type AttendanceClientProps = {
   currentClass: Class;
-  initialStudents: Student[];
 };
 
 export function AttendanceClient({
   currentClass,
-  initialStudents,
 }: AttendanceClientProps) {
   const { toast } = useToast();
-  const { studentsByClass, loading } = useStudents(initialStudents);
+  const { studentsByClass, loading } = useStudents();
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
