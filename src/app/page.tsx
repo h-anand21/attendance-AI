@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -11,9 +12,10 @@ import {
 } from '@/components/ui/card';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
-import { Users, BookOpen, Loader2 } from 'lucide-react';
+import { Users, BookOpen, Loader2, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading } = useClasses();
@@ -72,9 +74,17 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <h2 className="text-2xl font-semibold tracking-tight mb-4">
-          Select a Class
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Select a Class
+          </h2>
+          <Button asChild variant="outline">
+            <Link href="/registration">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Class
+            </Link>
+          </Button>
+        </div>
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls) => (
