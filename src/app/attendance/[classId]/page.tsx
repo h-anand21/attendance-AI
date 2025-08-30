@@ -1,4 +1,4 @@
-import { classes, students } from '@/lib/data';
+import { classes, students as initialStudents } from '@/lib/data';
 import { AppLayout } from '@/components/app-layout';
 import { notFound } from 'next/navigation';
 import { AttendanceClient } from './attendance-client';
@@ -12,15 +12,15 @@ type AttendancePageProps = {
 export default function AttendancePage({ params }: AttendancePageProps) {
   const { classId } = params;
   const currentClass = classes.find((c) => c.id === classId);
-  const classStudents = students[classId];
+  const classStudents = initialStudents[classId] || [];
 
-  if (!currentClass || !classStudents) {
+  if (!currentClass) {
     notFound();
   }
 
   return (
     <AppLayout pageTitle={`Attendance: ${currentClass.name}`}>
-      <AttendanceClient currentClass={currentClass} students={classStudents} />
+      <AttendanceClient currentClass={currentClass} initialStudents={classStudents} />
     </AppLayout>
   );
 }

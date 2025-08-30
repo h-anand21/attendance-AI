@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Download, Home, ScanFace, Users } from "lucide-react";
+import { Bell, Download, Home, ScanFace, Users, UserPlus } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -62,6 +62,18 @@ function AppSidebar() {
               <Link href="/">
                 <Users />
                 <span>Attendance</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/registration"}
+              tooltip={{ children: "Registration" }}
+            >
+              <Link href="/registration">
+                <UserPlus />
+                <span>Registration</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

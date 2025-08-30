@@ -19,29 +19,35 @@ import { Download, QrCode, ScanFace, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
+import { useStudents } from '@/hooks/use-students';
 
 type AttendanceClientProps = {
   currentClass: Class;
-  students: Student[];
+  initialStudents: Student[];
 };
 
 export function AttendanceClient({
   currentClass,
-  students,
+  initialStudents,
 }: AttendanceClientProps) {
   const { toast } = useToast();
+  const { studentsByClass, loading } = useStudents(initialStudents);
+  const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
-
+  
   useEffect(() => {
+    const classStudents = studentsByClass[currentClass.id] || [];
+    setStudents(classStudents);
     // Initialize attendance for all students as 'absent'
     setAttendance(
-      students.map((student) => ({
+      classStudents.map((student) => ({
         studentId: student.id,
         status: 'absent',
       }))
     );
-  }, [students]);
+  }, [studentsByClass, currentClass.id]);
+
 
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
     setAttendance((prev) =>
@@ -94,6 +100,7 @@ export function AttendanceClient({
           <Button
             className="bg-accent text-accent-foreground hover:bg-accent/90"
             onClick={() => setFaceScanOpen(true)}
+            disabled={loading || students.length === 0}
           >
             <ScanFace className="mr-2 h-4 w-4" /> Start Face Scan
           </Button>
@@ -110,10 +117,11 @@ export function AttendanceClient({
         students={students}
         attendance={attendance}
         onStatusChange={handleStatusChange}
+        loading={loading}
       />
 
       <div className="flex justify-end">
-        <Button size="lg" onClick={handleConfirmAttendance}>
+        <Button size="lg" onClick={handleConfirmAttendance} disabled={students.length === 0}>
           <CheckCircle className="mr-2 h-5 w-5" />
           Confirm Attendance
         </Button>
