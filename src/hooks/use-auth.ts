@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -18,7 +17,6 @@ import {
 import { auth } from '@/lib/firebase';
 import { useToast } from './use-toast';
 
-// Define the emails for roles from environment variables
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 const TEACHER_EMAIL = process.env.NEXT_PUBLIC_TEACHER_EMAIL;
 
@@ -42,19 +40,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setLoading(true);
       if (currentUser) {
         setUser(currentUser);
-        // Determine user role based on email
         if (currentUser.email === ADMIN_EMAIL) {
           setUserRole('admin');
         } else if (currentUser.email === TEACHER_EMAIL) {
           setUserRole('teacher');
         } else {
-          setUserRole(null); // Or a default role like 'guest'
+          setUserRole(null);
           toast({
             variant: 'destructive',
             title: 'Unauthorized User',
-            description: 'Your account does not have permission to access this application.',
+            description:
+              'Your account does not have permission to access this application.',
           });
           firebaseSignOut(auth);
         }
@@ -80,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: 'Sign-in Failed',
         description: 'Could not sign in with Google. Please try again.',
       });
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -98,7 +98,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userRole, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userRole,
+        loading,
+        signInWithGoogle,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
