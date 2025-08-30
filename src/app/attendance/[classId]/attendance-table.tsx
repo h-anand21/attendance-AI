@@ -19,6 +19,13 @@ import {
 } from '@/components/ui/select';
 import type { Student, AttendanceRecord, AttendanceStatus } from '@/types';
 import { cn } from '@/lib/utils';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 type AttendanceTableProps = {
   students: Student[];
