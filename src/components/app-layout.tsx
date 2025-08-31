@@ -59,24 +59,12 @@ function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/dashboard"}
+              isActive={pathname === "/dashboard" || pathname.startsWith("/attendance")}
               tooltip={{ children: "Dashboard" }}
             >
               <Link href="/dashboard">
                 <Home />
                 <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname.startsWith("/attendance")}
-              tooltip={{ children: "Attendance" }}
-            >
-              <Link href="/dashboard">
-                <Users />
-                <span>Attendance</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
