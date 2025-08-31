@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Carousel,
@@ -19,7 +16,6 @@ import {
 } from '@/components/ui/carousel';
 import { CheckCircle, Zap, Shield, BarChart, Star } from 'lucide-react';
 import Image from 'next/image';
-import { AppLogo } from '@/components/ui/app-logo';
 
 const features = [
   {

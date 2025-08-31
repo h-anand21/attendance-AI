@@ -1,9 +1,8 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, University } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { AppLogo } from '@/components/ui/app-logo';
 
 const navLinks = [
