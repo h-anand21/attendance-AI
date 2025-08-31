@@ -16,9 +16,10 @@ import { Users, BookOpen, Loader2, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { CreateClassDialog } from './create-class-dialog';
 
 export default function DashboardPage() {
-  const { classes, loading: classesLoading } = useClasses();
+  const { classes, loading: classesLoading, addClass } = useClasses();
   const { studentsByClass, loading: studentsLoading } = useStudents();
 
   const totalStudents = useMemo(() => {
@@ -72,12 +73,12 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-semibold tracking-tight">
             Select a Class
           </h2>
-          <Button asChild>
-            <Link href="/registration">
+          <CreateClassDialog onClassCreate={addClass}>
+             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
               New Class
-            </Link>
-          </Button>
+            </Button>
+          </CreateClassDialog>
         </div>
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -106,9 +107,9 @@ export default function DashboardPage() {
              <CardContent className="pt-6">
                 <div className="text-center text-muted-foreground">
                     <p>No classes found.</p>
-                    <Button variant="link" asChild>
-                        <Link href="/registration">Go to Registration to create a class</Link>
-                    </Button>
+                     <CreateClassDialog onClassCreate={addClass}>
+                         <Button variant="link">Create a new class to get started</Button>
+                    </CreateClassDialog>
                 </div>
              </CardContent>
            </Card>

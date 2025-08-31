@@ -45,27 +45,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Camera, UserPlus, Loader2, PlusCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
-  DialogClose,
-} from '@/components/ui/dialog';
+import { CreateClassDialog } from '../(dashboard)/dashboard/create-class-dialog';
+
 
 const studentFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   classId: z.string({ required_error: 'Please select a class.' }),
-});
-
-const classFormSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: 'Class name must be at least 3 characters.' }),
-  section: z.string().min(1, { message: 'Section is required.' }),
 });
 
 export function RegistrationClient() {
@@ -80,7 +65,6 @@ export function RegistrationClient() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
-  const [isClassDialogOpen, setClassDialogOpen] = useState(false);
 
   useEffect(() => {
     if (classes.length > 0 && !selectedClass) {
@@ -97,18 +81,11 @@ export function RegistrationClient() {
   });
 
   useEffect(() => {
-    if (classes.length > 0) {
-      studentForm.setValue('classId', classes[0].id);
+    if (classes.length > 0 && !studentForm.getValues('classId')) {
+      const classToSelect = selectedClass || classes[0].id;
+      studentForm.setValue('classId', classToSelect);
     }
-  }, [classes, studentForm]);
-
-  const classForm = useForm<z.infer<typeof classFormSchema>>({
-    resolver: zodResolver(classFormSchema),
-    defaultValues: {
-      name: '',
-      section: '',
-    },
-  });
+  }, [classes, studentForm, selectedClass]);
 
   const setupCamera = useCallback(async () => {
     try {
@@ -170,15 +147,13 @@ export function RegistrationClient() {
     setIsSubmitting(false);
   };
 
-  const onClassSubmit = async (values: z.infer<typeof classFormSchema>) => {
-    await addClass(values);
-    toast({
-      title: 'Class Created',
-      description: `${values.name} - Section ${values.section} has been created.`,
-    });
-    classForm.reset();
-    setClassDialogOpen(false);
-  };
+  const onClassCreate = async (newClassData: {name: string, section: string}) => {
+     await addClass(newClassData);
+     toast({
+        title: 'Class Created',
+        description: `${newClassData.name} - Section ${newClassData.section} has been created.`,
+     });
+  }
 
   const currentStudents = studentsByClass[selectedClass] || [];
   const loading = studentsLoading || classesLoading;
@@ -328,75 +303,12 @@ export function RegistrationClient() {
                   ))}
                 </SelectContent>
               </Select>
-              <Dialog
-                open={isClassDialogOpen}
-                onOpenChange={setClassDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    New Class
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Class</DialogTitle>
-                    <DialogDescription>
-                      Enter the details for the new class.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...classForm}>
-                    <form
-                      onSubmit={classForm.handleSubmit(onClassSubmit)}
-                      className="space-y-4"
-                    >
-                      <FormField
-                        control={classForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Class Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g. Mathematics 101"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={classForm.control}
-                        name="section"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Section</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. A" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="ghost">Cancel</Button>
-                        </DialogClose>
-                        <Button
-                          type="submit"
-                          disabled={classForm.formState.isSubmitting}
-                        >
-                          {classForm.formState.isSubmitting && (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          )}
-                          Create Class
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
+              <CreateClassDialog onClassCreate={onClassCreate}>
+                <Button variant="outline">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New Class
+                </Button>
+              </CreateClassDialog>
             </div>
           </div>
         </CardHeader>
