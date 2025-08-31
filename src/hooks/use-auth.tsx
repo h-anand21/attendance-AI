@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,6 +15,8 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   User,
+  setPersistence,
+  browserLocalPersistence,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from './use-toast';
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
+      await setPersistence(auth, browserLocalPersistence);
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (error) {
