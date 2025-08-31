@@ -83,7 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } finally {
-      setLoading(false);
+      // The onAuthStateChanged listener will handle setting loading to false
+      // after the user state is fully updated.
     }
   };
 
