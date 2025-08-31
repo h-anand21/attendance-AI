@@ -3,6 +3,9 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  env: {
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.EXT_PUBLIC_FIREBASE_API_KEY,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
