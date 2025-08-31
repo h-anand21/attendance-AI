@@ -7,12 +7,11 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   Home,
-  ScanFace,
-  Users,
   UserPlus,
   LogOut,
   Info,
   LineChart,
+  ClipboardCheck,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -59,12 +58,24 @@ function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/dashboard" || pathname.startsWith("/attendance")}
+              isActive={pathname === "/dashboard"}
               tooltip={{ children: "Dashboard" }}
             >
               <Link href="/dashboard">
                 <Home />
                 <span>Dashboard</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname.startsWith("/attendance")}
+              tooltip={{ children: "Attendance" }}
+            >
+              <Link href="/dashboard">
+                <ClipboardCheck />
+                <span>Attendance</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
