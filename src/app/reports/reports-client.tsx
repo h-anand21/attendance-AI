@@ -1,6 +1,8 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -38,6 +40,7 @@ export function ReportsClient() {
   const { studentsByClass } = useStudents();
   const { attendanceRecords } = useAttendance();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>(
@@ -53,10 +56,13 @@ export function ReportsClient() {
   const [isAnomaliesLoading, setIsAnomaliesLoading] = useState(false);
 
   useEffect(() => {
-    if (classes.length > 0 && !selectedClassId) {
+    const classIdFromParams = searchParams.get('classId');
+    if (classIdFromParams) {
+      setSelectedClassId(classIdFromParams);
+    } else if (classes.length > 0 && !selectedClassId) {
       setSelectedClassId(classes[0].id);
     }
-  }, [classes, selectedClassId]);
+  }, [searchParams, classes, selectedClassId]);
 
   const { years, months } = useMemo(() => {
     const years = [
