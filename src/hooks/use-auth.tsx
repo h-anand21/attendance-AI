@@ -69,11 +69,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Sign-in Failed',
-        description: 'Could not sign in with Google. Please try again.',
-      });
+      // Check for the specific popup closed by user error code
+      if ((error as { code?: string }).code === 'auth/popup-closed-by-user') {
+         toast({
+          title: 'Sign-in Cancelled',
+          description: 'You closed the sign-in window before completing the process.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Sign-in Failed',
+          description: 'Could not sign in with Google. Please try again.',
+        });
+      }
     } finally {
       setLoading(false);
     }
