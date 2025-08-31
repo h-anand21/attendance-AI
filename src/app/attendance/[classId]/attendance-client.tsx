@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -105,7 +106,6 @@ export function AttendanceClient({
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
           <Button
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
             onClick={() => setFaceScanOpen(true)}
             disabled={loading || students.length === 0}
           >

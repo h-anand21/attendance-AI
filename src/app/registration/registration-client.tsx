@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -231,6 +232,7 @@ export function RegistrationClient() {
               className="w-full"
               onClick={handleCapture}
               disabled={!hasCameraPermission}
+              variant="outline"
             >
               <Camera className="mr-2 h-4 w-4" />
               {capturedImage ? 'Retake Photo' : 'Capture Photo'}

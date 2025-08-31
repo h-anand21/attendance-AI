@@ -52,9 +52,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{classes.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all sections
-            </p>
           </CardContent>
         </Card>
         <Card>
@@ -66,9 +63,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground">
-              Enrolled in your classes
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -89,7 +83,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls) => (
               <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                <Card className="hover:border-primary/80 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col hover:shadow-primary/20">
+                <Card className="hover:border-primary/80 hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{cls.name}</CardTitle>

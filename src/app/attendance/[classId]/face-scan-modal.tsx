@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -197,7 +198,7 @@ export function FaceScanModal({
 
         <DialogFooter>
           <Button
-            className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+            className="w-full"
             onClick={handleStartScan}
             disabled={
               isLoading ||

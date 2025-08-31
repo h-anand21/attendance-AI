@@ -44,7 +44,7 @@ function AppSidebar() {
   const { user, userRole, signOut } = useAuth();
 
   return (
-    <Sidebar collapsible="icon" side="left" variant="floating">
+    <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader className="justify-center">
         <div className="flex items-center gap-2">
           <ScanFace className="h-8 w-8 text-primary" />
@@ -168,8 +168,8 @@ function AppSidebar() {
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-white/10 bg-transparent px-4 backdrop-blur-sm lg:h-[60px] lg:px-6">
-      <SidebarTrigger />
+    <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
+      <SidebarTrigger className="md:hidden"/>
       <h1 className="flex-1 text-xl font-semibold">{pageTitle}</h1>
       <Button variant="ghost" size="icon" className="rounded-full">
         <Bell className="h-5 w-5" />
