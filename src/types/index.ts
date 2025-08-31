@@ -19,3 +19,9 @@ export type AttendanceRecord = {
   date: string; // ISO date string (e.g., "2023-10-27")
   classId: string;
 };
+
+export type Task = {
+  id: number;
+  text: string;
+  completed: boolean;
+};
