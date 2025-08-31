@@ -21,7 +21,7 @@ import {
 import { auth } from '@/lib/firebase';
 import { useToast } from './use-toast';
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com';
 
 type UserRole = 'admin' | 'teacher' | null;
 
@@ -49,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (currentUser.email === ADMIN_EMAIL) {
           setUserRole('admin');
         } else {
-          // Default role for any other authenticated user
           setUserRole('teacher');
         }
       } else {
@@ -60,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const signInWithGoogle = async () => {
     setLoading(true);

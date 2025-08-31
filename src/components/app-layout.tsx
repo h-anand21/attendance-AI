@@ -38,6 +38,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { AppLogo } from "./ui/app-logo";
 
 function AppSidebar() {
   const pathname = usePathname();
@@ -47,7 +48,7 @@ function AppSidebar() {
     <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader className="justify-center">
         <div className="flex items-center gap-2">
-          <ScanFace className="h-8 w-8 text-primary" />
+          <AppLogo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">
             AttendEase
           </span>
@@ -58,10 +59,10 @@ function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/"}
+              isActive={pathname === "/dashboard"}
               tooltip={{ children: "Dashboard" }}
             >
-              <Link href="/">
+              <Link href="/dashboard">
                 <Home />
                 <span>Dashboard</span>
               </Link>
@@ -73,7 +74,7 @@ function AppSidebar() {
               isActive={pathname.startsWith("/attendance")}
               tooltip={{ children: "Attendance" }}
             >
-              <Link href="/">
+              <Link href="/dashboard">
                 <Users />
                 <span>Attendance</span>
               </Link>

@@ -10,9 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ScanFace, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { AppLogo } from '@/components/ui/app-logo';
 
 export default function LoginPage() {
   const { user, signInWithGoogle, loading } = useAuth();
@@ -20,7 +21,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [user, router]);
 
@@ -28,7 +29,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <ScanFace className="mx-auto h-12 w-12 text-primary" />
+          <AppLogo className="mx-auto h-12 w-12 text-primary" />
           <CardTitle className="mt-4 text-2xl font-bold">
             Welcome to AttendEase
           </CardTitle>

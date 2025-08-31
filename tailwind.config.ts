@@ -11,7 +11,7 @@ export default {
   theme: {
      container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
         "2xl": "1400px",
       },
@@ -98,11 +98,21 @@ export default {
           '0%': { transform: 'translateY(-10px)' },
           '100%': { transform: 'translateY(192px)' }, 
         },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        'slide-in-from-bottom': {
+          from: { transform: 'translateY(20px)', opacity: '0' },
+          to: { transform: 'translateY(0)', opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'scan-line': 'scan-line 2s ease-in-out infinite',
+        'fade-in': 'fade-in 0.8s ease-in-out forwards',
+        'slide-in-from-bottom': 'slide-in-from-bottom 0.8s ease-in-out forwards',
       },
     },
   },
