@@ -22,7 +22,6 @@ import { auth } from '@/lib/firebase';
 import { useToast } from './use-toast';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-const TEACHER_EMAIL = process.env.NEXT_PUBLIC_TEACHER_EMAIL;
 
 type UserRole = 'admin' | 'teacher' | null;
 
@@ -49,17 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser);
         if (currentUser.email === ADMIN_EMAIL) {
           setUserRole('admin');
-        } else if (currentUser.email === TEACHER_EMAIL) {
-          setUserRole('teacher');
         } else {
-          setUserRole(null);
-          toast({
-            variant: 'destructive',
-            title: 'Unauthorized User',
-            description:
-              'Your account does not have permission to access this application.',
-          });
-          firebaseSignOut(auth);
+          // Default role for any other authenticated user
+          setUserRole('teacher');
         }
       } else {
         setUser(null);
