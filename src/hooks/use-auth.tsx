@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, []);
-  
+
   const signInWithGoogle = () => {
     setPersistence(auth, browserLocalPersistence)
       .then(() => {
