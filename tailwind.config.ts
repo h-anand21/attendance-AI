@@ -33,6 +33,7 @@ export default {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          '90': '#c4e201'
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -75,6 +76,7 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        full: '100px',
       },
       keyframes: {
         'accordion-down': {
