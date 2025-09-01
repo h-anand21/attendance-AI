@@ -19,7 +19,7 @@ import {
   browserLocalPersistence,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useToast } from './use-toast';
+import { toast } from './use-toast';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com';
 
@@ -35,33 +35,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<UserRole>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setLoading(true);
-      if (currentUser) {
-        setUser(currentUser);
-        if (currentUser.email === ADMIN_EMAIL) {
-          setUserRole('admin');
-        } else {
-          setUserRole('teacher');
-        }
-      } else {
-        setUser(null);
-        setUserRole(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const signInWithGoogle = () => {
+const signInWithGoogle = () => {
     setPersistence(auth, browserLocalPersistence).then(() => {
       const provider = new GoogleAuthProvider();
       return signInWithPopup(auth, provider);
@@ -82,6 +56,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
   };
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setLoading(true);
+      if (currentUser) {
+        setUser(currentUser);
+        if (currentUser.email === ADMIN_EMAIL) {
+          setUserRole('admin');
+        } else {
+          setUserRole('teacher');
+        }
+      } else {
+        setUser(null);
+        setUserRole(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const signOut = async () => {
     try {
