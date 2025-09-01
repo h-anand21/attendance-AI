@@ -34,7 +34,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+let isSigningIn = false;
+
 const signInWithGoogle = () => {
+  if (isSigningIn) {
+    return;
+  }
+  isSigningIn = true;
+
   setPersistence(auth, browserLocalPersistence)
     .then(() => {
       const provider = new GoogleAuthProvider();
@@ -42,11 +49,11 @@ const signInWithGoogle = () => {
     })
     .catch((error) => {
       console.error('Error signing in with Google:', error);
-      if (error.code === 'auth/popup-closed-by-user') {
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
         toast({
           title: 'Sign-in Cancelled',
           description:
-            'You closed the sign-in window before completing the process.',
+            'The sign-in process was not completed.',
         });
       } else {
         toast({
@@ -55,6 +62,9 @@ const signInWithGoogle = () => {
           description: 'Could not sign in with Google. Please try again.',
         });
       }
+    })
+    .finally(() => {
+        isSigningIn = false;
     });
 };
 
