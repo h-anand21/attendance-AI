@@ -12,13 +12,13 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
-  signOut as firebaseSignOut,
+  signOut as firebaseSignout,
   User,
   setPersistence,
   browserLocalPersistence,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useToast } from './use-toast';
+import { toast } from './use-toast';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com';
 
@@ -34,12 +34,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const signInWithGoogle = () => {
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      const provider = new GoogleAuthProvider();
+      return signInWithPopup(auth, provider);
+    })
+    .catch((error) => {
+      console.error('Error signing in with Google:', error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        toast({
+          title: 'Sign-in Cancelled',
+          description:
+            'You closed the sign-in window before completing the process.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Sign-in Failed',
+          description: 'Could not sign in with Google. Please try again.',
+        });
+      }
+    });
+};
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setLoading(true);
@@ -60,33 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = () => {
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
-      })
-      .catch((error) => {
-        console.error('Error signing in with Google:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          toast({
-            title: 'Sign-in Cancelled',
-            description:
-              'You closed the sign-in window before completing the process.',
-          });
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Sign-in Failed',
-            description: 'Could not sign in with Google. Please try again.',
-          });
-        }
-      });
-  };
-
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      await firebaseSignout(auth);
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
