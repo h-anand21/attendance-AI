@@ -1,6 +1,7 @@
+
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScanFace } from 'lucide-react';
+import { ScanFace, Database } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -37,6 +38,22 @@ export default function AboutPage() {
               With features like instant face recognition and automated anomaly
               detection, AttendEase transforms a routine task into an
               opportunity for insight.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <Database className="h-6 w-6" /> Data Source
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-muted-foreground">
+            <p>
+              This application is currently running on sample data for demonstration purposes. All classes, students, and attendance records are loaded from mock data files and stored in your browser's local storage.
+            </p>
+            <p>
+                The initial data is sourced from <code className="font-mono bg-muted/50 p-1 rounded-md text-sm">src/lib/data.ts</code>. Any changes you make (like adding a class or student) are saved only in your browser and will not affect other users.
             </p>
           </CardContent>
         </Card>
