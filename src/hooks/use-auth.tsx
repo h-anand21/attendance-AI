@@ -29,7 +29,7 @@ interface AuthContextType {
   user: User | null;
   userRole: UserRole;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -61,13 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
-    try {
-      await setPersistence(auth, browserLocalPersistence);
+  const signInWithGoogle = () => {
+    setPersistence(auth, browserLocalPersistence).then(() => {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
+      return signInWithPopup(auth, provider);
+    }).catch((error) => {
+       console.error('Error signing in with Google:', error);
       // Check for the specific popup closed by user error code
       if ((error as { code?: string }).code === 'auth/popup-closed-by-user') {
          toast({
@@ -81,10 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: 'Could not sign in with Google. Please try again.',
         });
       }
-    } finally {
-      // The onAuthStateChanged listener will handle setting loading to false
-      // after the user state is fully updated.
-    }
+    });
   };
 
   const signOut = async () => {

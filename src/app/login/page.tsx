@@ -40,7 +40,7 @@ export default function LoginPage() {
         <CardContent>
           <Button
             className="w-full"
-            onClick={signInWithGoogle}
+            onClick={() => signInWithGoogle()}
             disabled={loading}
             size="lg"
           >
