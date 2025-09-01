@@ -199,7 +199,7 @@ export default function LandingPage() {
                       <CardContent className="pt-6 flex-grow">
                         <div className="flex items-center mb-4">
                             {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                                <Star key={i} className="h-5 w-5 fill-accent text-accent" />
                             ))}
                         </div>
                         <p className="text-muted-foreground">
