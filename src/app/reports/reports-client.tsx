@@ -17,6 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
@@ -31,6 +38,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AttendanceChart } from './attendance-chart';
 import type { AttendanceStatus } from '@/types';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export function ReportsClient() {
   const { classes } = useClasses();
@@ -39,12 +49,7 @@ export function ReportsClient() {
   const searchParams = useSearchParams();
 
   const [selectedClassId, setSelectedClassId] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>(
-    new Date().getFullYear().toString()
-  );
-  const [selectedMonth, setSelectedMonth] = useState<string>(
-    (new Date().getMonth() + 1).toString()
-  );
+  const [date, setDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const classIdFromParams = searchParams.get('classId');
@@ -55,36 +60,19 @@ export function ReportsClient() {
     }
   }, [searchParams, classes, selectedClassId]);
 
-  const { years, months } = useMemo(() => {
-    const years = [
-      ...new Set(
-        attendanceRecords.map((r) => new Date(r.date).getFullYear().toString())
-      ),
-    ];
-    const months = [
-      ...new Set(
-        attendanceRecords
-          .filter(
-            (r) =>
-              new Date(r.date).getFullYear().toString() === selectedYear
-          )
-          .map((r) => (new Date(r.date).getMonth() + 1).toString())
-      ),
-    ].sort((a, b) => parseInt(a) - parseInt(b));
-    return {
-      years: years.length > 0 ? years : [new Date().getFullYear().toString()],
-      months,
-    };
-  }, [attendanceRecords, selectedYear]);
-
   const filteredRecords = useMemo(() => {
+    const selectedYear = date.getFullYear();
+    const selectedMonth = date.getMonth();
+
     return attendanceRecords.filter(
-      (r) =>
-        r.classId === selectedClassId &&
-        new Date(r.date).getFullYear().toString() === selectedYear &&
-        (new Date(r.date).getMonth() + 1).toString() === selectedMonth
+      (r) => {
+        const recordDate = new Date(r.date);
+        return r.classId === selectedClassId &&
+        recordDate.getFullYear() === selectedYear &&
+        recordDate.getMonth() === selectedMonth
+      }
     );
-  }, [attendanceRecords, selectedClassId, selectedYear, selectedMonth]);
+  }, [attendanceRecords, selectedClassId, date]);
 
   const chartData = useMemo(() => {
     if (filteredRecords.length === 0) return [];
@@ -129,7 +117,7 @@ export function ReportsClient() {
         <CardHeader>
           <CardTitle>Filter Reports</CardTitle>
           <CardDescription>
-            Select a class, year, and month to view attendance records.
+            Select a class and month to view attendance records.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-4">
@@ -138,7 +126,7 @@ export function ReportsClient() {
             onValueChange={setSelectedClassId}
             disabled={classes.length === 0}
           >
-            <SelectTrigger className="md:w-1/3">
+            <SelectTrigger className="md:w-1/2">
               <SelectValue placeholder="Select a class" />
             </SelectTrigger>
             <SelectContent>
@@ -149,32 +137,31 @@ export function ReportsClient() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="md:w-1/3">
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="md:w-1/3">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {new Date(0, parseInt(m) - 1).toLocaleString('default', {
-                    month: 'long',
-                  })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'md:w-1/2 justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, 'MMMM yyyy') : <span>Pick a month</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(day) => setDate(day || new Date())}
+                initialFocus
+                captionLayout="dropdown-buttons"
+                fromYear={2020}
+                toYear={new Date().getFullYear()}
+              />
+            </PopoverContent>
+          </Popover>
         </CardContent>
       </Card>
       
