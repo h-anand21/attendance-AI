@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AppLogo } from '@/components/ui/app-logo';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 type Role = 'teacher' | 'admin';
 
@@ -41,7 +42,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <AppLogo className="mx-auto h-12 w-12 text-primary" />
@@ -55,24 +56,18 @@ export default function LoginPage() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <Button
-              variant="outline"
+              variant={selectedRole === 'teacher' ? 'default' : 'outline'}
               size="lg"
-              className={cn(
-                'h-24 flex-col gap-2 text-lg',
-                selectedRole === 'teacher' && 'border-primary ring-2 ring-primary'
-              )}
+              className='h-24 flex-col gap-2 text-lg'
               onClick={() => handleRoleSelect('teacher')}
             >
               <User className="h-8 w-8" />
               Teacher
             </Button>
             <Button
-              variant="outline"
+              variant={selectedRole === 'admin' ? 'default' : 'outline'}
               size="lg"
-              className={cn(
-                'h-24 flex-col gap-2 text-lg',
-                selectedRole === 'admin' && 'border-primary ring-2 ring-primary'
-              )}
+              className='h-24 flex-col gap-2 text-lg'
               onClick={() => handleRoleSelect('admin')}
             >
               <School className="h-8 w-8" />
@@ -86,7 +81,7 @@ export default function LoginPage() {
             size="lg"
           >
             {loading ? (
-              <LogIn className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
               <LogIn className="mr-2 h-5 w-5" />
             )}
