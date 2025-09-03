@@ -4,20 +4,24 @@
 import { AppLayout } from '@/components/app-layout';
 import { RegistrationClient } from './registration-client';
 import { useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Users, UserPlus } from 'lucide-react';
 
 export default function RegistrationPage() {
   const { userRole } = useAuth();
 
+  // This page is now the admin dashboard
   if (userRole !== 'admin') {
     return (
-      <AppLayout pageTitle="Access Denied">
+      <AppLayout pageTitle="Dashboard">
         <Card>
           <CardHeader>
-            <CardTitle>Permission Required</CardTitle>
+            <CardTitle>Access Denied</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You do not have permission to view this page. Please contact an administrator.</p>
+            <p>You do not have permission to view this page. This is the admin dashboard.</p>
           </CardContent>
         </Card>
       </AppLayout>
@@ -25,8 +29,37 @@ export default function RegistrationPage() {
   }
   
   return (
-    <AppLayout pageTitle="Student Registration">
-      <RegistrationClient />
+    <AppLayout pageTitle="Admin Dashboard">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Teacher Details</CardTitle>
+             <CardDescription>View and manage teacher information.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link href="#">
+                <Users className="mr-2 h-4 w-4" />
+                Manage Teachers
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+           <CardHeader>
+            <CardTitle>Student Details</CardTitle>
+            <CardDescription>Register new students and manage records.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             <Button asChild className="w-full">
+              <Link href="/registration/details">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Manage Students
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </AppLayout>
   );
 }
