@@ -27,10 +27,12 @@ import {
   SidebarInset,
   SidebarMenuSub,
   SidebarMenuSubButton,
+} from "@/components/ui/sidebar";
+import {
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

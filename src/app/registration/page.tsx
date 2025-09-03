@@ -48,7 +48,7 @@ export default function RegistrationPage() {
            <CardHeader>
             <CardTitle>Student Details</CardTitle>
             <CardDescription>Register new students and manage records.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
              <Button asChild className="w-full">
               <Link href="/registration/details">
