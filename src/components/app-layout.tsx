@@ -44,17 +44,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
+import { useClasses } from "@/hooks/use-classes";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
+  const { classes } = useClasses();
   const [isReportsOpen, setIsReportsOpen] = React.useState(false);
+  const [isAttendanceOpen, setIsAttendanceOpen] = React.useState(false);
 
   useEffect(() => {
     if (pathname.startsWith('/reports')) {
       setIsReportsOpen(true);
+    }
+    if (pathname.startsWith('/attendance')) {
+      setIsAttendanceOpen(true);
     }
   }, [pathname]);
 
@@ -82,17 +88,34 @@ function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname.startsWith("/attendance")}
-              tooltip={{ children: "Attendance" }}
-            >
-              <Link href="/dashboard">
-                <ClipboardCheck />
-                <span>Attendance</span>
-              </Link>
-            </SidebarMenuButton>
+           <SidebarMenuItem asChild>
+            <Collapsible open={isAttendanceOpen} onOpenChange={setIsAttendanceOpen}>
+              <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith("/attendance")}
+                    tooltip={{ children: "Attendance" }}
+                    className="justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ClipboardCheck />
+                      <span>Attendance</span>
+                    </div>
+                  </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent asChild>
+                <SidebarMenuSub>
+                  {classes.map((cls) => (
+                    <SidebarMenuSubButton 
+                      key={cls.id} 
+                      asChild 
+                      isActive={pathname === `/attendance/${cls.id}`}
+                    >
+                        <Link href={`/attendance/${cls.id}`}>{cls.name}</Link>
+                    </SidebarMenuSubButton>
+                  ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
           </SidebarMenuItem>
           {userRole === 'admin' && (
             <>
