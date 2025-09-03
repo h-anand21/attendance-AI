@@ -144,8 +144,8 @@ export function ReportsClient() {
       });
       setAiAnomalies(result);
     } catch (error) {
-      console.error(error);
-       toast({ variant: 'destructive', title: 'Error', description: 'Failed to analyze anomalies.' });
+      console.error('Error analyzing anomalies:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to analyze anomalies.' });
     } finally {
       setIsAnomaliesLoading(false);
     }
@@ -207,26 +207,7 @@ export function ReportsClient() {
         </CardContent>
       </Card>
       
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle>AI-Powered Summary</CardTitle>
-                        <CardDescription>Generate an overview of attendance trends.</CardDescription>
-                    </div>
-                    <Button onClick={handleGenerateSummary} disabled={isSummaryLoading || !selectedClassId}>
-                        {isSummaryLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4" />}
-                        Generate
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                {isSummaryLoading && <p className="text-muted-foreground">Generating summary...</p>}
-                {aiSummary && <p className="text-sm">{aiSummary}</p>}
-                {!isSummaryLoading && !aiSummary && <p className="text-sm text-muted-foreground">Click "Generate" to get an AI summary.</p>}
-            </CardContent>
-        </Card>
+      <div className="grid md:grid-cols-1 gap-6">
          <Card>
             <CardHeader>
                 <div className="flex justify-between items-center">
