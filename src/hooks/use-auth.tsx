@@ -56,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
            // Default to teacher if no role is stored
            setUserRole('teacher');
+           localStorage.setItem(ROLE_STORAGE_KEY, 'teacher');
         }
       } else {
         setUser(null);
