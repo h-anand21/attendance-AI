@@ -35,13 +35,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-let isSigningIn = false;
 const ROLE_STORAGE_KEY = 'attendease_user_role';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false); // Use state for signing in status
   const { toast } = useToast();
   const router = useRouter();
   
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
         setUserRole(null);
-        localStorage.removeItem(ROLE_STORAGE_KEY);
+        // Do not clear role on initial load if user is null
       }
       setLoading(false);
     });
@@ -79,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSigningIn) {
       return;
     }
-    isSigningIn = true;
+    setIsSigningIn(true);
+    setLoading(true);
 
     setPersistence(auth, browserLocalPersistence)
       .then(() => {
@@ -111,9 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .finally(() => {
-          isSigningIn = false;
+          setIsSigningIn(false);
+          setLoading(false); // Ensure loading is set to false in all cases
       });
-  }, [toast, router]);
+  }, [toast, router, isSigningIn]);
 
 
   const signOut = async () => {
