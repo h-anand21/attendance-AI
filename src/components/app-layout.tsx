@@ -12,6 +12,7 @@ import {
   Info,
   LineChart,
   ClipboardCheck,
+  Users,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -24,6 +25,11 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +48,13 @@ import { AppLogo } from "./ui/app-logo";
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
+  const [isReportsOpen, setIsReportsOpen] = React.useState(false);
+
+  useEffect(() => {
+    if (pathname.startsWith('/reports')) {
+      setIsReportsOpen(true);
+    }
+  }, [pathname]);
 
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
@@ -93,17 +106,31 @@ function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/reports"}
-                  tooltip={{ children: "Reports" }}
-                >
-                  <Link href="/reports">
-                    <LineChart />
-                    <span>Reports</span>
-                  </Link>
-                </SidebarMenuButton>
+              <SidebarMenuItem asChild>
+                <Collapsible open={isReportsOpen} onOpenChange={setIsReportsOpen}>
+                  <CollapsibleTrigger asChild>
+                     <SidebarMenuButton
+                        isActive={pathname.startsWith("/reports")}
+                        tooltip={{ children: "Reports" }}
+                        className="justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <LineChart />
+                          <span>Reports</span>
+                        </div>
+                      </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent asChild>
+                    <SidebarMenuSub>
+                        <SidebarMenuSubButton asChild isActive={pathname === '/reports'}>
+                            <Link href="/reports">Attendance Reports</Link>
+                        </SidebarMenuSubButton>
+                         <SidebarMenuSubButton asChild isActive={pathname === '/reports/teacher'}>
+                            <Link href="/reports/teacher">Teacher Reports</Link>
+                        </SidebarMenuSubButton>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </>
           )}

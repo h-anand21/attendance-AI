@@ -2,7 +2,6 @@
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
-import { RegistrationClient } from './registration-client';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,14 +32,14 @@ export default function RegistrationPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle>Teacher Details</CardTitle>
-             <CardDescription>View and manage teacher information.</CardDescription>
+            <CardTitle>Teacher Reports</CardTitle>
+             <CardDescription>View and manage teacher reports.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="#">
+              <Link href="/reports/teacher">
                 <Users className="mr-2 h-4 w-4" />
-                Manage Teachers
+                View Reports
               </Link>
             </Button>
           </CardContent>
@@ -49,7 +48,7 @@ export default function RegistrationPage() {
            <CardHeader>
             <CardTitle>Student Details</CardTitle>
             <CardDescription>Register new students and manage records.</CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
              <Button asChild className="w-full">
               <Link href="/registration/details">
