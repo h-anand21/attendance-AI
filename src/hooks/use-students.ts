@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -5,9 +6,9 @@ import {
   collection,
   query,
   onSnapshot,
-  addDoc,
   doc,
   runTransaction,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
@@ -46,7 +47,6 @@ export function useStudents() {
     if (!user) return;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
-    const studentsRef = collection(classRef, 'students');
     
     try {
        await runTransaction(db, async (transaction) => {
@@ -55,11 +55,11 @@ export function useStudents() {
           throw "Class document does not exist!";
         }
         
-        // Add new student
-        const classPrefix = classId.split('-')[0].toUpperCase();
-        const studentId = `${classPrefix}-${Date.now()}`;
-        const newStudentRef = doc(studentsRef, studentId);
-        transaction.set(newStudentRef, student);
+        // Add new student with a unique ID
+        const studentsRef = collection(db, 'users', user.uid, 'classes', classId, 'students');
+        const newStudentRef = doc(studentsRef); // Firestore generates a unique ID
+        
+        transaction.set(newStudentRef, { ...student, id: newStudentRef.id });
         
         // Increment student count
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
