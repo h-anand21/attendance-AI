@@ -1,3 +1,4 @@
+
 export type Class = {
   id: string;
   name: string;
@@ -9,6 +10,7 @@ export type Student = {
   id: string;
   name: string;
   avatar: string; // This will be a data URL for Firestore
+  classId: string;
 };
 
 export type AttendanceStatus = 'present' | 'absent' | 'late';

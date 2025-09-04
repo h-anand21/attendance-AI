@@ -29,32 +29,35 @@ export function useClasses() {
 
     const q = query(collection(db, 'users', user.uid, 'classes'));
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      // On first load, check if classes exist. If not, seed them.
       if (querySnapshot.empty) {
-        // Seed data for new user
+        setLoading(true);
+        console.log('No classes found, seeding initial data...');
         const batch = writeBatch(db);
+        
         initialClassesData.forEach(classData => {
             const classRef = doc(db, 'users', user.uid, 'classes', classData.id);
+            const studentCount = (initialStudentsData[classData.id] || []).length;
             batch.set(classRef, { 
               name: classData.name, 
               section: classData.section,
-              studentCount: (initialStudentsData[classData.id] || []).length 
+              studentCount: studentCount
             });
-            
-            // Seed students for this class
-            const studentsForClass = initialStudentsData[classData.id] || [];
-            studentsForClass.forEach(studentData => {
-                const studentRef = doc(db, 'users', user.uid, 'classes', classData.id, 'students', studentData.id);
+        });
+
+        Object.entries(initialStudentsData).forEach(([classId, students]) => {
+            students.forEach(studentData => {
+                const studentRef = doc(collection(db, 'users', user.uid, 'students'));
                 batch.set(studentRef, {
-                    name: studentData.name,
-                    avatar: studentData.avatar,
-                    id: studentData.id
+                    ...studentData,
+                    id: studentRef.id,
+                    classId: classId,
                 });
             });
         });
+
         await batch.commit();
+        console.log('Initial data seeded.');
         setLoading(false);
-        // Snapshot listener will pick up the new data
       } else {
         const fetchedClasses = querySnapshot.docs.map(doc => ({
             id: doc.id,
@@ -77,7 +80,7 @@ export function useClasses() {
     try {
       await addDoc(collection(db, 'users', user.uid, 'classes'), {
         ...newClassData,
-        studentCount: 0 // Initialize student count
+        studentCount: 0 
       });
     } catch (error) {
       console.error("Error adding class: ", error);

@@ -1,60 +1,61 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   collection,
   query,
   onSnapshot,
   doc,
   runTransaction,
-  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
 import { useAuth } from './use-auth';
-import { useClasses } from './use-classes';
-import { students as initialStudentsData } from '@/lib/data';
 
 export function useStudents() {
-  const [studentsByClass, setStudentsByClass] = useState<Record<string, Student[]>>({});
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { classes } = useClasses();
 
   useEffect(() => {
-    if (!user || classes.length === 0) {
-      setStudentsByClass({});
+    if (!user) {
+      setAllStudents([]);
       setLoading(false);
       return;
     }
     
     setLoading(true);
-    const unsubscribes = classes.map(c => {
-      const q = query(collection(db, 'users', user.uid, 'classes', c.id, 'students'));
-      return onSnapshot(q, (snapshot) => {
-        const classStudents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
-        setStudentsByClass(prev => ({ ...prev, [c.id]: classStudents }));
-      }, (error) => {
-        console.error(`Error fetching students for class ${c.id}: `, error);
-      });
+    const q = query(collection(db, 'users', user.uid, 'students'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const students = snapshot.docs.map(doc => doc.data() as Student);
+      setAllStudents(students);
+      setLoading(false);
+    }, (error) => {
+      console.error(`Error fetching students: `, error);
+      setLoading(false);
     });
 
-    // This is a workaround to signal loading is done after initial snapshot loads
-    const timer = setTimeout(() => setLoading(false), 1500); 
+    return () => unsubscribe();
+  }, [user]);
+  
+  const studentsByClass = useMemo(() => {
+    return allStudents.reduce((acc, student) => {
+      const classId = student.classId || 'unassigned';
+      if (!acc[classId]) {
+        acc[classId] = [];
+      }
+      acc[classId].push(student);
+      return acc;
+    }, {} as Record<string, Student[]>);
+  }, [allStudents]);
 
-    return () => {
-        unsubscribes.forEach(unsub => unsub());
-        clearTimeout(timer);
-    }
-  }, [user, classes]);
-
-  const addStudent = useCallback(async (student: Omit<Student, 'id'>, classId: string) => {
-    if (!user) return;
+  const addStudent = useCallback(async (student: Omit<Student, 'id' | 'classId'>, classId: string) => {
+    if (!user || !classId) return;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
-    const studentsRef = collection(db, 'users', user.uid, 'classes', classId, 'students');
-    const newStudentRef = doc(studentsRef); // Firestore generates a unique ID
+    const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
     
     try {
        await runTransaction(db, async (transaction) => {
@@ -63,10 +64,12 @@ export function useStudents() {
           throw new Error("Class document does not exist!");
         }
         
-        // Add new student with the generated unique ID
-        transaction.set(newStudentRef, { ...student, id: newStudentRef.id });
+        transaction.set(newStudentRef, { 
+          ...student, 
+          id: newStudentRef.id,
+          classId: classId,
+        });
         
-        // Atomically increment student count
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount });
       });
