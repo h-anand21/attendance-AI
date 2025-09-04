@@ -55,19 +55,16 @@ export function useClasses() {
                   studentCount: studentCount,
                   createdAt: new Date().toISOString(),
                 });
-            });
 
-            Object.values(initialStudentsData).flat().forEach(studentData => {
-                const studentRef = doc(studentsCollection); // Auto-generate ID
-                const classIdForStudent = initialClassesData.find(c => initialStudentsData[c.id]?.some(s => s.id === studentData.id))?.id;
-                
-                if(classIdForStudent) {
+                const studentsForClass = initialStudentsData[classData.id] || [];
+                studentsForClass.forEach(studentData => {
+                    const studentRef = doc(studentsCollection); // Auto-generate ID
                     batch.set(studentRef, {
                         ...studentData,
-                        id: studentRef.id,
-                        classId: classIdForStudent,
+                        id: studentRef.id, // Use the auto-generated ID
+                        classId: classData.id,
                     });
-                }
+                });
             });
 
             await batch.commit();

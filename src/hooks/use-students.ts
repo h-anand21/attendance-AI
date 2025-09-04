@@ -8,6 +8,7 @@ import {
   onSnapshot,
   doc,
   runTransaction,
+  addDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
@@ -55,7 +56,6 @@ export function useStudents() {
     if (!user || !classId) return;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
-    const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
     
     try {
        await runTransaction(db, async (transaction) => {
@@ -64,6 +64,9 @@ export function useStudents() {
           throw new Error("Class document does not exist!");
         }
         
+        // Let firestore generate a new ID
+        const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
+
         transaction.set(newStudentRef, { 
           ...student, 
           id: newStudentRef.id,
