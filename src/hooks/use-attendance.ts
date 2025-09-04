@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { collectionGroup, query, onSnapshot, writeBatch, where, getDocs } from 'firebase/firestore';
+import { collection, query, onSnapshot, writeBatch, where, getDocs, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
 import { useAuth } from './use-auth';
@@ -18,7 +19,8 @@ export function useAttendance() {
         return;
     }
 
-    const q = query(collectionGroup(db, 'attendance'), where('userId', '==', user.uid));
+    // Simplified query against a single collection
+    const q = query(collection(db, 'users', user.uid, 'attendance'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const records = snapshot.docs.map(doc => ({ ...doc.data() }) as AttendanceRecord);
         setAttendanceRecords(records);
