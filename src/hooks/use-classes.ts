@@ -42,8 +42,13 @@ export function useClasses() {
             const batch = writeBatch(db);
             const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
             
+            // This maps old hardcoded IDs to new Firestore-generated IDs
+            const classIdMap: Record<string, string> = {};
+
             for (const classData of initialClassesData) {
                 const newClassRef = doc(classesCollectionRef);
+                classIdMap[classData.id] = newClassRef.id;
+
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 const studentCount = studentsForClass.length;
 
@@ -61,15 +66,18 @@ export function useClasses() {
                     batch.set(newStudentRef, {
                         ...studentData,
                         id: newStudentRef.id,
-                        classId: newClassRef.id,
+                        classId: newClassRef.id, // Associate student with the new class ID
                     });
                 }
             }
             await batch.commit();
             console.log('Initial data seeded.');
+            // The onSnapshot listener will pick up the newly seeded data automatically.
+            // We don't need to manually set state here.
         } catch (error) {
             console.error("Error seeding data:", error);
-            sessionStorage.removeItem(seedingFlag);
+            sessionStorage.removeItem(seedingFlag); // Allow retry if seeding fails
+            setLoading(false);
         }
       } else {
         const fetchedClasses = querySnapshot.docs.map(doc => ({
