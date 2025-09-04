@@ -11,6 +11,7 @@ import {
   writeBatch,
   getDocs,
   setDoc,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -30,7 +31,7 @@ export function useClasses() {
     };
 
     const classesCollectionRef = collection(db, 'users', user.uid, 'classes');
-    const q = query(classesCollectionRef);
+    const q = query(classesCollectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const seedingFlag = `seeding_for_${user.uid}`;
@@ -76,7 +77,6 @@ export function useClasses() {
             console.log('Initial data seeded.');
         } catch (error) {
             console.error("Error seeding data:", error);
-        } finally {
             // Unset the flag in case seeding fails, allowing a retry
             sessionStorage.removeItem(seedingFlag);
         }
@@ -96,25 +96,24 @@ export function useClasses() {
     return () => unsubscribe();
   }, [user]);
 
-  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<Class | null> => {
-    if (!user) return null;
+  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<void> => {
+    if (!user) return;
     try {
       const classesCollection = collection(db, 'users', user.uid, 'classes');
       const classDocRef = doc(classesCollection); // Let Firestore generate ID
 
-      const newClass: Class = {
-        id: classDocRef.id,
+      const newClass: Omit<Class, 'id'> = {
         ...newClassData,
         studentCount: 0,
         createdAt: new Date().toISOString(),
       };
       
-      await setDoc(classDocRef, newClass);
+      // The `onSnapshot` listener will automatically pick up this change
+      // and update the local state.
+      await setDoc(classDocRef, {id: classDocRef.id, ...newClass});
       
-      return newClass;
     } catch (error) {
       console.error("Error adding class: ", error);
-      return null;
     }
   }, [user]);
 

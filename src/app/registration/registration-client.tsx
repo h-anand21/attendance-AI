@@ -150,15 +150,25 @@ export function RegistrationClient() {
   };
 
   const onClassCreate = async (newClassData: {name: string, section: string}) => {
-     const newClass = await addClass(newClassData);
-     if (newClass) {
-        toast({
-            title: 'Class Created',
-            description: `${newClassData.name} - Section ${newClassData.section} has been created.`,
-        });
-        setSelectedClass(newClass.id);
-     }
+     await addClass(newClassData);
+     // The onSnapshot listener in useClasses will handle updating the list
+     // and a useEffect will select the newest class.
   }
+
+  useEffect(() => {
+      // When classes list updates (e.g., a new class is added),
+      // select the most recently created one.
+      if (classes.length > 0) {
+        const sortedClasses = [...classes].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        const latestClass = sortedClasses[0];
+        if (latestClass.id !== selectedClass) {
+            setSelectedClass(latestClass.id);
+        }
+      }
+  }, [classes]);
+
 
   const currentStudents = studentsByClass[selectedClass] || [];
   const loading = studentsLoading || classesLoading;

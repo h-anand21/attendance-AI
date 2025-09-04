@@ -37,7 +37,7 @@ const classFormSchema = z.object({
 
 type CreateClassDialogProps = {
   children: React.ReactNode;
-  onClassCreate: (newClassData: Omit<Class, 'id' | 'studentCount'>) => Promise<void>;
+  onClassCreate: (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>) => Promise<void>;
 };
 
 export function CreateClassDialog({ children, onClassCreate }: CreateClassDialogProps) {
