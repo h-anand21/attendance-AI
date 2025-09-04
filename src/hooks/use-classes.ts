@@ -32,25 +32,21 @@ export function useClasses() {
     const q = query(classesCollection);
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      if (querySnapshot.empty && user) {
-        // Check if data is already being seeded to prevent race conditions
-        const seedingFlag = `seeding_for_${user.uid}`;
-        if (sessionStorage.getItem(seedingFlag)) {
-            return;
-        }
+      const seedingFlag = `seeding_for_${user.uid}`;
+      if (querySnapshot.empty && !sessionStorage.getItem(seedingFlag)) {
         sessionStorage.setItem(seedingFlag, 'true');
-
         setLoading(true);
+
         console.log('No classes found, seeding initial data...');
         try {
             const batch = writeBatch(db);
-            const studentsCollection = collection(db, 'users', user.uid, 'students');
+            const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
 
             for (const classData of initialClassesData) {
                 const classRef = doc(classesCollection, classData.id);
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 const studentCount = studentsForClass.length;
-                
+
                 batch.set(classRef, { 
                   name: classData.name, 
                   section: classData.section,
@@ -59,23 +55,20 @@ export function useClasses() {
                 });
 
                 studentsForClass.forEach(studentData => {
-                    // Create a new ref with a Firestore-generated ID
-                    const studentRef = doc(studentsCollection);
-                    // Include the generated ID in the document data
+                    const studentRef = doc(studentsCollectionRef); // Firestore auto-ID
                     batch.set(studentRef, {
                         ...studentData,
-                        id: studentRef.id, 
+                        id: studentRef.id,
                         classId: classData.id,
                     });
                 });
             }
-
             await batch.commit();
             console.log('Initial data seeded.');
         } catch (error) {
             console.error("Error seeding data:", error);
         } finally {
-            // Keep loading as false because the snapshot listener will refetch
+            // Let the snapshot listener update the state naturally
             sessionStorage.removeItem(seedingFlag);
         }
       } else {
@@ -105,8 +98,7 @@ export function useClasses() {
       });
       const newClass: Class = {
         id: docRef.id,
-        name: newClassData.name,
-        section: newClassData.section,
+        ...newClassData,
         studentCount: 0,
         createdAt: new Date().toISOString(),
       };

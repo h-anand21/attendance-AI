@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false); // Use state for signing in status
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   
@@ -54,14 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedRole) {
            setUserRole(storedRole);
         } else {
-           // Default to teacher if no role is stored
-           setUserRole('teacher');
-           localStorage.setItem(ROLE_STORAGE_KEY, 'teacher');
+           // This case should ideally not happen if role is set before sign-in
+           setUserRole('teacher'); 
         }
       } else {
         setUser(null);
         setUserRole(null);
-        // Do not clear role on initial load if user is null
       }
       setLoading(false);
     });
@@ -76,6 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(() => {
+    const roleForSignIn = localStorage.getItem(ROLE_STORAGE_KEY) as UserRole;
+    if (!roleForSignIn) {
+      toast({
+        variant: 'destructive',
+        title: 'Role not selected',
+        description: 'Please select a role before signing in.',
+      });
+      return;
+    }
+
     if (isSigningIn) {
       return;
     }
@@ -87,9 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const provider = new GoogleAuthProvider();
         return signInWithPopup(auth, provider);
       })
-      .then(() => {
-         const role = localStorage.getItem(ROLE_STORAGE_KEY) as UserRole;
-         if (role === 'admin') {
+      .then((result) => {
+         // After successful sign-in, result.user is available
+         // The onAuthStateChanged listener will handle setting user state
+         // We can now redirect based on the role stored before sign-in
+         if (roleForSignIn === 'admin') {
             router.push('/registration');
          } else {
             router.push('/dashboard');
@@ -113,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => {
           setIsSigningIn(false);
-          setLoading(false); // Ensure loading is set to false in all cases
+          setLoading(false);
       });
   }, [toast, router, isSigningIn]);
 

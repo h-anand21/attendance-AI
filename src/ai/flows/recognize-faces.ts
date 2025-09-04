@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -68,7 +69,7 @@ Scene Photo:
 
 Student Photos:
 {{#each studentPhotos}}
-- Student ID: {{{this.studentId}}}
+- Student ID: {{this.studentId}}
   Photo: {{media url=this.photoDataUri}}
 {{/each}}
 `,

@@ -12,15 +12,29 @@ import {
 } from '@/components/ui/card';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
-import { Users, BookOpen, Loader2, PlusCircle } from 'lucide-react';
+import { Users, BookOpen, Loader2, PlusCircle, BarChart2, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreateClassDialog } from './create-class-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { generateAttendanceSummary } from '@/ai/flows/generate-attendance-summary';
+import { useAttendance } from '@/hooks/use-attendance';
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
   const { studentsByClass, loading: studentsLoading } = useStudents();
+  const { attendanceRecords, loading: attendanceLoading } = useAttendance();
+  const [isSummaryLoading, setSummaryLoading] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
 
   const totalStudents = useMemo(() => {
     return Object.values(studentsByClass).reduce(
@@ -29,7 +43,31 @@ export default function DashboardPage() {
     );
   }, [studentsByClass]);
 
-  const loading = classesLoading || studentsLoading;
+  const loading = classesLoading || studentsLoading || attendanceLoading;
+
+  const handleGenerateSummary = async () => {
+    setSummaryLoading(true);
+    setSummaryModalOpen(true);
+    try {
+      const today = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      
+      const result = await generateAttendanceSummary({
+        // For simplicity, we'll ask for a summary of all classes.
+        // In a real app, you might let the user pick.
+        classId: 'all_classes',
+        startDate: thirtyDaysAgo.toISOString(),
+        endDate: today.toISOString(),
+      });
+      setSummary(result.summary);
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      setSummary("Sorry, I couldn't generate a summary at this time. Please try again later.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -65,6 +103,32 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
           </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Attendance Records
+            </CardTitle>
+            <BarChart2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{attendanceRecords.length}</div>
+             <p className="text-xs text-muted-foreground">Total records logged</p>
+          </CardContent>
+        </Card>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                AI Analytics
+                </CardTitle>
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <Button className="w-full" onClick={handleGenerateSummary}>
+                Get Summary
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">AI-powered attendance summary for the last 30 days.</p>
+            </CardContent>
         </Card>
       </div>
 
@@ -115,6 +179,28 @@ export default function DashboardPage() {
            </Card>
         )}
       </div>
+       <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>AI Attendance Summary (Last 30 Days)</DialogTitle>
+            <DialogDescription>
+              Here is an AI-generated summary of attendance trends across all classes.
+            </DialogDescription>
+          </DialogHeader>
+          {isSummaryLoading ? (
+            <div className="flex items-center justify-center h-24">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto">
+              <p>{summary}</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setSummaryModalOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

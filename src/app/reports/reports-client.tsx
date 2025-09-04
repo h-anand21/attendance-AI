@@ -38,9 +38,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AttendanceChart } from './attendance-chart';
 import type { AttendanceStatus } from '@/types';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, AlertTriangle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function ReportsClient() {
   const { classes } = useClasses();
@@ -50,6 +52,8 @@ export function ReportsClient() {
 
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [date, setDate] = useState<Date>(new Date());
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     const classIdFromParams = searchParams.get('classId');
@@ -73,6 +77,26 @@ export function ReportsClient() {
       }
     );
   }, [attendanceRecords, selectedClassId, date]);
+  
+  const handleAnalyzeAnomalies = async () => {
+    if (!selectedClassId) return;
+    setIsAnalyzing(true);
+    setAnomalies([]);
+
+    const currentClass = classes.find(c => c.id === selectedClassId);
+
+    try {
+        const result = await analyzeAttendanceAnomalies({
+            attendanceData: JSON.stringify(filteredRecords),
+            classSection: `${currentClass?.name} - Section ${currentClass?.section}`,
+        });
+        setAnomalies(result.anomalies);
+    } catch(error) {
+        console.error("Error analyzing anomalies:", error);
+    } finally {
+        setIsAnalyzing(false);
+    }
+  };
 
   const chartData = useMemo(() => {
     if (filteredRecords.length === 0) return [];
@@ -162,8 +186,38 @@ export function ReportsClient() {
               />
             </PopoverContent>
           </Popover>
+           <Button onClick={handleAnalyzeAnomalies} disabled={isAnalyzing || filteredRecords.length === 0}>
+                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <AlertTriangle className="mr-2 h-4 w-4" />}
+                Analyze with AI
+            </Button>
         </CardContent>
       </Card>
+
+        {isAnalyzing && (
+            <div className="flex items-center justify-center rounded-lg border border-dashed p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        )}
+      
+      {anomalies.length > 0 && (
+          <Card>
+              <CardHeader>
+                  <CardTitle>AI-Detected Anomalies</CardTitle>
+                  <CardDescription>The following potential anomalies were detected in the selected period.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  {anomalies.map((anomaly, index) => (
+                      <Alert key={index} className="mb-2">
+                         <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>{anomaly.anomalyType} - {getStudentName(anomaly.studentId)}</AlertTitle>
+                          <AlertDescription>
+                              {anomaly.description} (On: {new Date(anomaly.date).toLocaleDateString()})
+                          </AlertDescription>
+                      </Alert>
+                  ))}
+              </CardContent>
+          </Card>
+      )}
       
       {chartData.length > 0 ? (
          <AttendanceChart data={chartData} />
@@ -204,8 +258,8 @@ export function ReportsClient() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredRecords.map((record, index) => (
-                    <TableRow key={`${record.studentId}-${record.date}-${index}`}>
+                  filteredRecords.map((record) => (
+                    <TableRow key={`${record.studentId}-${record.date}`}>
                       <TableCell className="font-medium">
                         {getStudentName(record.studentId)}
                       </TableCell>
