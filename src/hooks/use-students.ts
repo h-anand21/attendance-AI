@@ -8,12 +8,13 @@ import {
   onSnapshot,
   doc,
   runTransaction,
-  setDoc,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
 import { useAuth } from './use-auth';
 import { useClasses } from './use-classes';
+import { students as initialStudentsData } from '@/lib/data';
 
 export function useStudents() {
   const [studentsByClass, setStudentsByClass] = useState<Record<string, Student[]>>({});
@@ -39,29 +40,33 @@ export function useStudents() {
       });
     });
 
-    setLoading(false);
-    return () => unsubscribes.forEach(unsub => unsub());
+    // This is a workaround to signal loading is done after initial snapshot loads
+    const timer = setTimeout(() => setLoading(false), 1500); 
+
+    return () => {
+        unsubscribes.forEach(unsub => unsub());
+        clearTimeout(timer);
+    }
   }, [user, classes]);
 
   const addStudent = useCallback(async (student: Omit<Student, 'id'>, classId: string) => {
     if (!user) return;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
+    const studentsRef = collection(db, 'users', user.uid, 'classes', classId, 'students');
+    const newStudentRef = doc(studentsRef); // Firestore generates a unique ID
     
     try {
        await runTransaction(db, async (transaction) => {
         const classDoc = await transaction.get(classRef);
         if (!classDoc.exists()) {
-          throw "Class document does not exist!";
+          throw new Error("Class document does not exist!");
         }
         
-        // Add new student with a unique ID
-        const studentsRef = collection(db, 'users', user.uid, 'classes', classId, 'students');
-        const newStudentRef = doc(studentsRef); // Firestore generates a unique ID
-        
+        // Add new student with the generated unique ID
         transaction.set(newStudentRef, { ...student, id: newStudentRef.id });
         
-        // Increment student count
+        // Atomically increment student count
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount });
       });

@@ -13,7 +13,7 @@ import {
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
 import { useAuth } from './use-auth';
-import { classes as initialClassesData } from '@/lib/data';
+import { classes as initialClassesData, students as initialStudentsData } from '@/lib/data';
 
 export function useClasses() {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -34,12 +34,22 @@ export function useClasses() {
         // Seed data for new user
         const batch = writeBatch(db);
         initialClassesData.forEach(classData => {
-            // Use the predefined ID for seeding to maintain relationships
             const classRef = doc(db, 'users', user.uid, 'classes', classData.id);
             batch.set(classRef, { 
               name: classData.name, 
               section: classData.section,
-              studentCount: classData.studentCount 
+              studentCount: (initialStudentsData[classData.id] || []).length 
+            });
+            
+            // Seed students for this class
+            const studentsForClass = initialStudentsData[classData.id] || [];
+            studentsForClass.forEach(studentData => {
+                const studentRef = doc(db, 'users', user.uid, 'classes', classData.id, 'students', studentData.id);
+                batch.set(studentRef, {
+                    name: studentData.name,
+                    avatar: studentData.avatar,
+                    id: studentData.id
+                });
             });
         });
         await batch.commit();
