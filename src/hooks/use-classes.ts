@@ -10,6 +10,7 @@ import {
   doc,
   writeBatch,
   getDocs,
+  DocumentReference,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -46,9 +47,10 @@ export function useClasses() {
             const batch = writeBatch(db);
             const studentsCollection = collection(db, 'users', user.uid, 'students');
 
-            initialClassesData.forEach(classData => {
+            for (const classData of initialClassesData) {
                 const classRef = doc(classesCollection, classData.id);
                 const studentCount = (initialStudentsData[classData.id] || []).length;
+                
                 batch.set(classRef, { 
                   name: classData.name, 
                   section: classData.section,
@@ -58,14 +60,14 @@ export function useClasses() {
 
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 studentsForClass.forEach(studentData => {
-                    const studentRef = doc(collection(studentsCollection));
+                    const studentRef = doc(studentsCollection); // Auto-generate ID
                     batch.set(studentRef, {
                         ...studentData,
                         id: studentRef.id,
                         classId: classData.id,
                     });
                 });
-            });
+            }
 
             await batch.commit();
             console.log('Initial data seeded.');
@@ -92,16 +94,23 @@ export function useClasses() {
     return () => unsubscribe();
   }, [user]);
 
-  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>) => {
-    if (!user) return;
+  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<Class | null> => {
+    if (!user) return null;
     try {
-      await addDoc(collection(db, 'users', user.uid, 'classes'), {
+      const docRef = await addDoc(collection(db, 'users', user.uid, 'classes'), {
         ...newClassData,
         studentCount: 0,
         createdAt: new Date().toISOString(),
       });
+      return {
+        ...newClassData,
+        id: docRef.id,
+        studentCount: 0,
+        createdAt: new Date().toISOString(),
+      }
     } catch (error) {
       console.error("Error adding class: ", error);
+      return null;
     }
   }, [user]);
 

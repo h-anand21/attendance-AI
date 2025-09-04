@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useStudents } from '@/hooks/use-students';
 import { useClasses } from '@/hooks/use-classes';
 import { useToast } from '@/hooks/use-toast';
-import type { Student } from '@/types';
+import type { Student, Class } from '@/types';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -66,12 +66,6 @@ export function RegistrationClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
 
-  useEffect(() => {
-    if (classes.length > 0 && !selectedClass) {
-      setSelectedClass(classes[0].id);
-    }
-  }, [classes, selectedClass]);
-
   const studentForm = useForm<z.infer<typeof studentFormSchema>>({
     resolver: zodResolver(studentFormSchema),
     defaultValues: {
@@ -81,11 +75,19 @@ export function RegistrationClient() {
   });
 
   useEffect(() => {
-    if (classes.length > 0 && !studentForm.getValues('classId')) {
-      const classToSelect = selectedClass || classes[0].id;
-      studentForm.setValue('classId', classToSelect);
+    // Set initial selected class when classes load
+    if (classes.length > 0 && !selectedClass) {
+      setSelectedClass(classes[0].id);
     }
-  }, [classes, studentForm, selectedClass]);
+  }, [classes, selectedClass]);
+
+  useEffect(() => {
+    // Sync selected class with the form
+    if (selectedClass) {
+      studentForm.setValue('classId', selectedClass);
+    }
+  }, [selectedClass, studentForm]);
+
 
   const setupCamera = useCallback(async () => {
     try {
@@ -148,11 +150,14 @@ export function RegistrationClient() {
   };
 
   const onClassCreate = async (newClassData: {name: string, section: string}) => {
-     await addClass(newClassData);
-     toast({
-        title: 'Class Created',
-        description: `${newClassData.name} - Section ${newClassData.section} has been created.`,
-     });
+     const newClass = await addClass(newClassData);
+     if (newClass) {
+        toast({
+            title: 'Class Created',
+            description: `${newClassData.name} - Section ${newClassData.section} has been created.`,
+        });
+        setSelectedClass(newClass.id);
+     }
   }
 
   const currentStudents = studentsByClass[selectedClass] || [];
