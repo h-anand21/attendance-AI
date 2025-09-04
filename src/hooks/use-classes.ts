@@ -58,10 +58,10 @@ export function useClasses() {
 
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 studentsForClass.forEach(studentData => {
-                    const studentRef = doc(studentsCollection); // Auto-generate ID
+                    const studentRef = doc(collection(studentsCollection));
                     batch.set(studentRef, {
                         ...studentData,
-                        id: studentRef.id, // Use the auto-generated ID
+                        id: studentRef.id,
                         classId: classData.id,
                     });
                 });
