@@ -10,6 +10,7 @@ import {
   where,
   getDocs,
   doc,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
@@ -78,8 +79,13 @@ export function useAttendance() {
             batch.update(existingDoc.ref, { status: record.status });
           } else {
             // If record doesn't exist, create a new one with a generated ID
-             const newDocRef = doc(attendanceCollection); 
-             batch.set(newDocRef, { ...record, id: newDocRef.id, userId: user.uid });
+             const newDocRef = doc(attendanceCollection);
+             const newRecord: AttendanceRecord = {
+                ...record,
+                id: newDocRef.id,
+                userId: user.uid,
+             } 
+             batch.set(newDocRef, newRecord);
           }
         }
 

@@ -10,6 +10,7 @@ import {
   doc,
   writeBatch,
   getDocs,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -41,40 +42,46 @@ export function useClasses() {
         try {
             const batch = writeBatch(db);
             const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
+            
+            // A map to hold the new Firestore-generated IDs for classes
+            const classIdMap = new Map<string, string>();
 
             for (const classData of initialClassesData) {
-                const classRef = doc(classesCollectionRef, classData.id);
+                // Let Firestore generate a new ID for the class
+                const newClassRef = doc(classesCollectionRef);
+                classIdMap.set(classData.id, newClassRef.id); // Map old static ID to new Firestore ID
+                
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 const studentCount = studentsForClass.length;
 
-                batch.set(classRef, { 
+                batch.set(newClassRef, {
+                  id: newClassRef.id, 
                   name: classData.name, 
                   section: classData.section,
                   studentCount: studentCount,
                   createdAt: new Date().toISOString(),
                 });
 
-                studentsForClass.forEach(studentData => {
-                    // Let firestore generate a new ID
-                    const studentRef = doc(studentsCollectionRef);
-                    batch.set(studentRef, {
+                for (const studentData of studentsForClass) {
+                    // Let firestore generate a new ID for the student
+                    const newStudentRef = doc(studentsCollectionRef);
+                    batch.set(newStudentRef, {
                         ...studentData,
-                        id: studentRef.id,
-                        classId: classData.id,
+                        id: newStudentRef.id,
+                        classId: newClassRef.id, // Use the new class ID
                     });
-                });
+                }
             }
             await batch.commit();
             console.log('Initial data seeded.');
         } catch (error) {
             console.error("Error seeding data:", error);
         } finally {
-            // Let the snapshot listener update the state naturally
+            // Unset the flag in case seeding fails, allowing a retry
             sessionStorage.removeItem(seedingFlag);
         }
       } else {
         const fetchedClasses = querySnapshot.docs.map(doc => ({
-            id: doc.id,
             ...doc.data()
         } as Class));
         
@@ -92,17 +99,18 @@ export function useClasses() {
   const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<Class | null> => {
     if (!user) return null;
     try {
-      const docRef = await addDoc(collection(db, 'users', user.uid, 'classes'), {
-        ...newClassData,
-        studentCount: 0,
-        createdAt: new Date().toISOString(),
-      });
+      const classesCollection = collection(db, 'users', user.uid, 'classes');
+      const classDocRef = doc(classesCollection); // Let Firestore generate ID
+
       const newClass: Class = {
-        id: docRef.id,
+        id: classDocRef.id,
         ...newClassData,
         studentCount: 0,
         createdAt: new Date().toISOString(),
       };
+      
+      await setDoc(classDocRef, newClass);
+      
       return newClass;
     } catch (error) {
       console.error("Error adding class: ", error);

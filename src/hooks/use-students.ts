@@ -9,6 +9,7 @@ import {
   doc,
   runTransaction,
   addDoc,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
@@ -66,14 +67,17 @@ export function useStudents() {
         
         // Let firestore generate a new ID
         const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
-
-        // Store the generated ID within the student document
-        transaction.set(newStudentRef, { 
-          ...student, 
-          id: newStudentRef.id,
-          classId: classId,
-        });
         
+        const newStudent: Student = {
+          ...student,
+          id: newStudentRef.id,
+          classId,
+        };
+
+        // Store the new student document
+        transaction.set(newStudentRef, newStudent);
+        
+        // Update the student count on the class document
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount });
       });
