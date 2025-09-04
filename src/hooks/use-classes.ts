@@ -10,7 +10,6 @@ import {
   doc,
   writeBatch,
   getDocs,
-  DocumentReference,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -49,7 +48,8 @@ export function useClasses() {
 
             for (const classData of initialClassesData) {
                 const classRef = doc(classesCollection, classData.id);
-                const studentCount = (initialStudentsData[classData.id] || []).length;
+                const studentsForClass = initialStudentsData[classData.id] || [];
+                const studentCount = studentsForClass.length;
                 
                 batch.set(classRef, { 
                   name: classData.name, 
@@ -58,12 +58,13 @@ export function useClasses() {
                   createdAt: new Date().toISOString(),
                 });
 
-                const studentsForClass = initialStudentsData[classData.id] || [];
                 studentsForClass.forEach(studentData => {
-                    const studentRef = doc(studentsCollection); // Auto-generate ID
+                    // Create a new ref with a Firestore-generated ID
+                    const studentRef = doc(studentsCollection);
+                    // Include the generated ID in the document data
                     batch.set(studentRef, {
                         ...studentData,
-                        id: studentRef.id,
+                        id: studentRef.id, 
                         classId: classData.id,
                     });
                 });
@@ -74,7 +75,7 @@ export function useClasses() {
         } catch (error) {
             console.error("Error seeding data:", error);
         } finally {
-            setLoading(false);
+            // Keep loading as false because the snapshot listener will refetch
             sessionStorage.removeItem(seedingFlag);
         }
       } else {
@@ -94,7 +95,7 @@ export function useClasses() {
     return () => unsubscribe();
   }, [user]);
 
-  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<Class | null> => {
+  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount'>): Promise<Class | null> => {
     if (!user) return null;
     try {
       const docRef = await addDoc(collection(db, 'users', user.uid, 'classes'), {
@@ -102,12 +103,14 @@ export function useClasses() {
         studentCount: 0,
         createdAt: new Date().toISOString(),
       });
-      return {
-        ...newClassData,
+      const newClass: Class = {
         id: docRef.id,
+        name: newClassData.name,
+        section: newClassData.section,
         studentCount: 0,
         createdAt: new Date().toISOString(),
-      }
+      };
+      return newClass;
     } catch (error) {
       console.error("Error adding class: ", error);
       return null;

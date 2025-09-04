@@ -8,7 +8,6 @@ import {
   onSnapshot,
   doc,
   runTransaction,
-  addDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
@@ -67,6 +66,7 @@ export function useStudents() {
         // Let firestore generate a new ID
         const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
 
+        // Store the generated ID within the student document
         transaction.set(newStudentRef, { 
           ...student, 
           id: newStudentRef.id,
