@@ -9,6 +9,7 @@ import {
   addDoc,
   doc,
   writeBatch,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -27,37 +28,56 @@ export function useClasses() {
       return;
     };
 
-    const q = query(collection(db, 'users', user.uid, 'classes'));
+    const classesCollection = collection(db, 'users', user.uid, 'classes');
+    const q = query(classesCollection);
+
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      if (querySnapshot.empty) {
+      if (querySnapshot.empty && user) {
+        // Check if data is already being seeded to prevent race conditions
+        const seedingFlag = `seeding_for_${user.uid}`;
+        if (sessionStorage.getItem(seedingFlag)) {
+            return;
+        }
+        sessionStorage.setItem(seedingFlag, 'true');
+
         setLoading(true);
         console.log('No classes found, seeding initial data...');
-        const batch = writeBatch(db);
-        
-        initialClassesData.forEach(classData => {
-            const classRef = doc(db, 'users', user.uid, 'classes', classData.id);
-            const studentCount = (initialStudentsData[classData.id] || []).length;
-            batch.set(classRef, { 
-              name: classData.name, 
-              section: classData.section,
-              studentCount: studentCount
-            });
-        });
+        try {
+            const batch = writeBatch(db);
+            const studentsCollection = collection(db, 'users', user.uid, 'students');
 
-        Object.entries(initialStudentsData).forEach(([classId, students]) => {
-            students.forEach(studentData => {
-                const studentRef = doc(collection(db, 'users', user.uid, 'students'));
-                batch.set(studentRef, {
-                    ...studentData,
-                    id: studentRef.id,
-                    classId: classId,
+            initialClassesData.forEach(classData => {
+                const classRef = doc(classesCollection, classData.id);
+                const studentCount = (initialStudentsData[classData.id] || []).length;
+                batch.set(classRef, { 
+                  name: classData.name, 
+                  section: classData.section,
+                  studentCount: studentCount,
+                  createdAt: new Date().toISOString(),
                 });
             });
-        });
 
-        await batch.commit();
-        console.log('Initial data seeded.');
-        setLoading(false);
+            Object.values(initialStudentsData).flat().forEach(studentData => {
+                const studentRef = doc(studentsCollection); // Auto-generate ID
+                const classIdForStudent = initialClassesData.find(c => initialStudentsData[c.id]?.some(s => s.id === studentData.id))?.id;
+                
+                if(classIdForStudent) {
+                    batch.set(studentRef, {
+                        ...studentData,
+                        id: studentRef.id,
+                        classId: classIdForStudent,
+                    });
+                }
+            });
+
+            await batch.commit();
+            console.log('Initial data seeded.');
+        } catch (error) {
+            console.error("Error seeding data:", error);
+        } finally {
+            setLoading(false);
+            sessionStorage.removeItem(seedingFlag);
+        }
       } else {
         const fetchedClasses = querySnapshot.docs.map(doc => ({
             id: doc.id,
@@ -75,12 +95,13 @@ export function useClasses() {
     return () => unsubscribe();
   }, [user]);
 
-  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount'>) => {
+  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>) => {
     if (!user) return;
     try {
       await addDoc(collection(db, 'users', user.uid, 'classes'), {
         ...newClassData,
-        studentCount: 0 
+        studentCount: 0,
+        createdAt: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Error adding class: ", error);

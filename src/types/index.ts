@@ -4,6 +4,7 @@ export type Class = {
   name: string;
   section: string;
   studentCount: number;
+  createdAt: string; // ISO date string
 };
 
 export type Student = {
