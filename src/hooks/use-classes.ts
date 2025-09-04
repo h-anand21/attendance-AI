@@ -6,12 +6,10 @@ import {
   collection,
   query,
   onSnapshot,
-  addDoc,
-  doc,
   writeBatch,
-  getDocs,
-  setDoc,
+  doc,
   orderBy,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Class } from '@/types';
@@ -44,32 +42,26 @@ export function useClasses() {
             const batch = writeBatch(db);
             const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
             
-            // A map to hold the new Firestore-generated IDs for classes
-            const classIdMap = new Map<string, string>();
-
             for (const classData of initialClassesData) {
-                // Let Firestore generate a new ID for the class
                 const newClassRef = doc(classesCollectionRef);
-                classIdMap.set(classData.id, newClassRef.id); // Map old static ID to new Firestore ID
-                
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 const studentCount = studentsForClass.length;
 
-                batch.set(newClassRef, {
+                const newClassPayload: Class = {
                   id: newClassRef.id, 
                   name: classData.name, 
                   section: classData.section,
                   studentCount: studentCount,
                   createdAt: new Date().toISOString(),
-                });
+                };
+                batch.set(newClassRef, newClassPayload);
 
                 for (const studentData of studentsForClass) {
-                    // Let firestore generate a new ID for the student
                     const newStudentRef = doc(studentsCollectionRef);
                     batch.set(newStudentRef, {
                         ...studentData,
                         id: newStudentRef.id,
-                        classId: newClassRef.id, // Use the new class ID
+                        classId: newClassRef.id,
                     });
                 }
             }
@@ -77,7 +69,6 @@ export function useClasses() {
             console.log('Initial data seeded.');
         } catch (error) {
             console.error("Error seeding data:", error);
-            // Unset the flag in case seeding fails, allowing a retry
             sessionStorage.removeItem(seedingFlag);
         }
       } else {
@@ -100,17 +91,16 @@ export function useClasses() {
     if (!user) return;
     try {
       const classesCollection = collection(db, 'users', user.uid, 'classes');
-      const classDocRef = doc(classesCollection); // Let Firestore generate ID
+      const classDocRef = doc(classesCollection);
 
-      const newClass: Omit<Class, 'id'> = {
+      const newClass: Class = {
+        id: classDocRef.id,
         ...newClassData,
         studentCount: 0,
         createdAt: new Date().toISOString(),
       };
       
-      // The `onSnapshot` listener will automatically pick up this change
-      // and update the local state.
-      await setDoc(classDocRef, {id: classDocRef.id, ...newClass});
+      await setDoc(classDocRef, newClass);
       
     } catch (error) {
       console.error("Error adding class: ", error);

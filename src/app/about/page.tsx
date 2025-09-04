@@ -45,15 +45,15 @@ export default function AboutPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <Database className="h-6 w-6" /> Data Source
+                <Database className="h-6 w-6" /> Data Source &amp; Storage
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              This application is currently running on sample data for demonstration purposes. All classes, students, and attendance records are loaded from mock data files and stored in your browser's local storage.
+              This application stores all of its data—including users, classes, students, and attendance records—in **Cloud Firestore**, a real-time database from Google Firebase. 
             </p>
             <p>
-                The initial data is sourced from <code className="font-mono bg-muted/50 p-1 rounded-md text-sm">src/lib/data.ts</code>. Any changes you make (like adding a class or student) are saved only in your browser and will not affect other users.
+              All data is stored securely under your unique User ID. When you first sign up, the application automatically seeds your database with sample data sourced from <code className="font-mono bg-muted/50 p-1 rounded-md text-sm">src/lib/data.ts</code>. Any changes you make, like adding a class or student, are saved directly to your personal Firestore database, ensuring your data is persistent and secure.
             </p>
           </CardContent>
         </Card>

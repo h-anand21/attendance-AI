@@ -10,7 +10,6 @@ import {
   where,
   getDocs,
   doc,
-  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
@@ -63,7 +62,6 @@ export function useAttendance() {
         );
 
         for (const record of newRecords) {
-          // Query for an existing record for this student on this date
           const q = query(
             attendanceCollection,
             where('studentId', '==', record.studentId),
@@ -74,15 +72,13 @@ export function useAttendance() {
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
-            // If record exists, update it
             const existingDoc = querySnapshot.docs[0];
             batch.update(existingDoc.ref, { status: record.status });
           } else {
-            // If record doesn't exist, create a new one with a generated ID
              const newDocRef = doc(attendanceCollection);
              const newRecord: AttendanceRecord = {
-                ...record,
                 id: newDocRef.id,
+                ...record,
                 userId: user.uid,
              } 
              batch.set(newDocRef, newRecord);

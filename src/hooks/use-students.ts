@@ -65,7 +65,6 @@ export function useStudents() {
           throw new Error("Class document does not exist!");
         }
         
-        // Let firestore generate a new ID
         const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
         
         const newStudent: Student = {
@@ -74,10 +73,8 @@ export function useStudents() {
           classId,
         };
 
-        // Store the new student document
         transaction.set(newStudentRef, newStudent);
         
-        // Update the student count on the class document
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount });
       });
