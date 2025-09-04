@@ -10,7 +10,6 @@ import {
   where,
   getDocs,
   doc,
-  addDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
@@ -50,7 +49,7 @@ export function useAttendance() {
   }, [user]);
 
   const addAttendanceRecords = useCallback(
-    async (newRecords: Omit<AttendanceRecord, 'userId'>[]) => {
+    async (newRecords: Omit<AttendanceRecord, 'userId'| 'id'>[]) => {
       if (!user || newRecords.length === 0) return;
 
       try {
@@ -78,9 +77,9 @@ export function useAttendance() {
             const existingDoc = querySnapshot.docs[0];
             batch.update(existingDoc.ref, { status: record.status });
           } else {
-            // If record doesn't exist, create a new one
-             const newDocRef = doc(attendanceCollection); // Let Firestore generate ID
-             batch.set(newDocRef, { ...record, userId: user.uid });
+            // If record doesn't exist, create a new one with a generated ID
+             const newDocRef = doc(attendanceCollection); 
+             batch.set(newDocRef, { ...record, id: newDocRef.id, userId: user.uid });
           }
         }
 

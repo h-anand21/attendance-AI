@@ -28,8 +28,8 @@ export function useClasses() {
       return;
     };
 
-    const classesCollection = collection(db, 'users', user.uid, 'classes');
-    const q = query(classesCollection);
+    const classesCollectionRef = collection(db, 'users', user.uid, 'classes');
+    const q = query(classesCollectionRef);
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const seedingFlag = `seeding_for_${user.uid}`;
@@ -43,7 +43,7 @@ export function useClasses() {
             const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
 
             for (const classData of initialClassesData) {
-                const classRef = doc(classesCollection, classData.id);
+                const classRef = doc(classesCollectionRef, classData.id);
                 const studentsForClass = initialStudentsData[classData.id] || [];
                 const studentCount = studentsForClass.length;
 
@@ -55,7 +55,8 @@ export function useClasses() {
                 });
 
                 studentsForClass.forEach(studentData => {
-                    const studentRef = doc(studentsCollectionRef); // Firestore auto-ID
+                    // Let firestore generate a new ID
+                    const studentRef = doc(studentsCollectionRef);
                     batch.set(studentRef, {
                         ...studentData,
                         id: studentRef.id,
@@ -88,7 +89,7 @@ export function useClasses() {
     return () => unsubscribe();
   }, [user]);
 
-  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount'>): Promise<Class | null> => {
+  const addClass = useCallback(async (newClassData: Omit<Class, 'id' | 'studentCount' | 'createdAt'>): Promise<Class | null> => {
     if (!user) return null;
     try {
       const docRef = await addDoc(collection(db, 'users', user.uid, 'classes'), {

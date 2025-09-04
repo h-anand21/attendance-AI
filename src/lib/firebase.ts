@@ -1,3 +1,4 @@
+
 // Important: This file is used to connect to the Firebase project.
 // You can find the firebaseConfig object in the Firebase console.
 // navigate to Project Settings -> General -> Your apps -> Firebase SDK snippet -> Config
@@ -11,7 +12,7 @@ const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBAsE_APP_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

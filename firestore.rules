@@ -3,34 +3,9 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check ownership
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
-    }
-
-    // Secure the users collection
-    match /users/{userId} {
-      // Only the authenticated user can access their own document
-      allow read, write: if isOwner(userId);
-      
-      // Secure the classes subcollection
-      match /classes/{classId} {
-        // Owner can perform all operations on their own class documents
-        allow read, write, create, delete: if isOwner(userId);
-      }
-      
-      // Secure the students subcollection
-      match /students/{studentId} {
-         // Owner can perform all operations on their own student documents
-        allow read, write, create, delete: if isOwner(userId);
-      }
-      
-      // Secure the attendance subcollection
-      match /attendance/{recordId} {
-        // Owner can perform all operations on their own attendance records
-         allow read, write, create, delete: if isOwner(userId);
-      }
+    // Users can only read and write to their own data
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

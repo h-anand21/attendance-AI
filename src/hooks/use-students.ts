@@ -8,6 +8,7 @@ import {
   onSnapshot,
   doc,
   runTransaction,
+  addDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
