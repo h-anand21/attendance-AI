@@ -8,7 +8,7 @@ export type Class = {
 export type Student = {
   id: string;
   name: string;
-  avatar: string;
+  avatar: string; // This will be a data URL for Firestore
 };
 
 export type AttendanceStatus = 'present' | 'absent' | 'late';
@@ -18,6 +18,7 @@ export type AttendanceRecord = {
   status: AttendanceStatus;
   date: string; // ISO date string (e.g., "2023-10-27")
   classId: string;
+  userId: string; // To associate record with the logged-in user
 };
 
 export type Task = {

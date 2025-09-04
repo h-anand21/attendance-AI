@@ -1,42 +1,56 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { collectionGroup, query, onSnapshot, writeBatch, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
-
-const ATTENDANCE_STORAGE_KEY = 'attendease_attendance';
+import { useAuth } from './use-auth';
 
 export function useAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    try {
-      const storedAttendance = localStorage.getItem(ATTENDANCE_STORAGE_KEY);
-      if (storedAttendance) {
-        setAttendanceRecords(JSON.parse(storedAttendance));
-      }
-    } catch (error) {
-      console.error("Failed to read attendance from localStorage", error);
-    } finally {
-      setLoading(false);
+    if (!user) {
+        setAttendanceRecords([]);
+        setLoading(false);
+        return;
     }
-  }, []);
 
-  const addAttendanceRecords = useCallback((newRecords: AttendanceRecord[]) => {
-    setAttendanceRecords(prev => {
-        // Filter out any records for the same student, class, and date to avoid duplicates
-        const existingKeys = new Set(newRecords.map(r => `${r.studentId}-${r.classId}-${r.date}`));
-        const filteredPrev = prev.filter(r => !existingKeys.has(`${r.studentId}-${r.classId}-${r.date}`));
-        
-        const newState = [...filteredPrev, ...newRecords];
-        try {
-            localStorage.setItem(ATTENDANCE_STORAGE_KEY, JSON.stringify(newState));
-        } catch (error) {
-            console.error("Failed to save attendance to localStorage", error);
-        }
-        return newState;
+    const q = query(collectionGroup(db, 'attendance'), where('userId', '==', user.uid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const records = snapshot.docs.map(doc => ({ ...doc.data() }) as AttendanceRecord);
+        setAttendanceRecords(records);
+        setLoading(false);
+    }, (error) => {
+        console.error("Error fetching attendance records: ", error);
+        setLoading(false);
     });
-  }, []);
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const addAttendanceRecords = useCallback(async (newRecords: Omit<AttendanceRecord, 'userId'>[]) => {
+    if (!user || newRecords.length === 0) return;
+
+    try {
+        const batch = writeBatch(db);
+        
+        // In Firestore, we can just overwrite documents to update them.
+        // We'll create a unique ID for each record to ensure this.
+        newRecords.forEach(record => {
+            const recordId = `${record.classId}_${record.date}_${record.studentId}`;
+            const recordRef = doc(db, 'users', user.uid, 'attendance', recordId);
+            batch.set(recordRef, { ...record, userId: user.uid });
+        });
+        
+        await batch.commit();
+
+    } catch (error) {
+        console.error("Failed to save attendance to Firestore", error);
+    }
+  }, [user]);
 
   return { attendanceRecords, addAttendanceRecords, loading };
 }
