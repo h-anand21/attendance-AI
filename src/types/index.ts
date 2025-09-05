@@ -12,6 +12,7 @@ export type Student = {
   name: string;
   avatar: string; // This will be a data URL for Firestore
   classId: string;
+  qrCode: string; // data URL of the QR code
 };
 
 export type AttendanceStatus = 'present' | 'absent' | 'late';
