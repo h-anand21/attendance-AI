@@ -10,10 +10,13 @@ import {
   runTransaction,
   addDoc,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
 import { useAuth } from './use-auth';
+import QRCode from 'qrcode';
+
 
 export function useStudents() {
   const [allStudents, setAllStudents] = useState<Student[]>([]);
@@ -53,11 +56,12 @@ export function useStudents() {
     }, {} as Record<string, Student[]>);
   }, [allStudents]);
 
-  const addStudent = useCallback(async (student: Omit<Student, 'id' | 'classId'>, classId: string) => {
+  const addStudent = useCallback(async (studentData: Omit<Student, 'id' | 'classId' | 'qrCode'>, classId: string) => {
     if (!user || !classId) return;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
-    
+    const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
+
     try {
        await runTransaction(db, async (transaction) => {
         const classDoc = await transaction.get(classRef);
@@ -65,21 +69,30 @@ export function useStudents() {
           throw new Error("Class document does not exist!");
         }
         
-        const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
-        
-        const newStudent: Student = {
-          ...student,
+        // 1. Create student without QR code first to get the ID
+        const newStudent: Omit<Student, 'qrCode'> = {
+          ...studentData,
           id: newStudentRef.id,
           classId,
         };
-
         transaction.set(newStudentRef, newStudent);
         
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount });
       });
+
+      // 2. After transaction, generate QR code with the final ID
+       const qrCodeDataUrl = await QRCode.toDataURL(newStudentRef.id, {
+          errorCorrectionLevel: 'H',
+          type: 'image/jpeg',
+          width: 300,
+      });
+
+      // 3. Update the student document with the generated QR code
+      await updateDoc(newStudentRef, { qrCode: qrCodeDataUrl });
+
     } catch (e) {
-      console.error("Transaction failed: ", e);
+      console.error("Transaction or QR code update failed: ", e);
     }
   }, [user]);
   
