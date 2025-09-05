@@ -20,6 +20,7 @@ import { Download, QrCode, ScanFace, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
+import { QrScanModal } from './qr-scan-modal';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
 
@@ -36,6 +37,7 @@ export function AttendanceClient({
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Omit<AttendanceRecord, 'date' | 'classId'>[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
+  const [isQrScanOpen, setQrScanOpen] = useState(false);
   
   useEffect(() => {
     const classStudents = studentsByClass[currentClass.id] || [];
@@ -44,7 +46,7 @@ export function AttendanceClient({
     setAttendance(
       classStudents.map((student) => ({
         studentId: student.id,
-        status: 'absent',
+        status: 'present',
       }))
     );
   }, [studentsByClass, currentClass.id]);
@@ -57,6 +59,24 @@ export function AttendanceClient({
       )
     );
   };
+
+  const handleQrScan = (studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if(student) {
+        handleStatusChange(studentId, 'present');
+        toast({
+            title: 'Student Scanned',
+            description: `${student.name} has been marked as present.`,
+        });
+    } else {
+         toast({
+            variant: 'destructive',
+            title: 'Scan Failed',
+            description: 'This QR code does not belong to any student in this class.',
+        });
+    }
+  };
+
 
   const handleFaceScanComplete = (recognizedStudentIds: string[]) => {
     setAttendance((prev) =>
@@ -111,7 +131,11 @@ export function AttendanceClient({
           >
             <ScanFace className="mr-2 h-4 w-4" /> Start Face Scan
           </Button>
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={() => setQrScanOpen(true)}
+            disabled={loading || students.length === 0}
+          >
             <QrCode className="mr-2 h-4 w-4" /> Scan RFID/QR
           </Button>
           <Button variant="outline" onClick={handleExport}>
@@ -139,6 +163,11 @@ export function AttendanceClient({
         onOpenChange={setFaceScanOpen}
         students={students}
         onScanComplete={handleFaceScanComplete}
+      />
+      <QrScanModal
+        isOpen={isQrScanOpen}
+        onOpenChange={setQrScanOpen}
+        onScan={handleQrScan}
       />
     </div>
   );
