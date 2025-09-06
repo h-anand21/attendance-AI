@@ -16,13 +16,14 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Download, QrCode, ScanFace, CheckCircle } from 'lucide-react';
+import { Download, QrCode, ScanFace, CheckCircle, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
 import { QrScanModal } from './qr-scan-modal';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
+import { PhotoUploadModal } from './photo-upload-modal';
 
 type AttendanceClientProps = {
   currentClass: Class;
@@ -38,11 +39,12 @@ export function AttendanceClient({
   const [attendance, setAttendance] = useState<Omit<AttendanceRecord, 'date' | 'classId'>[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
   const [isQrScanOpen, setQrScanOpen] = useState(false);
+  const [isPhotoUploadOpen, setPhotoUploadOpen] = useState(false);
   
   useEffect(() => {
     const classStudents = studentsByClass[currentClass.id] || [];
     setStudents(classStudents);
-    // Initialize attendance for all students as 'absent'
+    // Initialize attendance for all students as 'present'
     setAttendance(
       classStudents.map((student) => ({
         studentId: student.id,
@@ -133,6 +135,13 @@ export function AttendanceClient({
           </Button>
           <Button 
             variant="outline"
+            onClick={() => setPhotoUploadOpen(true)}
+            disabled={loading || students.length === 0}
+          >
+            <Upload className="mr-2 h-4 w-4" /> Upload Photo
+          </Button>
+          <Button 
+            variant="outline"
             onClick={() => setQrScanOpen(true)}
             disabled={loading || students.length === 0}
           >
@@ -161,6 +170,12 @@ export function AttendanceClient({
       <FaceScanModal
         isOpen={isFaceScanOpen}
         onOpenChange={setFaceScanOpen}
+        students={students}
+        onScanComplete={handleFaceScanComplete}
+      />
+      <PhotoUploadModal
+        isOpen={isPhotoUploadOpen}
+        onOpenChange={setPhotoUploadOpen}
         students={students}
         onScanComplete={handleFaceScanComplete}
       />
