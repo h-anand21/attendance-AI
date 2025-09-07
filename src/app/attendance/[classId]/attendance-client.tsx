@@ -44,18 +44,39 @@ export function AttendanceClient({
   const [isQrScanOpen, setQrScanOpen] = useState(false);
   const [isPhotoUploadOpen, setPhotoUploadOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isAttendanceConfirmed, setIsAttendanceConfirmed] = useState(false);
   
   useEffect(() => {
     const classStudents = studentsByClass[currentClass.id] || [];
     setStudents(classStudents);
-    // Initialize attendance for all students as 'present'
-    setAttendance(
-      classStudents.map((student) => ({
+
+    const today = new Date().toISOString().split('T')[0];
+    const todaysRecords = attendanceRecords.filter(
+      r => r.classId === currentClass.id && r.date === today
+    );
+
+    let initialAttendance;
+    if (todaysRecords.length > 0) {
+      // If records for today exist, use them
+      initialAttendance = classStudents.map(student => {
+        const record = todaysRecords.find(r => r.studentId === student.id);
+        return {
+          studentId: student.id,
+          status: record ? record.status : 'absent', // Default to absent if student has no record today
+        };
+      });
+      setIsAttendanceConfirmed(true);
+    } else {
+      // If no records for today, default everyone to present
+      initialAttendance = classStudents.map(student => ({
         studentId: student.id,
         status: 'present',
-      }))
-    );
-  }, [studentsByClass, currentClass.id]);
+      }));
+      setIsAttendanceConfirmed(false);
+    }
+    setAttendance(initialAttendance);
+    
+  }, [studentsByClass, currentClass.id, attendanceRecords]);
 
 
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
@@ -64,6 +85,8 @@ export function AttendanceClient({
         record.studentId === studentId ? { ...record, status } : record
       )
     );
+    // Any change should allow re-confirmation
+    setIsAttendanceConfirmed(false);
   };
 
   const handleQrScan = (studentId: string) => {
@@ -85,13 +108,13 @@ export function AttendanceClient({
 
 
   const handleFaceScanComplete = (recognizedStudentIds: string[]) => {
-    setAttendance((prev) =>
-      prev.map((record) =>
-        recognizedStudentIds.includes(record.studentId)
-          ? { ...record, status: 'present' }
-          : record
-      )
+    const updatedAttendance = attendance.map(record =>
+      recognizedStudentIds.includes(record.studentId)
+        ? { ...record, status: 'present' as AttendanceStatus }
+        : record
     );
+    setAttendance(updatedAttendance);
+    setIsAttendanceConfirmed(false); // Changes were made, allow confirmation
     toast({
       title: 'Face Scan Complete',
       description: `${recognizedStudentIds.length} students marked as present.`,
@@ -107,10 +130,11 @@ export function AttendanceClient({
     }));
     
     addAttendanceRecords(recordsToSave);
+    setIsAttendanceConfirmed(true);
 
     toast({
       title: 'Attendance Confirmed!',
-      description: `Attendance for ${currentClass.name} on ${today} has been saved.`,
+      description: `Attendance for ${currentClass.name} on ${format(new Date(), 'dd / MM / yyyy')} has been saved.`,
     });
   };
 
@@ -205,9 +229,9 @@ export function AttendanceClient({
       />
 
       <div className="flex justify-end">
-        <Button size="lg" onClick={handleConfirmAttendance} disabled={students.length === 0}>
+        <Button size="lg" onClick={handleConfirmAttendance} disabled={students.length === 0 || isAttendanceConfirmed}>
           <CheckCircle className="mr-2 h-5 w-5" />
-          Confirm Attendance
+          {isAttendanceConfirmed ? 'Attendance Saved' : 'Confirm Attendance'}
         </Button>
       </div>
 
