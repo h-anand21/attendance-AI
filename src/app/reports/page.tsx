@@ -2,11 +2,16 @@
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
-import { ReportsClient } from './reports-client';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useClasses } from '@/hooks/use-classes';
+import dynamic from 'next/dynamic';
+
+const ReportsClient = dynamic(() => import('./reports-client').then(mod => mod.ReportsClient), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>
+});
 
 export default function ReportsPage() {
   const { userRole, loading: authLoading } = useAuth();
@@ -30,7 +35,7 @@ export default function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Permission Required</CardTitle>
-          </CardHeader>
+          </Header>
           <CardContent>
             <p>You do not have permission to view this page. Please contact an administrator.</p>
           </CardContent>
