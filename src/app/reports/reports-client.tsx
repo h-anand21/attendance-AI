@@ -66,7 +66,7 @@ export function ReportsClient() {
     } else if (classes.length > 0 && !selectedClassId) {
       setSelectedClassId(classes[0].id);
     }
-  }, [searchParams, classes, selectedClassId]);
+  }, [searchParams, classes]);
 
   const filteredRecords = useMemo(() => {
     const selectedYear = date.getFullYear();
