@@ -57,7 +57,32 @@ const sectionVariants = {
   },
 };
 
+const sentence = {
+  hidden: { opacity: 1 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delay: 0.1,
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const word = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
+
 export default function LandingPage() {
+  const headlineText = "Automated attendance that actually works.";
+
   return (
     <MarketingLayout>
       <div className="flex flex-col min-h-screen">
@@ -67,17 +92,21 @@ export default function LandingPage() {
             <div className="container text-center">
               <div className="max-w-4xl mx-auto">
                 <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  variants={sentence}
+                  initial="hidden"
+                  animate="visible"
                   className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl"
                 >
-                  Automated attendance that actually works.
+                  {headlineText.split(" ").map((char, index) => (
+                    <motion.span key={`${char}-${index}`} variants={word} className="inline-block">
+                      {char}&nbsp;
+                    </motion.span>
+                  ))}
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+                  transition={{ duration: 0.5, delay: 0.8, ease: 'easeOut' }}
                   className="mt-6 text-xl leading-8 text-muted-foreground"
                 >
                   AI-driven face scans, photo uploads, and QR check-ins — fast, accurate, and easy. Free up teaching time and gain valuable insights.
@@ -85,7 +114,7 @@ export default function LandingPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
+                  transition={{ duration: 0.5, delay: 1, ease: 'easeOut' }}
                   className="mt-10 flex items-center justify-center gap-x-6"
                 >
                   <Button size="lg" asChild>
@@ -99,7 +128,7 @@ export default function LandingPage() {
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
+                transition={{ duration: 0.8, delay: 1.2, ease: 'easeOut' }}
                 className="mt-16 sm:mt-24"
               >
                 <div className="relative w-full max-w-5xl mx-auto">
