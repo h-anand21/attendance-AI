@@ -32,12 +32,12 @@ export default function RegistrationPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <Card>
            <CardHeader>
-            <CardTitle>Teacher Reports</CardTitle>
-            <CardDescription>View reports and manage teachers.</CardDescription>
+            <CardTitle>Teacher Management</CardTitle>
+            <CardDescription>Register new teachers and view records.</CardDescription>
           </CardHeader>
           <CardContent>
              <Button asChild className="w-full">
-              <Link href="/reports/teacher">
+              <Link href="/registration/teacher">
                 <Users className="mr-2 h-4 w-4" />
                 Manage Teachers
               </Link>
@@ -46,9 +46,9 @@ export default function RegistrationPage() {
         </Card>
         <Card>
            <CardHeader>
-            <CardTitle>Student Details</CardTitle>
+            <CardTitle>Student Management</CardTitle>
             <CardDescription>Register new students and manage records.</CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
              <Button asChild className="w-full">
               <Link href="/registration/details">

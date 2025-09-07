@@ -3,6 +3,7 @@
 
 import { AppLayout } from '@/components/app-layout';
 import { useAuth } from '@/hooks/use-auth';
+import { useTeachers } from '@/hooks/use-teachers';
 import {
   Card,
   CardContent,
@@ -19,45 +20,12 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileDown } from 'lucide-react';
-
-const sampleTeachers = [
-  {
-    id: 'teacher-1',
-    name: 'Dr. Evelyn Reed',
-    email: 'e.reed@school.edu',
-    avatar: 'https://picsum.photos/seed/evelyn/40/40',
-    classesTaught: 3,
-    totalStudents: 83,
-    avgAttendance: '92%',
-    lastActive: '2023-10-26',
-  },
-  {
-    id: 'teacher-2',
-    name: 'Mr. Samuel Carter',
-    email: 's.carter@school.edu',
-    avatar: 'https://picsum.photos/seed/samuel/40/40',
-    classesTaught: 2,
-    totalStudents: 53,
-    avgAttendance: '95%',
-    lastActive: '2023-10-27',
-  },
-   {
-    id: 'teacher-3',
-    name: 'Ms. Olivia Chen',
-    email: 'o.chen@school.edu',
-    avatar: 'https://picsum.photos/seed/olivia/40/40',
-    classesTaught: 4,
-    totalStudents: 110,
-    avgAttendance: '88%',
-    lastActive: '2023-10-27',
-  },
-];
+import { FileDown, Loader2 } from 'lucide-react';
 
 export default function TeacherReportsPage() {
   const { userRole } = useAuth();
+  const { teachers, loading } = useTeachers();
 
   if (userRole !== 'admin') {
     return (
@@ -78,19 +46,19 @@ export default function TeacherReportsPage() {
   }
 
   return (
-    <AppLayout pageTitle="Teacher Reports">
+    <AppLayout pageTitle="Teacher Activity">
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>All Teachers</CardTitle>
               <CardDescription>
-                An overview of all registered teachers and their activity.
+                An overview of all registered teachers in the system.
               </CardDescription>
             </div>
-            <Button>
+            <Button disabled>
                 <FileDown className='mr-2 h-4 w-4' />
-                Export All Reports
+                Export Reports
             </Button>
           </div>
         </CardHeader>
@@ -100,41 +68,42 @@ export default function TeacherReportsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Teacher</TableHead>
-                  <TableHead>Classes Taught</TableHead>
-                  <TableHead>Total Students</TableHead>
-                  <TableHead>Avg. Attendance</TableHead>
-                  <TableHead>Last Active</TableHead>
+                  <TableHead>Email</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sampleTeachers.map((teacher) => (
-                  <TableRow key={teacher.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={teacher.avatar} alt={teacher.name} data-ai-hint="person portrait"/>
-                          <AvatarFallback>
-                            {teacher.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{teacher.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {teacher.email}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{teacher.classesTaught}</TableCell>
-                    <TableCell>{teacher.totalStudents}</TableCell>
-                    <TableCell>
-                      <Badge variant={parseFloat(teacher.avgAttendance) > 90 ? 'default' : 'secondary'}>{teacher.avgAttendance}</Badge>
-                    </TableCell>
-                     <TableCell>
-                        {new Date(teacher.lastActive).toLocaleDateString()}
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : teachers.length > 0 ? (
+                  teachers.map((teacher) => (
+                    <TableRow key={teacher.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={teacher.avatar} alt={teacher.name} data-ai-hint="person portrait"/>
+                            <AvatarFallback>
+                              {teacher.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{teacher.name}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{teacher.email}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={2} className="h-24 text-center">
+                       No teachers registered yet.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
