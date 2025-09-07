@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
-import { Users, BookOpen, Loader2, PlusCircle, BarChart2, AlertCircle, TrendingUp, UserCheck, Megaphone, CalendarDays } from 'lucide-react';
+import { Users, BookOpen, Loader2, PlusCircle, TrendingUp, UserCheck, Megaphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/dialog';
 import { generateAttendanceSummary } from '@/ai/flows/generate-attendance-summary';
 import { useAttendance } from '@/hooks/use-attendance';
-import { Calendar } from '@/components/ui/calendar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function DashboardPage() {
@@ -37,7 +36,6 @@ export default function DashboardPage() {
   const [isSummaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
-  const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
 
   const totalStudents = useMemo(() => {
     return Object.values(studentsByClass).reduce(
@@ -165,19 +163,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-8">
-             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5"/> Academic Schedule</CardTitle>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                   <Calendar
-                        mode="single"
-                        selected={calendarDate}
-                        onSelect={setCalendarDate}
-                        className="rounded-md border p-0"
-                    />
-                </CardContent>
-            </Card>
              <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
