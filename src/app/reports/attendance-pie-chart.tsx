@@ -49,9 +49,9 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
-        <CardTitle>Attendance Status</CardTitle>
+        <CardTitle>Overall Status</CardTitle>
         <CardDescription>
-          Daily summary of student attendance status. Total: {totalStudents} students.
+          Summary for the selected date range. Total records: {totalStudents}.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -72,8 +72,8 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={120}
-                  innerRadius={80}
+                  outerRadius={100}
+                  innerRadius={70}
                   labelLine={false}
                   label={({
                     cx,
@@ -82,7 +82,6 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
                     innerRadius,
                     outerRadius,
                     percent,
-                    index,
                   }) => {
                     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
                     const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
@@ -115,18 +114,18 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
                 <Legend
                   content={({ payload }) => {
                     return (
-                      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4 text-sm">
+                      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-4 text-sm">
                         {payload?.map((entry, index) => (
                           <div
                             key={`item-${index}`}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-1.5"
                           >
                             <span
-                              className="w-2.5 h-2.5 rounded-full"
+                              className="w-2 h-2 rounded-full"
                               style={{ backgroundColor: entry.color }}
                             ></span>
-                            <span className="text-muted-foreground">{entry.value}</span>
-                            <span>
+                            <span className="text-muted-foreground">{entry.value}:</span>
+                            <span className="font-medium">
                                 {data.find(d => d.name === entry.value)?.value || 0}
                             </span>
                           </div>
@@ -140,10 +139,12 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
           </ChartContainer>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="text-muted-foreground">No attendance data for this day.</p>
+            <p className="text-muted-foreground">No attendance data for this range.</p>
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
+
+    

@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { DateRange } from 'react-day-picker';
 import {
   Card,
   CardContent,
@@ -37,9 +38,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AttendancePieChart } from './attendance-pie-chart';
+import { AttendanceBarChart } from './attendance-bar-chart';
 import type { AttendanceStatus } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, subDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -54,7 +56,10 @@ export function ReportsClient() {
   const { toast } = useToast();
 
   const [selectedClassId, setSelectedClassId] = useState<string>('');
-  const [date, setDate] = useState<Date>(new Date());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 29),
+    to: new Date(),
+  });
   const [anomalies, setAnomalies] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -69,12 +74,19 @@ export function ReportsClient() {
   }, [searchParams, classes, selectedClassId]);
 
   const filteredRecords = useMemo(() => {
-    const selectedDate = format(date, 'yyyy-MM-dd');
+    if (!dateRange?.from || !dateRange?.to) return [];
+
+    const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+    const toDate = format(addDays(dateRange.to, 1), 'yyyy-MM-dd'); // include the 'to' date
+
     return attendanceRecords.filter(
-      (r) => r.classId === selectedClassId && r.date === selectedDate
+      (r) =>
+        r.classId === selectedClassId &&
+        r.date >= fromDate &&
+        r.date < toDate
     );
-  }, [attendanceRecords, selectedClassId, date]);
-  
+  }, [attendanceRecords, selectedClassId, dateRange]);
+
   const handleAnalyzeAnomalies = async () => {
     if (!selectedClassId) return;
     setIsAnalyzing(true);
@@ -105,15 +117,13 @@ export function ReportsClient() {
       toast({
         variant: 'destructive',
         title: 'No Data to Export',
-        description: 'There are no records for the selected class and day.',
+        description: 'There are no records for the selected class and date range.',
       });
       return;
     }
     setIsExporting(true);
 
     try {
-        const studentsInClass = studentsByClass[selectedClassId] || [];
-        
         const dataToExport = filteredRecords.map(record => ({
             'Student Name': getStudentName(record.studentId),
             'Student ID': record.studentId,
@@ -124,10 +134,10 @@ export function ReportsClient() {
         const summarySheet = XLSX.utils.json_to_sheet(dataToExport);
         
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Daily Log');
+        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Attendance Log');
 
         const currentClass = classes.find(c => c.id === selectedClassId);
-        const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(date, 'yyyy_MM_dd')}.xlsx`;
+        const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(dateRange?.from || new Date(), 'yyyyMMdd')}_to_${format(dateRange?.to || new Date(), 'yyyyMMdd')}.xlsx`;
         XLSX.writeFile(workbook, fileName);
 
          toast({
@@ -147,7 +157,7 @@ export function ReportsClient() {
     }
   }
 
-  const chartData = useMemo(() => {
+  const pieChartData = useMemo(() => {
     if (filteredRecords.length === 0) return [];
     
     const statusCounts = filteredRecords.reduce((acc, record) => {
@@ -161,6 +171,27 @@ export function ReportsClient() {
         value,
       }));
   }, [filteredRecords]);
+
+  const barChartData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return [];
+
+    const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
+    const currentDate = new Date(dateRange.from);
+    while (currentDate <= dateRange.to) {
+      const dateStr = format(currentDate, 'yyyy-MM-dd');
+      dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    filteredRecords.forEach(record => {
+      if (dailyData[record.date]) {
+        dailyData[record.date][record.status]++;
+      }
+    });
+
+    return Object.entries(dailyData).map(([date, counts]) => ({ date, ...counts }));
+  }, [filteredRecords, dateRange]);
+
 
   const studentsInClass = studentsByClass[selectedClassId] || [];
 
@@ -184,7 +215,7 @@ export function ReportsClient() {
         <CardHeader>
           <CardTitle>Filter Reports</CardTitle>
           <CardDescription>
-            Select a class and a day to view the attendance report.
+            Select a class and a date range to view the attendance report.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-4">
@@ -207,22 +238,36 @@ export function ReportsClient() {
           <Popover>
             <PopoverTrigger asChild>
               <Button
+                id="date"
                 variant={'outline'}
                 className={cn(
-                  'flex-1 min-w-[200px] justify-start text-left font-normal',
-                  !date && 'text-muted-foreground'
+                  "flex-1 min-w-[200px] justify-start text-left font-normal",
+                  !dateRange && "text-muted-foreground"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "LLL dd, y")} -{" "}
+                      {format(dateRange.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(day) => setDate(day || new Date())}
                 initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
@@ -263,59 +308,16 @@ export function ReportsClient() {
           </Card>
       )}
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-            <AttendancePieChart data={chartData} />
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-1">
+            <AttendancePieChart data={pieChartData} />
         </div>
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Current Day Status</CardTitle>
-                    <CardDescription>A live look at today's check-ins.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground text-center py-8">Donut chart coming soon.</p>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle>Daily Log</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead>Student</TableHead>
-                            <TableHead className="text-right">Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredRecords.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={2} className="h-24 text-center">
-                                No records found.
-                                </TableCell>
-                            </TableRow>
-                            ) : (
-                            filteredRecords.map((record) => (
-                                <TableRow key={record.id}>
-                                <TableCell className="font-medium">
-                                    {getStudentName(record.studentId)}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Badge variant={getStatusVariant(record.status)}>
-                                        {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                                    </Badge>
-                                </TableCell>
-                                </TableRow>
-                            ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-             </Card>
+        <div className="md:col-span-2">
+            <AttendanceBarChart data={barChartData} />
         </div>
       </div>
     </div>
   );
 }
+
+    
