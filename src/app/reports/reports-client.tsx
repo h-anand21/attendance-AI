@@ -213,13 +213,13 @@ export function ReportsClient() {
     if (!dateRange?.from || !dateRange?.to) return [];
 
     const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
-    const currentDate = new Date(dateRange.from);
-    while (currentDate <= dateRange.to) {
-      const dateStr = format(currentDate, 'yyyy-MM-dd');
-      dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+    const dateInterval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
 
+    dateInterval.forEach(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
+    });
+    
     filteredRecords.forEach(record => {
       if (dailyData[record.date]) {
         dailyData[record.date][record.status]++;
