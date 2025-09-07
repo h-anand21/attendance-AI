@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, UserPlus, Loader2, PlusCircle, QrCodeIcon } from 'lucide-react';
+import { Camera, UserPlus, Loader2, PlusCircle, QrCodeIcon, Search } from 'lucide-react';
 import { CreateClassDialog } from '../(dashboard)/dashboard/create-class-dialog';
 
 const studentFormSchema = z.object({
@@ -87,6 +87,7 @@ export function RegistrationClient() {
   const [isQrCodeModalOpen, setQrCodeModalOpen] = useState(false);
   const [selectedStudentForQr, setSelectedStudentForQr] = useState<Student | null>(null);
   const [highlightedStudentId, setHighlightedStudentId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
 
   const studentForm = useForm<z.infer<typeof studentFormSchema>>({
@@ -218,8 +219,18 @@ export function RegistrationClient() {
       }
   }, [classes]);
 
+  const filteredStudents = useMemo(() => {
+    const studentsInSelectedClass = studentsByClass[selectedClass] || [];
+    if (!searchQuery) {
+      return studentsInSelectedClass;
+    }
+    return studentsInSelectedClass.filter(student => 
+      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [studentsByClass, selectedClass, searchQuery]);
 
-  const currentStudents = studentsByClass[selectedClass] || [];
+
   const loading = studentsLoading || classesLoading;
 
   const handleShowQrCode = (student: Student) => {
@@ -364,22 +375,32 @@ export function RegistrationClient() {
               <div>
                 <CardTitle>Registered Students</CardTitle>
                 <CardDescription>
-                  Showing students in the selected class.
+                  Manage and view student records.
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                 <div className="relative flex-1 sm:flex-initial">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search by name or ID..."
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
                 <Select
                   value={selectedClass}
                   onValueChange={setSelectedClass}
                   disabled={classes.length === 0}
                 >
                   <SelectTrigger className="w-full sm:w-[250px]">
-                    <SelectValue placeholder="Select a class to view" />
+                    <SelectValue placeholder="Filter by class" />
                   </SelectTrigger>
                   <SelectContent>
                     {classes.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name} - Section {c.section}
+                        {c.name} - Sec. {c.section}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -405,8 +426,8 @@ export function RegistrationClient() {
                         <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
                       </TableCell>
                     </TableRow>
-                  ) : currentStudents.length > 0 ? (
-                    currentStudents.map((student) => (
+                  ) : filteredStudents.length > 0 ? (
+                    filteredStudents.map((student) => (
                       <TableRow 
                         key={student.id} 
                         ref={student.id === highlightedStudentId ? newStudentRowRef : null}
@@ -440,9 +461,7 @@ export function RegistrationClient() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} className="h-48 text-center">
-                        {classes.length === 0
-                          ? 'Create a class to begin registering students.'
-                          : 'No students registered for this class yet.'}
+                        {searchQuery ? `No students found for "${searchQuery}".` : (classes.length === 0 ? 'Create a class to begin registering students.' : 'No students registered for this class yet.')}
                       </TableCell>
                     </TableRow>
                   )}
@@ -483,5 +502,3 @@ export function RegistrationClient() {
     </>
   );
 }
-
-    

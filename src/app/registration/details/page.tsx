@@ -25,7 +25,7 @@ export default function RegistrationDetailsPage() {
   }
   
   return (
-    <AppLayout pageTitle="Student Registration">
+    <AppLayout pageTitle="Student Directory">
       <RegistrationClient />
     </AppLayout>
   );

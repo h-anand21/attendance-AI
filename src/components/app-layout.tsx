@@ -101,18 +101,6 @@ function AppSidebar() {
           </SidebarMenuItem>
           {userRole === 'admin' && (
             <>
-               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith("/registration/details")}
-                  tooltip={{ children: "Add Student" }}
-                >
-                  <Link href="/registration/details">
-                    <UserPlus />
-                    <span>Add Student</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem asChild>
                 <Collapsible open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
                   <CollapsibleTrigger asChild>
@@ -122,18 +110,18 @@ function AppSidebar() {
                         className="justify-between"
                       >
                         <div className="flex items-center gap-2">
-                          <Users />
+                          <UserPlus />
                           <span>Registration</span>
                         </div>
                       </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
-                        <SidebarMenuSubButton asChild isActive={pathname === '/registration/teacher'}>
-                            <Link href="/registration/teacher">Teacher</Link>
+                         <SidebarMenuSubButton asChild isActive={pathname.startsWith('/registration/details')}>
+                            <Link href="/registration/details">Student Directory</Link>
                         </SidebarMenuSubButton>
-                         <SidebarMenuSubButton asChild isActive={pathname === '/registration/details'}>
-                            <Link href="/registration/details">Student</Link>
+                        <SidebarMenuSubButton asChild isActive={pathname.startsWith('/registration/teacher')}>
+                            <Link href="/registration/teacher">Teacher Directory</Link>
                         </SidebarMenuSubButton>
                     </SidebarMenuSub>
                   </CollapsibleContent>
