@@ -33,19 +33,29 @@ import { AttendanceBarChart } from '@/app/reports/attendance-bar-chart';
 import { subDays, format, eachDayOfInterval } from 'date-fns';
 import type { AttendanceStatus, Notice } from '@/types';
 import { PublishNoticeDialog } from './publish-notice-dialog';
+import { useAuth } from '@/hooks/use-auth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Trash2 } from 'lucide-react';
 
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
   const { studentsByClass, loading: studentsLoading } = useStudents();
   const { attendanceRecords, loading: attendanceLoading } = useAttendance();
+  const { userRole } = useAuth();
+
   const [isSummaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([
-    { title: "Results for Class IX out now!", time: "Today, 11:00 am" },
-    { title: "Parent-Teacher meeting scheduled.", time: "Yesterday, 3:00 pm" },
-    { title: "Annual sports day next week.", time: "2 days ago, 10:00 am" },
+    { id: 1, title: "Results for Class IX out now!", time: "Today, 11:00 am" },
+    { id: 2, title: "Parent-Teacher meeting scheduled.", time: "Yesterday, 3:00 pm" },
+    { id: 3, title: "Annual sports day next week.", time: "2 days ago, 10:00 am" },
   ]);
 
   const totalStudents = useMemo(() => {
@@ -79,12 +89,17 @@ export default function DashboardPage() {
     }
   };
   
-  const handlePublishNotice = (notice: Omit<Notice, 'time'>) => {
+  const handlePublishNotice = (notice: Omit<Notice, 'time' | 'id'>) => {
     const newNotice: Notice = {
+        id: Date.now(),
         ...notice,
         time: format(new Date(), "'Today,' h:mm a"),
     };
     setNotices(prevNotices => [newNotice, ...prevNotices]);
+  }
+
+  const handleDeleteNotice = (id: number) => {
+    setNotices(prevNotices => prevNotices.filter(notice => notice.id !== id));
   }
 
   const StatCard = ({ title, value, icon, description }: { title: string; value: string | number | React.ReactNode; icon: React.ReactNode, description?: string }) => (
@@ -243,19 +258,36 @@ export default function DashboardPage() {
              <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
-                    <PublishNoticeDialog onPublish={handlePublishNotice}>
-                        <Button variant="ghost" size="icon">
-                            <PlusCircle className="h-5 w-5" />
-                            <span className="sr-only">Publish new notice</span>
-                        </Button>
-                    </PublishNoticeDialog>
+                    {userRole === 'admin' && (
+                        <PublishNoticeDialog onPublish={handlePublishNotice}>
+                            <Button variant="ghost" size="icon">
+                                <PlusCircle className="h-5 w-5" />
+                                <span className="sr-only">Publish new notice</span>
+                            </Button>
+                        </PublishNoticeDialog>
+                    )}
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">
                      {notices.map((notice, index) => (
-                        <Alert key={index}>
+                        <Alert key={index} className="relative pr-10">
                            <AlertTitle className="text-sm font-semibold">{notice.title}</AlertTitle>
                            <AlertDescription className="text-xs text-muted-foreground">{notice.time}</AlertDescription>
+                           {userRole === 'admin' && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => handleDeleteNotice(notice.id)} className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                           )}
                         </Alert>
                      ))}
                      <Button variant="outline" className="w-full">View All Notices</Button>

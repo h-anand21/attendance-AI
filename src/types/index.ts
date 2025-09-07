@@ -40,6 +40,7 @@ export type Task = {
 };
 
 export type Notice = {
+    id: number;
     title: string;
     time: string;
 }

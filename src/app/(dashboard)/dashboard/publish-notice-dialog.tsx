@@ -37,7 +37,7 @@ const noticeFormSchema = z.object({
 
 type PublishNoticeDialogProps = {
   children: React.ReactNode;
-  onPublish: (newNotice: Omit<Notice, 'time'>) => void;
+  onPublish: (newNotice: Omit<Notice, 'time' | 'id'>) => void;
 };
 
 export function PublishNoticeDialog({ children, onPublish }: PublishNoticeDialogProps) {
