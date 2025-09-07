@@ -46,6 +46,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
+import { ThemeToggle } from "./theme-toggle";
 
 function AppSidebar() {
   const pathname = usePathname();
@@ -218,6 +219,7 @@ function Header({ pageTitle }: { pageTitle: string }) {
     <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6 sticky top-0 z-30">
       <SidebarTrigger className="md:hidden"/>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
+       <ThemeToggle />
       <Button variant="ghost" size="icon" className="rounded-full">
         <Bell className="h-5 w-5" />
         <span className="sr-only">Toggle notifications</span>
