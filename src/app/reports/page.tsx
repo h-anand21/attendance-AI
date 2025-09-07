@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic';
 
 const ReportsClient = dynamic(() => import('./reports-client').then(mod => mod.ReportsClient), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>
+  loading: () => (<div className="flex items-center justify-center h-full"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>)
 });
 
 export default function ReportsPage() {
@@ -26,7 +26,7 @@ export default function ReportsPage() {
             <Loader2 className="h-16 w-16 animate-spin text-primary" />
         </div>
       </AppLayout>
-    )
+    );
   }
 
   if (userRole !== 'admin') {
@@ -35,7 +35,7 @@ export default function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Permission Required</CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent>
             <p>You do not have permission to view this page. Please contact an administrator.</p>
           </CardContent>
