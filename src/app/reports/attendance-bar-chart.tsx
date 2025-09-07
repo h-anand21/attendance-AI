@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, Line } from 'recharts';
 import {
   Card,
   CardContent,
@@ -18,7 +18,7 @@ type AttendanceBarChartProps = {
 const chartConfig = {
   present: {
     label: 'Present',
-    color: 'hsl(var(--chart-2))',
+    color: 'hsl(var(--chart-1))',
   },
   absent: {
     label: 'Absent',
@@ -43,7 +43,7 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
         {data.length > 0 ? (
           <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false}/>
                 <XAxis 
                   dataKey="date" 
@@ -53,13 +53,24 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
                   tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} 
                 />
                 <YAxis 
+                  yAxisId="left"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={10}
                   allowDecimals={false}
+                  tickFormatter={(value) => `${value}`}
+                />
+                 <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  allowDecimals={false}
+                  tickFormatter={(value) => `${value}`}
                 />
                 <ChartTooltip 
-                  cursor={false}
+                  cursor={{fill: 'hsl(var(--muted))'}}
                   content={<ChartTooltipContent 
                       labelFormatter={(label, payload) => {
                           const date = payload?.[0]?.payload.date;
@@ -69,9 +80,9 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
                   />} 
                 />
                 <Legend />
-                <Bar dataKey="present" stackId="a" fill="var(--color-present)" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="absent" stackId="a" fill="var(--color-absent)" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="late" stackId="a" fill="var(--color-late)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="present" yAxisId="left" fill="var(--color-present)" radius={[4, 4, 0, 0]} />
+                <Line type="monotone" yAxisId="right" dataKey="absent" stroke="var(--color-absent)" strokeWidth={2} dot={false} />
+                <Line type="monotone" yAxisId="right" dataKey="late" stroke="var(--color-late)" strokeWidth={2} dot={false} />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -84,5 +95,3 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
     </Card>
   );
 }
-
-    
