@@ -233,8 +233,12 @@ export default function DashboardPage() {
 
         <div className="space-y-8">
              <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
+                    <Button variant="ghost" size="icon">
+                        <PlusCircle className="h-5 w-5" />
+                        <span className="sr-only">Publish new notice</span>
+                    </Button>
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">
