@@ -264,7 +264,7 @@ export function ReportsClient() {
                         {getStudentName(record.studentId)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">{record.studentId}</TableCell>
-                      <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{format(new Date(record.date), 'dd/MM/yyyy')}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant={getStatusVariant(record.status)}>
                             {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
