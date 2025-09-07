@@ -101,6 +101,18 @@ function AppSidebar() {
           </SidebarMenuItem>
           {userRole === 'admin' && (
             <>
+               <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/registration/details")}
+                  tooltip={{ children: "Add Student" }}
+                >
+                  <Link href="/registration/details">
+                    <UserPlus />
+                    <span>Add Student</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem asChild>
                 <Collapsible open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
                   <CollapsibleTrigger asChild>
@@ -110,7 +122,7 @@ function AppSidebar() {
                         className="justify-between"
                       >
                         <div className="flex items-center gap-2">
-                          <UserPlus />
+                          <Users />
                           <span>Registration</span>
                         </div>
                       </SidebarMenuButton>
