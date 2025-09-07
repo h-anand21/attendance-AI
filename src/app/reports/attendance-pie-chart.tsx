@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, ResponsiveContainer, Cell, Legend, Tooltip } from 'recharts';
+import { Pie, PieChart, ResponsiveContainer, Cell, Sector } from 'recharts';
 import {
   Card,
   CardContent,
@@ -13,7 +13,6 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltipContent,
 } from '@/components/ui/chart';
 
 type AttendancePieChartProps = {
@@ -41,6 +40,33 @@ const COLORS = {
   Late: 'hsl(var(--chart-4))',
 };
 
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 1.25;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="hsl(var(--muted-foreground))" fill="none" />
+      <circle cx={sx} cy={sy} r={2} fill="hsl(var(--muted-foreground))" stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" dominantBaseline="central">
+        {`${name} (${(percent * 100).toFixed(0)}%)`}
+      </text>
+    </g>
+  );
+};
+
+
 export function AttendancePieChart({ data }: AttendancePieChartProps) {
   const totalStudents = React.useMemo(() => {
     return data.reduce((acc, curr) => acc + curr.value, 0);
@@ -61,79 +87,21 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
             className="mx-auto aspect-square max-h-[400px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Tooltip
-                  cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
-                />
+              <PieChart margin={{ top: 20, right: 50, bottom: 20, left: 50 }}>
                 <Pie
                   data={data}
-                  dataKey="value"
-                  nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
-                  innerRadius={70}
                   labelLine={false}
-                  label={({
-                    cx,
-                    cy,
-                    midAngle,
-                    innerRadius,
-                    outerRadius,
-                    percent,
-                  }) => {
-                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                    const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                    const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
-
-                    if (percent * 100 < 5) return null; // Don't render label for small slices
-
-                    return (
-                      <text
-                        x={x}
-                        y={y}
-                        fill="white"
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        className="text-xs font-bold"
-                      >
-                        {`${(percent * 100).toFixed(0)}%`}
-                      </text>
-                    );
-                  }}
+                  label={renderCustomizedLabel}
+                  innerRadius={60}
+                  outerRadius={100}
+                  dataKey="value"
                 >
                   {data.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[entry.name as keyof typeof COLORS] || 'hsl(var(--muted))'}
-                      className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS] || 'hsl(var(--muted))'} />
                   ))}
                 </Pie>
-                <Legend
-                  content={({ payload }) => {
-                    return (
-                      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-4 text-sm">
-                        {payload?.map((entry, index) => (
-                          <div
-                            key={`item-${index}`}
-                            className="flex items-center gap-1.5"
-                          >
-                            <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: entry.color }}
-                            ></span>
-                            <span className="text-muted-foreground">{entry.value}:</span>
-                            <span className="font-medium">
-                                {data.find(d => d.name === entry.value)?.value || 0}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  }}
-                />
               </PieChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -146,5 +114,3 @@ export function AttendancePieChart({ data }: AttendancePieChartProps) {
     </Card>
   );
 }
-
-    
