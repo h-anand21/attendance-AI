@@ -1,10 +1,4 @@
-# Firebase Studio
 
-This is a Next.js starter project for Firebase Studio.
-
-## Getting Started
-
-To get started with development, take a look at `src/app/page.tsx`.
 
 ## Running the Project Locally in VS Code
 
