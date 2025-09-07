@@ -16,7 +16,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Download, QrCode, ScanFace, CheckCircle, Upload } from 'lucide-react';
+import { Download, QrCode, ScanFace, CheckCircle, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
@@ -24,6 +24,8 @@ import { QrScanModal } from './qr-scan-modal';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
 import { PhotoUploadModal } from './photo-upload-modal';
+import * as XLSX from 'xlsx';
+
 
 type AttendanceClientProps = {
   currentClass: Class;
@@ -34,12 +36,13 @@ export function AttendanceClient({
 }: AttendanceClientProps) {
   const { toast } = useToast();
   const { studentsByClass, loading } = useStudents();
-  const { addAttendanceRecords } = useAttendance();
+  const { attendanceRecords, addAttendanceRecords } = useAttendance();
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Omit<AttendanceRecord, 'date' | 'classId'>[]>([]);
   const [isFaceScanOpen, setFaceScanOpen] = useState(false);
   const [isQrScanOpen, setQrScanOpen] = useState(false);
   const [isPhotoUploadOpen, setPhotoUploadOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   useEffect(() => {
     const classStudents = studentsByClass[currentClass.id] || [];
@@ -111,10 +114,49 @@ export function AttendanceClient({
   };
 
   const handleExport = () => {
-    toast({
-      title: 'Export Started',
-      description: 'Your CSV export will be downloaded shortly.',
-    });
+    setIsExporting(true);
+    try {
+        const recordsToExport = attendanceRecords.filter(record => record.classId === currentClass.id);
+
+        if (recordsToExport.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'No Data to Export',
+                description: 'There are no attendance records for this class to export.',
+            });
+            return;
+        }
+
+        const dataForSheet = recordsToExport.map(record => {
+            const student = students.find(s => s.id === record.studentId);
+            return {
+                'Student Name': student ? student.name : 'Unknown Student',
+                'Student ID': record.studentId,
+                Date: record.date,
+                Status: record.status,
+            };
+        });
+        
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+        XLSX.writeFile(workbook, 'attendance.xlsx');
+        
+        toast({
+            title: 'Export Successful',
+            description: 'The attendance report has been downloaded.',
+        });
+
+    } catch (error) {
+        console.error("Error exporting to Excel:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Export Failed',
+            description: 'An error occurred while exporting the data.',
+        });
+    } finally {
+        setIsExporting(false);
+    }
   };
 
   return (
@@ -147,8 +189,9 @@ export function AttendanceClient({
           >
             <QrCode className="mr-2 h-4 w-4" /> Scan RFID/QR
           </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" /> Export CSV
+          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+            Download Excel
           </Button>
         </CardContent>
       </Card>
