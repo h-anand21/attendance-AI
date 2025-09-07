@@ -90,6 +90,45 @@ export default function DashboardPage() {
     return formatDistanceToNow(new Date(isoDate), { addSuffix: true });
   }
 
+  const { pieChartData, barChartData } = useMemo(() => {
+    const today = new Date();
+    const thirtyDaysAgo = subDays(today, 29);
+    
+    const fromDateStr = format(thirtyDaysAgo, 'yyyy-MM-dd');
+    const toDateStr = format(today, 'yyyy-MM-dd');
+
+    const relevantRecords = attendanceRecords.filter(r => r.date >= fromDateStr && r.date <= toDateStr);
+
+    const pieData = relevantRecords.reduce((acc, record) => {
+      acc[record.status] = (acc[record.status] || 0) + 1;
+      return acc;
+    }, {} as Record<AttendanceStatus, number>);
+
+    const pieChartData = Object.entries(pieData).map(([name, value]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value,
+    }));
+    
+    const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
+    const dateInterval = eachDayOfInterval({ start: thirtyDaysAgo, end: today });
+    
+    dateInterval.forEach(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
+    });
+    
+    relevantRecords.forEach(record => {
+      if (dailyData[record.date]) {
+        dailyData[record.date][record.status]++;
+      }
+    });
+
+    const barChartData = Object.entries(dailyData).map(([date, counts]) => ({ date, ...counts }));
+
+    return { pieChartData, barChartData };
+
+  }, [attendanceRecords]);
+
   if (loading) {
     return (
       <AppLayout pageTitle="Dashboard">
@@ -147,10 +186,10 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-8">
             <div className="grid gap-6 md:grid-cols-3">
               <div className="md:col-span-1">
-                 <AttendancePieChart data={[]} />
+                 <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance status" />
               </div>
               <div className="md:col-span-2">
-                  <AttendanceBarChart data={[]} />
+                  <AttendanceBarChart data={barChartData} />
               </div>
             </div>
 
