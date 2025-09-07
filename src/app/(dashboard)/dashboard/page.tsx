@@ -31,7 +31,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AttendancePieChart } from '@/app/reports/attendance-pie-chart';
 import { AttendanceBarChart } from '@/app/reports/attendance-bar-chart';
 import { subDays, format, eachDayOfInterval } from 'date-fns';
-import type { AttendanceStatus } from '@/types';
+import type { AttendanceStatus, Notice } from '@/types';
+import { PublishNoticeDialog } from './publish-notice-dialog';
 
 
 export default function DashboardPage() {
@@ -41,6 +42,11 @@ export default function DashboardPage() {
   const [isSummaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [notices, setNotices] = useState<Notice[]>([
+    { title: "Results for Class IX out now!", time: "Today, 11:00 am" },
+    { title: "Parent-Teacher meeting scheduled.", time: "Yesterday, 3:00 pm" },
+    { title: "Annual sports day next week.", time: "2 days ago, 10:00 am" },
+  ]);
 
   const totalStudents = useMemo(() => {
     return Object.values(studentsByClass).reduce(
@@ -73,11 +79,13 @@ export default function DashboardPage() {
     }
   };
   
-  const notices = [
-    { title: "Results for Class IX out now!", time: "Today, 11:00 am" },
-    { title: "Parent-Teacher meeting scheduled.", time: "Yesterday, 3:00 pm" },
-    { title: "Annual sports day next week.", time: "2 days ago, 10:00 am" },
-  ]
+  const handlePublishNotice = (notice: Omit<Notice, 'time'>) => {
+    const newNotice: Notice = {
+        ...notice,
+        time: format(new Date(), "'Today,' h:mm a"),
+    };
+    setNotices(prevNotices => [newNotice, ...prevNotices]);
+  }
 
   const StatCard = ({ title, value, icon, description }: { title: string; value: string | number | React.ReactNode; icon: React.ReactNode, description?: string }) => (
     <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
@@ -235,10 +243,12 @@ export default function DashboardPage() {
              <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
-                    <Button variant="ghost" size="icon">
-                        <PlusCircle className="h-5 w-5" />
-                        <span className="sr-only">Publish new notice</span>
-                    </Button>
+                    <PublishNoticeDialog onPublish={handlePublishNotice}>
+                        <Button variant="ghost" size="icon">
+                            <PlusCircle className="h-5 w-5" />
+                            <span className="sr-only">Publish new notice</span>
+                        </Button>
+                    </PublishNoticeDialog>
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">

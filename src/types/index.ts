@@ -39,4 +39,8 @@ export type Task = {
   completed: boolean;
 };
 
+export type Notice = {
+    title: string;
+    time: string;
+}
     
