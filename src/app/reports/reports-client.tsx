@@ -41,7 +41,7 @@ import { AttendancePieChart } from './attendance-pie-chart';
 import { AttendanceBarChart } from './attendance-bar-chart';
 import type { AttendanceStatus } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
-import { format, subDays, addDays } from 'date-fns';
+import { format, subDays, addDays, eachDayOfInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -124,17 +124,50 @@ export function ReportsClient() {
     setIsExporting(true);
 
     try {
-        const dataToExport = filteredRecords.map(record => ({
-            'Student Name': getStudentName(record.studentId),
-            'Student ID': record.studentId,
-            'Date': record.date,
-            'Status': record.status,
-        }));
+        const studentsInClass = studentsByClass[selectedClassId] || [];
+        const studentMap = new Map(studentsInClass.map(s => [s.id, s.name]));
 
-        const summarySheet = XLSX.utils.json_to_sheet(dataToExport);
+        // Sheet 1: Student Summary
+        const studentSummary: any[] = [];
+        const dateInterval = eachDayOfInterval({ start: dateRange!.from!, end: dateRange!.to! });
+        const classDays = new Set(filteredRecords.map(r => r.date));
+        const totalClasses = classDays.size;
+
+        studentsInClass.forEach(student => {
+            const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
+            const presentCount = studentRecords.filter(r => r.status === 'present').length;
+            const absentCount = totalClasses - presentCount; // Simplified logic
+            studentSummary.push({
+                'Student Name': student.name,
+                'Student ID': student.id,
+                'Total Classes in Range': totalClasses,
+                'Classes Attended': presentCount,
+                'Classes Absent': absentCount,
+                'Attendance %': totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) + '%' : 'N/A'
+            });
+        });
+        const studentSheet = XLSX.utils.json_to_sheet(studentSummary);
+
+        // Sheet 2: Daily Log
+        const dailyLog: any[] = [];
+        classDays.forEach(date => {
+            const recordsForDay = filteredRecords.filter(r => r.date === date);
+            const presentCount = recordsForDay.filter(r => r.status === 'present').length;
+            const absentCount = recordsForDay.filter(r => r.status === 'absent').length;
+            const lateCount = recordsForDay.filter(r => r.status === 'late').length;
+            dailyLog.push({
+                'Date': date,
+                'Present': presentCount,
+                'Absent': absentCount,
+                'Late': lateCount,
+                'Total Students': presentCount + absentCount + lateCount
+            });
+        });
+        const dailySheet = XLSX.utils.json_to_sheet(dailyLog);
         
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Attendance Log');
+        XLSX.utils.book_append_sheet(workbook, studentSheet, 'Student Summary');
+        XLSX.utils.book_append_sheet(workbook, dailySheet, 'Daily Log');
 
         const currentClass = classes.find(c => c.id === selectedClassId);
         const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(dateRange?.from || new Date(), 'yyyyMMdd')}_to_${format(dateRange?.to || new Date(), 'yyyyMMdd')}.xlsx`;
@@ -319,5 +352,3 @@ export function ReportsClient() {
     </div>
   );
 }
-
-    
