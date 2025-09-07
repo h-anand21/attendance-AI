@@ -37,11 +37,12 @@ const noticeFormSchema = z.object({
 
 type PublishNoticeDialogProps = {
   children: React.ReactNode;
-  onPublish: (newNotice: Omit<Notice, 'time' | 'id'>) => void;
+  onPublish: (newNotice: Omit<Notice, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
 };
 
 export function PublishNoticeDialog({ children, onPublish }: PublishNoticeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof noticeFormSchema>>({
     resolver: zodResolver(noticeFormSchema),
@@ -50,9 +51,11 @@ export function PublishNoticeDialog({ children, onPublish }: PublishNoticeDialog
     },
   });
 
-  const onSubmit = (values: z.infer<typeof noticeFormSchema>) => {
-    onPublish(values);
+  const onSubmit = async (values: z.infer<typeof noticeFormSchema>) => {
+    setIsSubmitting(true);
+    await onPublish(values);
     form.reset();
+    setIsSubmitting(false);
     setIsOpen(false);
   };
 
@@ -95,9 +98,9 @@ export function PublishNoticeDialog({ children, onPublish }: PublishNoticeDialog
               </DialogClose>
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
+                disabled={isSubmitting}
               >
-                {form.formState.isSubmitting && (
+                {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Publish

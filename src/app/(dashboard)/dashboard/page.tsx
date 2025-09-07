@@ -30,7 +30,7 @@ import { useAttendance } from '@/hooks/use-attendance';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AttendancePieChart } from '@/app/reports/attendance-pie-chart';
 import { AttendanceBarChart } from '@/app/reports/attendance-bar-chart';
-import { subDays, format, eachDayOfInterval } from 'date-fns';
+import { subDays, format, eachDayOfInterval, formatDistanceToNow } from 'date-fns';
 import type { AttendanceStatus, Notice } from '@/types';
 import { PublishNoticeDialog } from './publish-notice-dialog';
 import { useAuth } from '@/hooks/use-auth';
@@ -41,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Trash2 } from 'lucide-react';
+import { useNotices } from '@/hooks/use-notices';
 
 
 export default function DashboardPage() {
@@ -48,16 +49,12 @@ export default function DashboardPage() {
   const { studentsByClass, loading: studentsLoading } = useStudents();
   const { attendanceRecords, loading: attendanceLoading } = useAttendance();
   const { userRole } = useAuth();
+  const { notices, addNotice, deleteNotice, loading: noticesLoading } = useNotices();
 
   const [isSummaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
-  const [notices, setNotices] = useState<Notice[]>([
-    { id: 1, title: "Results for Class IX out now!", time: "Today, 11:00 am" },
-    { id: 2, title: "Parent-Teacher meeting scheduled.", time: "Yesterday, 3:00 pm" },
-    { id: 3, title: "Annual sports day next week.", time: "2 days ago, 10:00 am" },
-  ]);
-
+  
   const totalStudents = useMemo(() => {
     return Object.values(studentsByClass).reduce(
       (acc, classStudents) => acc + classStudents.length,
@@ -65,7 +62,7 @@ export default function DashboardPage() {
     );
   }, [studentsByClass]);
 
-  const loading = classesLoading || studentsLoading || attendanceLoading;
+  const loading = classesLoading || studentsLoading || attendanceLoading || noticesLoading;
 
   const handleGenerateSummary = async () => {
     setSummaryLoading(true);
@@ -88,89 +85,10 @@ export default function DashboardPage() {
       setSummaryLoading(false);
     }
   };
-  
-  const handlePublishNotice = (notice: Omit<Notice, 'time' | 'id'>) => {
-    const newNotice: Notice = {
-        id: Date.now(),
-        ...notice,
-        time: format(new Date(), "'Today,' h:mm a"),
-    };
-    setNotices(prevNotices => [newNotice, ...prevNotices]);
+
+  const getFormattedNoticeTime = (isoDate: string) => {
+    return formatDistanceToNow(new Date(isoDate), { addSuffix: true });
   }
-
-  const handleDeleteNotice = (id: number) => {
-    setNotices(prevNotices => prevNotices.filter(notice => notice.id !== id));
-  }
-
-  const StatCard = ({ title, value, icon, description }: { title: string; value: string | number | React.ReactNode; icon: React.ReactNode, description?: string }) => (
-    <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
-          {title}
-        </CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-xs text-muted-foreground">{description}</p>}
-      </CardContent>
-    </Card>
-  )
-
-  const dateRange = useMemo(() => ({
-    from: subDays(new Date(), 29),
-    to: new Date(),
-  }), []);
-
-  const filteredRecords = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
-
-    const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-    const toDate = format(new Date(), 'yyyy-MM-dd'); 
-
-    return attendanceRecords.filter(
-      (r) =>
-        r.date >= fromDate &&
-        r.date <= toDate
-    );
-  }, [attendanceRecords, dateRange]);
-
-
-  const pieChartData = useMemo(() => {
-    if (filteredRecords.length === 0) return [];
-    
-    const statusCounts = filteredRecords.reduce((acc, record) => {
-      acc[record.status] = (acc[record.status] || 0) + 1;
-      return acc;
-    }, {} as Record<AttendanceStatus, number>);
-
-    return Object.entries(statusCounts)
-      .map(([name, value]) => ({
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        value,
-      }));
-  }, [filteredRecords]);
-
-  const barChartData = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
-
-    const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
-    const interval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-
-    interval.forEach(day => {
-        const dateStr = format(day, 'yyyy-MM-dd');
-        dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
-    });
-
-    filteredRecords.forEach(record => {
-      if (dailyData[record.date]) {
-        dailyData[record.date][record.status]++;
-      }
-    });
-
-    return Object.entries(dailyData).map(([date, counts]) => ({ date, ...counts }));
-  }, [filteredRecords, dateRange]);
-
 
   if (loading) {
     return (
@@ -185,20 +103,54 @@ export default function DashboardPage() {
   return (
     <AppLayout pageTitle="Dashboard">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Classes" value={classes.length} icon={<BookOpen className="h-5 w-5 text-muted-foreground" />} />
-        <StatCard title="Total Students" value={totalStudents} icon={<Users className="h-5 w-5 text-muted-foreground" />} />
-        <StatCard title="Attendance Events" value={attendanceRecords.length} icon={<UserCheck className="h-5 w-5 text-muted-foreground" />} description="Total records logged" />
-        <StatCard title="AI Summary" value={<Button size="sm" className="w-full bg-accent hover:bg-accent/90" onClick={handleGenerateSummary}>Get Insights</Button>} icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />} description="30-day attendance trends" />
+        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
+                <BookOpen className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{classes.length}</div>
+            </CardContent>
+        </Card>
+         <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+                <Users className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{totalStudents}</div>
+            </CardContent>
+        </Card>
+        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
+                <UserCheck className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{attendanceRecords.length}</div>
+                <p className="text-xs text-muted-foreground">Total records logged</p>
+            </CardContent>
+        </Card>
+        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <Button size="sm" className="w-full bg-accent hover:bg-accent/90" onClick={handleGenerateSummary}>Get Insights</Button>
+                <p className="text-xs text-muted-foreground">30-day attendance trends</p>
+            </CardContent>
+        </Card>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
             <div className="grid gap-6 md:grid-cols-3">
               <div className="md:col-span-1">
-                 <AttendancePieChart data={pieChartData} />
+                 <AttendancePieChart data={[]} />
               </div>
               <div className="md:col-span-2">
-                  <AttendanceBarChart data={barChartData} />
+                  <AttendanceBarChart data={[]} />
               </div>
             </div>
 
@@ -259,7 +211,7 @@ export default function DashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
                     {userRole === 'admin' && (
-                        <PublishNoticeDialog onPublish={handlePublishNotice}>
+                        <PublishNoticeDialog onPublish={addNotice}>
                             <Button variant="ghost" size="icon">
                                 <PlusCircle className="h-5 w-5" />
                                 <span className="sr-only">Publish new notice</span>
@@ -269,10 +221,10 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">
-                     {notices.map((notice, index) => (
-                        <Alert key={index} className="relative pr-10">
+                     {notices.length > 0 ? notices.map((notice) => (
+                        <Alert key={notice.id} className="relative pr-10">
                            <AlertTitle className="text-sm font-semibold">{notice.title}</AlertTitle>
-                           <AlertDescription className="text-xs text-muted-foreground">{notice.time}</AlertDescription>
+                           <AlertDescription className="text-xs text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -281,7 +233,7 @@ export default function DashboardPage() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => handleDeleteNotice(notice.id)} className="text-destructive">
+                                    <DropdownMenuItem onClick={() => deleteNotice(notice.id)} className="text-destructive">
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -289,7 +241,9 @@ export default function DashboardPage() {
                             </DropdownMenu>
                            )}
                         </Alert>
-                     ))}
+                     )) : (
+                        <div className="text-center text-sm text-muted-foreground py-4">No notices yet.</div>
+                     )}
                      <Button variant="outline" className="w-full">View All Notices</Button>
                    </div>
                 </CardContent>

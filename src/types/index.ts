@@ -40,8 +40,8 @@ export type Task = {
 };
 
 export type Notice = {
-    id: number;
-    title: string;
-    time: string;
-}
-    
+  id: string; // Firestore document ID
+  title: string;
+  createdAt: string; // ISO date string
+  userId: string;
+};
