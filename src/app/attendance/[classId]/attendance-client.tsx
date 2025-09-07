@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import type {
   Class,
   Student,
@@ -165,7 +166,7 @@ export function AttendanceClient({
         <CardHeader>
           <CardTitle>Take Attendance</CardTitle>
           <CardDescription>
-            Use one of the methods below for {currentClass.name}. Today's date is {new Date().toLocaleDateString()}.
+            Use one of the methods below for {currentClass.name}. Today's date is {format(new Date(), 'dd / MM / yyyy')}.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
