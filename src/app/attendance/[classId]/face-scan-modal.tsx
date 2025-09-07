@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { ScanFace, UserCheck, UserX } from 'lucide-react';
+import { ScanFace, UserCheck, Users, StopCircle, CheckSquare } from 'lucide-react';
 import type { Student } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { recognizeFaces } from '@/ai/flows/recognize-faces';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 type FaceScanModalProps = {
   isOpen: boolean;
@@ -34,26 +34,30 @@ export function FaceScanModal({
 }: FaceScanModalProps) {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isScanning, setScanning] = useState(false);
-  const [recognizedCount, setRecognizedCount] = useState(0);
-  const [unrecognizedCount, setUnrecognizedCount] = useState(0);
-  const [hasCameraPermission, setHasCameraPermission] = useState<
-    boolean | undefined
-  >(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isScanningSession, setIsScanningSession] = useState(false);
+  const [sessionRecognizedIds, setSessionRecognizedIds] = useState<Set<string>>(new Set());
+  const [lastScanCount, setLastScanCount] = useState(0);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
+  
+  const resetState = useCallback(() => {
+    if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+    }
+    setIsScanningSession(false);
+    setSessionRecognizedIds(new Set());
+    setLastScanCount(0);
+    setHasCameraPermission(undefined);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      setScanning(false);
-      setRecognizedCount(0);
-      setUnrecognizedCount(0);
-      setHasCameraPermission(undefined);
+      resetState();
 
       const getCameraPermission = async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCameraPermission(true);
 
           if (videoRef.current) {
@@ -65,8 +69,7 @@ export function FaceScanModal({
           toast({
             variant: 'destructive',
             title: 'Camera Access Denied',
-            description:
-              'Please enable camera permissions in your browser settings to use this app.',
+            description: 'Please enable camera permissions in your browser settings to use this app.',
           });
         }
       };
@@ -79,8 +82,12 @@ export function FaceScanModal({
         stream.getTracks().forEach((track) => track.stop());
         videoRef.current.srcObject = null;
       }
+       if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+      }
     }
-  }, [isOpen, toast]);
+  }, [isOpen, toast, resetState]);
 
   const captureFrame = (): string | null => {
     if (videoRef.current) {
@@ -95,66 +102,78 @@ export function FaceScanModal({
     }
     return null;
   };
+  
+  const performScan = async () => {
+     const frame = captureFrame();
+      if (!frame) {
+        // Silently fail if frame can't be captured, loop will try again
+        return;
+      }
 
-  const handleStartScan = async () => {
-    setScanning(true);
-    setIsLoading(true);
-    const frame = captureFrame();
+      try {
+        const studentPhotos = students.map((s) => ({
+          studentId: s.id,
+          photoDataUri: s.avatar,
+        }));
 
-    if (!frame) {
-      toast({
-        variant: 'destructive',
-        title: 'Scan Failed',
-        description: 'Could not capture a frame from the camera.',
-      });
-      setScanning(false);
-      setIsLoading(false);
-      return;
-    }
+        const result = await recognizeFaces({
+          scenePhotoDataUri: frame,
+          studentPhotos,
+        });
 
-    try {
-      const studentPhotos = students.map((s) => ({
-        studentId: s.id,
-        photoDataUri: s.avatar,
-      }));
+        const newIds = result.recognizedStudentIds;
+        setLastScanCount(newIds.length);
+        if(newIds.length > 0) {
+            setSessionRecognizedIds(prevIds => {
+                const updatedIds = new Set(prevIds);
+                newIds.forEach(id => updatedIds.add(id));
+                return updatedIds;
+            });
+        }
+      } catch(error) {
+          console.error("Single scan failed:", error);
+          // Don't stop the session for a single failed scan
+      }
+  }
 
-      const result = await recognizeFaces({
-        scenePhotoDataUri: frame,
-        studentPhotos,
-      });
-
-      const recognizedIds = result.recognizedStudentIds;
-      setRecognizedCount(recognizedIds.length);
-      setUnrecognizedCount(students.length - recognizedIds.length);
-
-      setTimeout(() => {
-        onScanComplete(recognizedIds);
-        onOpenChange(false);
-        setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      console.error('Face recognition error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Recognition Failed',
-        description: 'An error occurred during face recognition.',
-      });
-      setScanning(false);
-      setIsLoading(false);
+  const handleStartStopScan = () => {
+    if(isScanningSession) {
+        // Stop scanning
+        if (scanIntervalRef.current) {
+            clearInterval(scanIntervalRef.current);
+            scanIntervalRef.current = null;
+        }
+        setIsScanningSession(false);
+    } else {
+        // Start scanning
+        setSessionRecognizedIds(new Set());
+        setLastScanCount(0);
+        setIsScanningSession(true);
+        
+        // Perform initial scan immediately
+        performScan();
+        
+        // Then set interval for subsequent scans
+        scanIntervalRef.current = setInterval(performScan, 5000); // Scan every 5 seconds
     }
   };
 
+  const handleDone = () => {
+    onScanComplete(Array.from(sessionRecognizedIds));
+    onOpenChange(false);
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Face Scan Attendance</DialogTitle>
+          <DialogTitle>Face Scan Session</DialogTitle>
           <DialogDescription>
-            Position students in front of the camera and press start.
+            Start a session to continuously scan for students. The system will keep recognizing faces until you stop.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center space-y-4 py-8">
+        <div className="flex flex-col items-center justify-center space-y-4 py-4">
           <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
             <video
               ref={videoRef}
@@ -168,7 +187,9 @@ export function FaceScanModal({
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             )}
+            {isScanningSession && <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 text-white p-2 rounded-md"><Loader2 className="h-4 w-4 animate-spin" /><span className="text-sm">Scanning...</span></div>}
           </div>
+          
           {hasCameraPermission === false && (
             <Alert variant="destructive">
               <AlertTitle>Camera Access Required</AlertTitle>
@@ -178,45 +199,36 @@ export function FaceScanModal({
             </Alert>
           )}
 
-          {isScanning && (
-            <div className="w-full space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1">
-                    <UserCheck className="h-4 w-4 text-primary" />{' '}
-                    {recognizedCount} Recognized
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <UserX className="h-4 w-4 text-destructive" />{' '}
-                    {unrecognizedCount} Unrecognized
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="w-full space-y-2 text-center">
+             <div className="text-5xl font-bold">{sessionRecognizedIds.size}</div>
+             <p className="text-muted-foreground">Total unique students recognized in this session.</p>
+              {isScanningSession && (
+                <Badge variant="secondary">Recognized {lastScanCount} in last scan</Badge>
+              )}
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="grid grid-cols-2 gap-2">
+           <Button
+            className="w-full"
+            onClick={handleStartStopScan}
+            disabled={hasCameraPermission === false || hasCameraPermission === undefined}
+            variant={isScanningSession ? 'destructive' : 'default'}
+          >
+            {isScanningSession ? (
+                <><StopCircle className="mr-2 h-4 w-4" /> Stop Session</>
+            ) : (
+                <><ScanFace className="mr-2 h-4 w-4" /> Start Session</>
+            )}
+          </Button>
           <Button
             className="w-full"
-            onClick={handleStartScan}
-            disabled={
-              isLoading ||
-              isScanning ||
-              hasCameraPermission === false ||
-              hasCameraPermission === undefined
-            }
+            variant="outline"
+            onClick={handleDone}
+            disabled={isScanningSession}
           >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <ScanFace className="mr-2 h-4 w-4" />
-            )}
-            {isLoading
-              ? 'Scanning...'
-              : isScanning
-              ? 'Scan Complete'
-              : 'Start Scan'}
+            <CheckSquare className="mr-2 h-4 w-4" />
+            Apply and Close
           </Button>
         </DialogFooter>
       </DialogContent>
