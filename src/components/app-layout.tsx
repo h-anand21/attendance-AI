@@ -52,14 +52,10 @@ function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
   const [isReportsOpen, setIsReportsOpen] = React.useState(false);
-  const [isRegistrationOpen, setIsRegistrationOpen] = React.useState(false);
 
   useEffect(() => {
     if (pathname.startsWith('/reports')) {
       setIsReportsOpen(true);
-    }
-     if (pathname.startsWith('/registration')) {
-      setIsRegistrationOpen(true);
     }
   }, [pathname]);
 
@@ -101,31 +97,29 @@ function AppSidebar() {
           </SidebarMenuItem>
           {userRole === 'admin' && (
             <>
-              <SidebarMenuItem asChild>
-                <Collapsible open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
-                  <CollapsibleTrigger asChild>
-                     <SidebarMenuButton
-                        isActive={pathname.startsWith("/registration")}
-                        tooltip={{ children: "Registration" }}
-                        className="justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <UserPlus />
-                          <span>Registration</span>
-                        </div>
-                      </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                         <SidebarMenuSubButton asChild isActive={pathname.startsWith('/registration/details')}>
-                            <Link href="/registration/details">Student Directory</Link>
-                        </SidebarMenuSubButton>
-                        <SidebarMenuSubButton asChild isActive={pathname.startsWith('/registration/teacher')}>
-                            <Link href="/registration/teacher">Teacher Directory</Link>
-                        </SidebarMenuSubButton>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith('/registration/details')}
+                  tooltip={{ children: 'Student Directory' }}
+                >
+                  <Link href="/registration/details">
+                    <Users />
+                    <span>Student Directory</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith('/registration/teacher')}
+                  tooltip={{ children: 'Teacher Directory' }}
+                >
+                  <Link href="/registration/teacher">
+                    <UserPlus />
+                    <span>Teacher Directory</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem asChild>
                 <Collapsible open={isReportsOpen} onOpenChange={setIsReportsOpen}>
