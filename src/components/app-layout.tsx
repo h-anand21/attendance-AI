@@ -44,14 +44,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
-import { useClasses } from "@/hooks/use-classes";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
-  const { classes } = useClasses();
   const [isReportsOpen, setIsReportsOpen] = React.useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = React.useState(false);
 
@@ -66,13 +64,13 @@ function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
-      <SidebarHeader className="justify-center">
-        <div className="flex items-center gap-2">
-          <AppLogo className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">
+      <SidebarHeader>
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <AppLogo className="h-8 w-8" />
+          <span className="text-xl font-bold group-data-[collapsible=icon]:hidden">
             AttendEase
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
@@ -119,10 +117,10 @@ function AppSidebar() {
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
                         <SidebarMenuSubButton asChild isActive={pathname === '/registration/teacher'}>
-                            <Link href="/registration/teacher">Teacher Registration</Link>
+                            <Link href="/registration/teacher">Teacher</Link>
                         </SidebarMenuSubButton>
                          <SidebarMenuSubButton asChild isActive={pathname === '/registration/details'}>
-                            <Link href="/registration/details">Student Registration</Link>
+                            <Link href="/registration/details">Student</Link>
                         </SidebarMenuSubButton>
                     </SidebarMenuSub>
                   </CollapsibleContent>
@@ -145,7 +143,7 @@ function AppSidebar() {
                   <CollapsibleContent asChild>
                     <SidebarMenuSub>
                         <SidebarMenuSubButton asChild isActive={pathname === '/reports'}>
-                            <Link href="/reports">Attendance Reports</Link>
+                            <Link href="/reports">Attendance</Link>
                         </SidebarMenuSubButton>
                          <SidebarMenuSubButton asChild isActive={pathname === '/reports/teacher'}>
                             <Link href="/reports/teacher">Teacher Activity</Link>
@@ -217,9 +215,9 @@ function AppSidebar() {
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
+    <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6 sticky top-0 z-30">
       <SidebarTrigger className="md:hidden"/>
-      <h1 className="flex-1 text-xl font-semibold">{pageTitle}</h1>
+      <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
       <Button variant="ghost" size="icon" className="rounded-full">
         <Bell className="h-5 w-5" />
         <span className="sr-only">Toggle notifications</span>

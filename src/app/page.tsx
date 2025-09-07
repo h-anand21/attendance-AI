@@ -6,6 +6,8 @@ import {
   Card,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
   Carousel,
@@ -20,25 +22,25 @@ import MarketingLayout from './(marketing)/layout';
 
 const features = [
   {
-    icon: <Zap className="h-8 w-8 text-primary" />,
+    icon: <Zap className="h-8 w-8 text-accent" />,
     title: 'Instant Face Recognition',
     description:
       'Take attendance for the entire class in seconds. Our AI accurately recognizes registered students from a single photo or live feed.',
   },
   {
-    icon: <CheckCircle className="h-8 w-8 text-primary" />,
+    icon: <CheckCircle className="h-8 w-8 text-accent" />,
     title: 'Automated Record Keeping',
     description:
       'Say goodbye to manual entry. Attendance is automatically logged, saving you time and reducing errors.',
   },
   {
-    icon: <BarChart className="h-8 w-8 text-primary" />,
+    icon: <BarChart className="h-8 w-8 text-accent" />,
     title: 'Insightful Analytics',
     description:
       "Track trends and identify at-risk students with AI-powered summaries and anomaly detection. It's not just data; it's insight.",
   },
   {
-    icon: <Shield className="h-8 w-8 text-primary" />,
+    icon: <Shield className="h-8 w-8 text-accent" />,
     title: 'Secure & Private',
     description:
       'Student data is handled with the utmost care, ensuring privacy and security are always a top priority.',
@@ -80,7 +82,7 @@ export default function LandingPage() {
           {/* Hero Section */}
           <section className="relative overflow-hidden bg-background py-24 sm:py-32">
             <div className="container text-center">
-              <div className="max-w-3xl mx-auto">
+              <div className="max-w-4xl mx-auto">
                 <div className="mb-6 fade-in" style={{ animationDelay: '0.2s' }}>
                   <div className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                     Smarter Attendance, Simplified
@@ -89,7 +91,7 @@ export default function LandingPage() {
                 <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl fade-in" style={{ animationDelay: '0.4s' }}>
                   Focus on Teaching, Not Roll Calling
                 </h1>
-                <p className="mt-6 text-lg leading-8 text-muted-foreground fade-in" style={{ animationDelay: '0.6s' }}>
+                <p className="mt-6 text-xl leading-8 text-muted-foreground fade-in" style={{ animationDelay: '0.6s' }}>
                   AttendEase uses AI-powered face recognition to make classroom
                   attendance fast, accurate, and insightful. Reclaim your
                   teaching time.
@@ -98,15 +100,15 @@ export default function LandingPage() {
                   <Button size="lg" asChild>
                     <Link href="/login">Get Started for Free</Link>
                   </Button>
-                  <Button size="lg" variant="ghost" asChild>
+                  <Button size="lg" variant="outline" asChild>
                     <Link href="#features">Learn More &rarr;</Link>
                   </Button>
                 </div>
               </div>
               <div className="mt-16 sm:mt-24 slide-in-from-bottom" style={{ animationDelay: '1s' }}>
                 <div className="relative w-full max-w-5xl mx-auto">
-                  <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-3xl"></div>
-                  <div className="relative shadow-2xl rounded-2xl overflow-hidden border">
+                  <div className="absolute -inset-8 bg-primary/10 rounded-full blur-3xl"></div>
+                  <div className="relative shadow-2xl rounded-2xl overflow-hidden border-4 border-white">
                       <Image
                         src="https://picsum.photos/seed/dashboard/1200/675"
                         alt="App screenshot"
@@ -114,6 +116,7 @@ export default function LandingPage() {
                         height={675}
                         className="w-full"
                         data-ai-hint="app dashboard"
+                        priority
                       />
                   </div>
                 </div>
@@ -134,19 +137,21 @@ export default function LandingPage() {
             </div>
             <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
               {features.map((feature, i) => (
-                <div key={feature.title} className="p-6 bg-card rounded-lg slide-in-from-bottom" style={{ animationDelay: `${i * 0.1}s`}}>
-                  <div className="mb-4">{feature.icon}</div>
-                  <h3 className="text-lg font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
+                <Card key={feature.title} className="text-center p-6 bg-card rounded-2xl shadow-lg transition-transform duration-300 hover:-translate-y-2 slide-in-from-bottom" style={{ animationDelay: `${i * 0.1}s`}}>
+                  <CardHeader className="p-0">
+                    <div className="mb-4 inline-block p-4 bg-primary/10 rounded-xl">{feature.icon}</div>
+                    <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0 mt-2 text-muted-foreground">
+                    <p>{feature.description}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </section>
 
           {/* App Preview Section */}
-          <section className="bg-secondary/30">
+          <section className="bg-secondary">
               <div className="container grid md:grid-cols-2 gap-12 items-center">
                   <div className="slide-in-from-bottom">
                       <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -165,7 +170,7 @@ export default function LandingPage() {
                         alt="App on multiple devices"
                         width={600}
                         height={500}
-                        className="rounded-xl shadow-2xl"
+                        className="rounded-2xl shadow-2xl"
                         data-ai-hint="app on devices"
                       />
                   </div>
@@ -197,7 +202,7 @@ export default function LandingPage() {
                     className="md:basis-1/2 lg:basis-1/3"
                   >
                     <div className="p-1 h-full">
-                      <Card className="h-full flex flex-col bg-secondary/30">
+                      <Card className="h-full flex flex-col bg-secondary/50 shadow-lg rounded-2xl">
                         <CardContent className="pt-6 flex-grow">
                           <div className="flex items-center mb-4">
                               {[...Array(5)].map((_, i) => (
@@ -234,7 +239,7 @@ export default function LandingPage() {
           </section>
           
           {/* Pricing/CTA Section */}
-          <section id="pricing" className="bg-secondary/30">
+          <section id="pricing" className="bg-secondary">
               <div className="container text-center max-w-3xl mx-auto">
                   <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                       Ready to Revolutionize Your Classroom?

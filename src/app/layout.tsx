@@ -3,9 +3,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth.tsx';
-import { Inter } from 'next/font/google';
+import { PT_Sans } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
   title: 'AttendEase',
@@ -19,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={ptSans.className} suppressHydrationWarning>
         <AuthProvider>
           {children}
           <Toaster />
