@@ -84,12 +84,13 @@ export function RegistrationClient() {
   });
 
   useEffect(() => {
-    // Set initial selected class when classes load
+    // Set initial selected class when classes load for the first time
     if (classes.length > 0 && !selectedClass) {
       const latestClass = [...classes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
       setSelectedClass(latestClass.id);
     }
-  }, [classes]);
+  }, [classes, selectedClass]);
+
 
   useEffect(() => {
     // Sync selected class with the form
@@ -179,7 +180,7 @@ export function RegistrationClient() {
             setSelectedClass(latestClass.id);
         }
       }
-  }, [classes, selectedClass]);
+  }, [classes]);
 
 
   const currentStudents = studentsByClass[selectedClass] || [];
