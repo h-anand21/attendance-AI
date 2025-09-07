@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, Line } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import {
   Card,
   CardContent,
@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useTheme } from 'next-themes';
 
 type AttendanceBarChartProps = {
   data: { date: string; present: number; absent: number; late: number }[];
@@ -18,7 +19,7 @@ type AttendanceBarChartProps = {
 const chartConfig = {
   present: {
     label: 'Present',
-    color: 'hsl(var(--chart-1))',
+    color: 'hsl(var(--chart-2))',
   },
   absent: {
     label: 'Absent',
@@ -31,6 +32,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
+  const { theme } = useTheme();
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -43,8 +46,22 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
         {data.length > 0 ? (
           <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+              <AreaChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                 <defs>
+                    <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-present)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="var(--color-present)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorAbsent" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-absent)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="var(--color-absent)" stopOpacity={0}/>
+                    </linearGradient>
+                     <linearGradient id="colorLate" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-late)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="var(--color-late)" stopOpacity={0}/>
+                    </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'} />
                 <XAxis 
                   dataKey="date" 
                   tickLine={false}
@@ -53,16 +70,6 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
                   tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} 
                 />
                 <YAxis 
-                  yAxisId="left"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={10}
-                  allowDecimals={false}
-                  tickFormatter={(value) => `${value}`}
-                />
-                 <YAxis 
-                  yAxisId="right"
-                  orientation="right"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={10}
@@ -80,10 +87,10 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
                   />} 
                 />
                 <Legend />
-                <Bar dataKey="present" yAxisId="left" fill="var(--color-present)" radius={[4, 4, 0, 0]} />
-                <Line type="monotone" yAxisId="right" dataKey="absent" stroke="var(--color-absent)" strokeWidth={2} dot={false} />
-                <Line type="monotone" yAxisId="right" dataKey="late" stroke="var(--color-late)" strokeWidth={2} dot={false} />
-              </BarChart>
+                <Area type="monotone" dataKey="present" stroke="var(--color-present)" strokeWidth={2} fillOpacity={1} fill="url(#colorPresent)" />
+                <Area type="monotone" dataKey="absent" stroke="var(--color-absent)" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" />
+                <Area type="monotone" dataKey="late" stroke="var(--color-late)" strokeWidth={2} fillOpacity={1} fill="url(#colorLate)" />
+              </AreaChart>
             </ResponsiveContainer>
           </ChartContainer>
         ) : (
