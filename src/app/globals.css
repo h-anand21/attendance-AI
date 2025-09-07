@@ -89,10 +89,10 @@
 
 @layer utilities {
   .fade-in {
-    animation: fade-in 0.8s ease-in-out;
+    animation: fade-in 0.8s ease-in-out forwards;
   }
   .slide-in-from-bottom {
-    animation: slide-in-from-bottom 0.8s ease-in-out;
+    animation: slide-in-from-bottom 0.8s ease-in-out forwards;
   }
 }
 
