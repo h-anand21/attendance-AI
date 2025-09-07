@@ -7,7 +7,7 @@ import { AppLogo } from '@/components/ui/app-logo';
 
 const navLinks = [
   { label: 'Features', href: '#features' },
-  { label: 'Testimonials', href: '#testimonials' },
+  { label: 'How it Works', href: '#how-it-works' },
   { label: 'Pricing', href: '#pricing' },
 ];
 
@@ -37,10 +37,10 @@ export default function MarketingLayout({
           </nav>
           <div className="hidden md:flex items-center gap-4">
             <Button variant="ghost" asChild>
-              <Link href="/login">Log in</Link>
+              <Link href="/login">Sign In</Link>
             </Button>
             <Button asChild>
-              <Link href="/login">Sign Up</Link>
+              <Link href="/login">Get Started</Link>
             </Button>
           </div>
           <Sheet>
@@ -71,10 +71,10 @@ export default function MarketingLayout({
                 </nav>
                  <div className="p-4 border-t">
                     <Button variant="ghost" asChild className='w-full justify-start mb-2'>
-                      <Link href="/login">Log in</Link>
+                      <Link href="/login">Sign In</Link>
                     </Button>
                     <Button asChild className='w-full'>
-                      <Link href="/login">Sign Up</Link>
+                      <Link href="/login">Get Started</Link>
                     </Button>
                   </div>
               </div>
@@ -90,20 +90,20 @@ export default function MarketingLayout({
                 <AppLogo className="h-6 w-6 text-primary" />
                 <span className="font-bold">AttendEase</span>
               </Link>
-            <p className="text-sm text-muted-foreground">Simplify attendance tracking with AI.</p>
+            <p className="text-sm text-muted-foreground">Automated attendance that actually works.</p>
           </div>
           <div>
             <h4 className="font-semibold mb-3">Product</h4>
             <div className="grid gap-2 text-sm">
               <Link href="#features" className="text-muted-foreground hover:text-foreground">Features</Link>
+              <Link href="#how-it-works" className="text-muted-foreground hover:text-foreground">How it Works</Link>
               <Link href="#pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
-              <Link href="/about" className="text-muted-foreground hover:text-foreground">About</Link>
             </div>
           </div>
           <div>
             <h4 className="font-semibold mb-3">Company</h4>
              <div className="grid gap-2 text-sm">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">Contact Us</Link>
+              <Link href="/about" className="text-muted-foreground hover:text-foreground">About Us</Link>
               <Link href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link>
               <Link href="#" className="text-muted-foreground hover:text-foreground">Terms of Service</Link>
             </div>
