@@ -39,6 +39,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AttendancePieChart } from './attendance-pie-chart';
 import { AttendanceBarChart } from './attendance-bar-chart';
+import { AnomalyChart } from './anomaly-chart';
 import type { AttendanceStatus } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
 import { format, subDays, addDays, eachDayOfInterval } from 'date-fns';
@@ -129,27 +130,30 @@ export function ReportsClient() {
 
         // Sheet 1: Student Summary
         const studentSummary: any[] = [];
-        const dateInterval = eachDayOfInterval({ start: dateRange!.from!, end: dateRange!.to! });
-        const classDays = new Set(filteredRecords.map(r => r.date));
-        const totalClasses = classDays.size;
-
-        studentsInClass.forEach(student => {
-            const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
-            const presentCount = studentRecords.filter(r => r.status === 'present').length;
-            const absentCount = totalClasses - presentCount; // Simplified logic
-            studentSummary.push({
-                'Student Name': student.name,
-                'Student ID': student.id,
-                'Total Classes in Range': totalClasses,
-                'Classes Attended': presentCount,
-                'Classes Absent': absentCount,
-                'Attendance %': totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) + '%' : 'N/A'
+        if (dateRange?.from && dateRange?.to) {
+            const dateInterval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+            const classDays = new Set(filteredRecords.map(r => r.date));
+            const totalClasses = classDays.size;
+    
+            studentsInClass.forEach(student => {
+                const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
+                const presentCount = studentRecords.filter(r => r.status === 'present').length;
+                const absentCount = totalClasses - presentCount; // Simplified logic
+                studentSummary.push({
+                    'Student Name': student.name,
+                    'Student ID': student.id,
+                    'Total Classes in Range': totalClasses,
+                    'Classes Attended': presentCount,
+                    'Classes Absent': absentCount,
+                    'Attendance %': totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) + '%' : 'N/A'
+                });
             });
-        });
+        }
         const studentSheet = XLSX.utils.json_to_sheet(studentSummary);
 
         // Sheet 2: Daily Log
         const dailyLog: any[] = [];
+        const classDays = new Set(filteredRecords.map(r => r.date));
         classDays.forEach(date => {
             const recordsForDay = filteredRecords.filter(r => r.date === date);
             const presentCount = recordsForDay.filter(r => r.status === 'present').length;
@@ -233,14 +237,20 @@ export function ReportsClient() {
     return student?.name || 'Unknown Student';
   };
   
-  const getStatusVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'present': return 'default';
-      case 'absent': return 'destructive';
-      case 'late': return 'secondary';
-      default: return 'outline';
-    }
-  };
+  const anomalyChartData = useMemo(() => {
+    if (anomalies.length === 0) return [];
+    
+    const anomalyCounts = anomalies.reduce((acc, anomaly) => {
+        const studentName = getStudentName(anomaly.studentId);
+        acc[studentName] = (acc[studentName] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(anomalyCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a,b) => b.count - a.count);
+  }, [anomalies, studentsInClass]);
+  
 
   return (
     <div className="space-y-6">
@@ -324,11 +334,14 @@ export function ReportsClient() {
       {anomalies.length > 0 && (
           <Card>
               <CardHeader>
-                  <CardTitle>AI-Detected Anomalies</CardTitle>
-                  <CardDescription>The following potential anomalies were detected in the selected period.</CardDescription>
+                  <CardTitle>AI-Powered Anomaly Detection</CardTitle>
+                  <CardDescription>The following insights and potential issues were detected in the selected period.</CardDescription>
               </CardHeader>
-              <CardContent>
-                  {anomalies.map((anomaly, index) => (
+              <CardContent className="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 className="font-semibold mb-2">Anomaly Details</h4>
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {anomalies.map((anomaly, index) => (
                       <Alert key={index} className="mb-2">
                          <AlertTriangle className="h-4 w-4" />
                           <AlertTitle>{anomaly.anomalyType} - {getStudentName(anomaly.studentId)}</AlertTitle>
@@ -336,7 +349,13 @@ export function ReportsClient() {
                               {anomaly.description} (On: {new Date(anomaly.date).toLocaleDateString()})
                           </AlertDescription>
                       </Alert>
-                  ))}
+                    ))}
+                    </div>
+                </div>
+                <div>
+                   <h4 className="font-semibold mb-2">Students with Most Anomalies</h4>
+                   <AnomalyChart data={anomalyChartData} />
+                </div>
               </CardContent>
           </Card>
       )}
