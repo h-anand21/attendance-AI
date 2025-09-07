@@ -65,9 +65,9 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
                 />} 
               />
               <Legend />
-              <Bar dataKey="present" fill="var(--color-present)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="absent" fill="var(--color-absent)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="late" fill="var(--color-late)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="present" stackId="a" fill="var(--color-present)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="absent" stackId="a" fill="var(--color-absent)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="late" stackId="a" fill="var(--color-late)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>

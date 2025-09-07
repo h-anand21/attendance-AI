@@ -36,10 +36,10 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AttendanceChart } from './attendance-chart';
-import type { AttendanceStatus, Student } from '@/types';
+import { AttendancePieChart } from './attendance-pie-chart';
+import type { AttendanceStatus } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
-import { format, getDaysInMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -69,16 +69,9 @@ export function ReportsClient() {
   }, [searchParams, classes, selectedClassId]);
 
   const filteredRecords = useMemo(() => {
-    const selectedYear = date.getFullYear();
-    const selectedMonth = date.getMonth();
-
+    const selectedDate = format(date, 'yyyy-MM-dd');
     return attendanceRecords.filter(
-      (r) => {
-        const recordDate = new Date(r.date);
-        return r.classId === selectedClassId &&
-        recordDate.getFullYear() === selectedYear &&
-        recordDate.getMonth() === selectedMonth
-      }
+      (r) => r.classId === selectedClassId && r.date === selectedDate
     );
   }, [attendanceRecords, selectedClassId, date]);
   
@@ -112,7 +105,7 @@ export function ReportsClient() {
       toast({
         variant: 'destructive',
         title: 'No Data to Export',
-        description: 'There are no records for the selected class and month.',
+        description: 'There are no records for the selected class and day.',
       });
       return;
     }
@@ -121,41 +114,20 @@ export function ReportsClient() {
     try {
         const studentsInClass = studentsByClass[selectedClassId] || [];
         
-        const conductedDays = new Set(filteredRecords.map(r => r.date)).size;
-
-        const summary = studentsInClass.map(student => {
-            const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
-            const present = studentRecords.filter(r => r.status === 'present').length;
-            const absent = studentRecords.filter(r => r.status === 'absent').length;
-            const late = studentRecords.filter(r => r.status === 'late').length;
-            const attendancePercentage = conductedDays > 0 ? ((present + late) / conductedDays) * 100 : 0;
-
-            return {
-                'Student Name': student.name,
-                'Student ID': student.id,
-                'Total Present': present,
-                'Total Absent': absent,
-                'Total Late': late,
-                'Attendance %': `${attendancePercentage.toFixed(2)}%`,
-            };
-        });
-
-        const rawLog = filteredRecords.map(record => ({
-            'Date': format(new Date(record.date), 'yyyy-MM-dd'),
+        const dataToExport = filteredRecords.map(record => ({
             'Student Name': getStudentName(record.studentId),
             'Student ID': record.studentId,
+            'Date': record.date,
             'Status': record.status,
-        })).sort((a,b) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
+        }));
 
-        const summarySheet = XLSX.utils.json_to_sheet(summary);
-        const rawLogSheet = XLSX.utils.json_to_sheet(rawLog);
+        const summarySheet = XLSX.utils.json_to_sheet(dataToExport);
         
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Student Summary');
-        XLSX.utils.book_append_sheet(workbook, rawLogSheet, 'Daily Log');
+        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Daily Log');
 
         const currentClass = classes.find(c => c.id === selectedClassId);
-        const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(date, 'MMMM_yyyy')}.xlsx`;
+        const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(date, 'yyyy_MM_dd')}.xlsx`;
         XLSX.writeFile(workbook, fileName);
 
          toast({
@@ -178,22 +150,16 @@ export function ReportsClient() {
   const chartData = useMemo(() => {
     if (filteredRecords.length === 0) return [];
     
-    const dataByDate = filteredRecords.reduce((acc, record) => {
-      if (!acc[record.date]) {
-        acc[record.date] = { present: 0, absent: 0, late: 0 };
-      }
-      acc[record.date][record.status]++;
+    const statusCounts = filteredRecords.reduce((acc, record) => {
+      acc[record.status] = (acc[record.status] || 0) + 1;
       return acc;
-    }, {} as Record<string, Record<AttendanceStatus, number>>);
+    }, {} as Record<AttendanceStatus, number>);
 
-    return Object.entries(dataByDate)
-      .map(([date, counts]) => ({
-        date,
-        present: counts.present || 0,
-        absent: counts.absent || 0,
-        late: counts.late || 0,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return Object.entries(statusCounts)
+      .map(([name, value]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value,
+      }));
   }, [filteredRecords]);
 
   const studentsInClass = studentsByClass[selectedClassId] || [];
@@ -204,7 +170,7 @@ export function ReportsClient() {
   };
   
   const getStatusVariant = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'present': return 'default';
       case 'absent': return 'destructive';
       case 'late': return 'secondary';
@@ -218,7 +184,7 @@ export function ReportsClient() {
         <CardHeader>
           <CardTitle>Filter Reports</CardTitle>
           <CardDescription>
-            Select a class and month to view and export attendance records.
+            Select a class and a day to view the attendance report.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-4">
@@ -248,7 +214,7 @@ export function ReportsClient() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, 'MMMM yyyy') : <span>Pick a month</span>}
+                {date ? format(date, 'PPP') : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -257,9 +223,6 @@ export function ReportsClient() {
                 selected={date}
                 onSelect={(day) => setDate(day || new Date())}
                 initialFocus
-                captionLayout="dropdown-buttons"
-                fromYear={2020}
-                toYear={new Date().getFullYear()}
               />
             </PopoverContent>
           </Popover>
@@ -300,65 +263,59 @@ export function ReportsClient() {
           </Card>
       )}
       
-      {chartData.length > 0 ? (
-         <AttendanceChart data={chartData} />
-      ) : (
-        <Card>
-            <CardHeader>
-                <CardTitle>Monthly Attendance Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center">
-                <p className="text-muted-foreground">No attendance data to display for this period.</p>
-            </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Attendance Records</CardTitle>
-          <CardDescription>
-            Showing {filteredRecords.length} records for the selected period.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRecords.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
-                      No records found for this period.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredRecords.map((record) => (
-                    <TableRow key={`${record.studentId}-${record.date}`}>
-                      <TableCell className="font-medium">
-                        {getStudentName(record.studentId)}
-                      </TableCell>
-                      <TableCell>{format(new Date(record.date), 'dd/MM/yyyy')}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={getStatusVariant(record.status)}>
-                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+            <AttendancePieChart data={chartData} />
+        </div>
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Current Day Status</CardTitle>
+                    <CardDescription>A live look at today's check-ins.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground text-center py-8">Donut chart coming soon.</p>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Daily Log</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                            <TableHead>Student</TableHead>
+                            <TableHead className="text-right">Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredRecords.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={2} className="h-24 text-center">
+                                No records found.
+                                </TableCell>
+                            </TableRow>
+                            ) : (
+                            filteredRecords.map((record) => (
+                                <TableRow key={record.id}>
+                                <TableCell className="font-medium">
+                                    {getStudentName(record.studentId)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Badge variant={getStatusVariant(record.status)}>
+                                        {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                                    </Badge>
+                                </TableCell>
+                                </TableRow>
+                            ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+             </Card>
+        </div>
+      </div>
     </div>
   );
 }
-
-    
