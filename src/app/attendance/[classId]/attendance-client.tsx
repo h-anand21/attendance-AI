@@ -149,6 +149,7 @@ export function AttendanceClient({
                 title: 'No Data to Export',
                 description: 'There are no attendance records for this class to export.',
             });
+            setIsExporting(false);
             return;
         }
 
