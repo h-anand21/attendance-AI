@@ -56,7 +56,14 @@ export function ReportsClient() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedClassId, setSelectedClassId] = useState<string>(() => {
+    const classIdFromParams = searchParams.get('classId');
+    if (classIdFromParams && classes.some(c => c.id === classIdFromParams)) {
+      return classIdFromParams;
+    }
+    return classes.length > 0 ? classes[0].id : '';
+  });
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 29),
     to: new Date(),
@@ -66,16 +73,14 @@ export function ReportsClient() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    const classIdFromParams = searchParams.get('classId');
-    if (classIdFromParams && classes.some(c => c.id === classIdFromParams)) {
-      setSelectedClassId(classIdFromParams);
-    } else if (classes.length > 0 && !selectedClassId) {
+    // If selectedClassId is not set and classes are loaded, set it to the first class.
+    if (!selectedClassId && classes.length > 0) {
       setSelectedClassId(classes[0].id);
     }
-  }, [searchParams, classes, selectedClassId]);
+  }, [classes, selectedClassId]);
 
   const filteredRecords = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
+    if (!dateRange?.from || !dateRange?.to || !selectedClassId) return [];
 
     const fromDate = format(dateRange.from, 'yyyy-MM-dd');
     const toDate = format(addDays(dateRange.to, 1), 'yyyy-MM-dd'); // include the 'to' date
