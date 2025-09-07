@@ -39,7 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { AttendanceChart } from './attendance-chart';
 import type { AttendanceStatus, Student } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, getDaysInMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -61,12 +61,12 @@ export function ReportsClient() {
 
   useEffect(() => {
     const classIdFromParams = searchParams.get('classId');
-    if (classIdFromParams) {
+    if (classIdFromParams && classes.some(c => c.id === classIdFromParams)) {
       setSelectedClassId(classIdFromParams);
     } else if (classes.length > 0 && !selectedClassId) {
       setSelectedClassId(classes[0].id);
     }
-  }, [searchParams, classes]);
+  }, [searchParams, classes, selectedClassId]);
 
   const filteredRecords = useMemo(() => {
     const selectedYear = date.getFullYear();
@@ -97,6 +97,11 @@ export function ReportsClient() {
         setAnomalies(result.anomalies);
     } catch(error) {
         console.error("Error analyzing anomalies:", error);
+         toast({
+            variant: 'destructive',
+            title: 'AI Analysis Failed',
+            description: 'An error occurred while analyzing anomalies.',
+        });
     } finally {
         setIsAnalyzing(false);
     }
@@ -114,39 +119,41 @@ export function ReportsClient() {
     setIsExporting(true);
 
     try {
-        // 1. Create Summary Data
         const studentsInClass = studentsByClass[selectedClassId] || [];
+        
+        const conductedDays = new Set(filteredRecords.map(r => r.date)).size;
+
         const summary = studentsInClass.map(student => {
             const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
             const present = studentRecords.filter(r => r.status === 'present').length;
             const absent = studentRecords.filter(r => r.status === 'absent').length;
             const late = studentRecords.filter(r => r.status === 'late').length;
+            const attendancePercentage = conductedDays > 0 ? ((present + late) / conductedDays) * 100 : 0;
+
             return {
                 'Student Name': student.name,
                 'Student ID': student.id,
-                'Total Days Present': present,
-                'Total Days Absent': absent,
-                'Total Days Late': late,
+                'Total Present': present,
+                'Total Absent': absent,
+                'Total Late': late,
+                'Attendance %': `${attendancePercentage.toFixed(2)}%`,
             };
         });
 
-        // 2. Create Raw Log Data
         const rawLog = filteredRecords.map(record => ({
+            'Date': format(new Date(record.date), 'yyyy-MM-dd'),
             'Student Name': getStudentName(record.studentId),
             'Student ID': record.studentId,
-            'Date': format(new Date(record.date), 'yyyy-MM-dd'),
             'Status': record.status,
-        }));
+        })).sort((a,b) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
 
-        // 3. Create Excel Workbook
         const summarySheet = XLSX.utils.json_to_sheet(summary);
         const rawLogSheet = XLSX.utils.json_to_sheet(rawLog);
         
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Monthly Summary');
-        XLSX.utils.book_append_sheet(workbook, rawLogSheet, 'Raw Attendance Log');
+        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Student Summary');
+        XLSX.utils.book_append_sheet(workbook, rawLogSheet, 'Daily Log');
 
-        // 4. Download the file
         const currentClass = classes.find(c => c.id === selectedClassId);
         const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(date, 'MMMM_yyyy')}.xlsx`;
         XLSX.writeFile(workbook, fileName);
@@ -319,7 +326,6 @@ export function ReportsClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
-                  <TableHead>Student ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Status</TableHead>
                 </TableRow>
@@ -327,7 +333,7 @@ export function ReportsClient() {
               <TableBody>
                 {filteredRecords.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       No records found for this period.
                     </TableCell>
                   </TableRow>
@@ -337,7 +343,6 @@ export function ReportsClient() {
                       <TableCell className="font-medium">
                         {getStudentName(record.studentId)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{record.studentId}</TableCell>
                       <TableCell>{format(new Date(record.date), 'dd/MM/yyyy')}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant={getStatusVariant(record.status)}>
@@ -355,3 +360,5 @@ export function ReportsClient() {
     </div>
   );
 }
+
+    
