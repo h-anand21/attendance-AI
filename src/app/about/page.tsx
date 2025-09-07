@@ -1,109 +1,118 @@
 
+'use client';
+
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScanFace, Database } from 'lucide-react';
+import { ScanFace, Database, Lock, Cloudy, QrCode } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const techPillars = [
+    {
+        icon: <ScanFace className="h-8 w-8 text-primary" />,
+        title: "AI Face Recognition",
+        description: "Powered by Genkit for fast, on-device matching."
+    },
+    {
+        icon: <Cloudy className="h-8 w-8 text-primary" />,
+        title: "Secure Cloud",
+        description: "Firestore storage with strict access per school account."
+    },
+    {
+        icon: <QrCode className="h-8 w-8 text-primary" />,
+        title: "Multiple Check-ins",
+        description: "Face scans, photo uploads, & QR codes for every classroom."
+    }
+]
 
 export default function AboutPage() {
   return (
     <AppLayout pageTitle="About AttendEase">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <Card>
-          <CardHeader className="text-center">
-            <ScanFace className="mx-auto h-16 w-16 text-primary mb-4" />
-            <CardTitle className="text-4xl font-bold">
-              Welcome to AttendEase
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-lg text-muted-foreground text-center">
-            <p>
-              AttendEase is a modern, AI-powered solution designed to make
-              classroom attendance simple, efficient, and insightful.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Our Mission</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            <p>
-              In today's fast-paced educational environment, teachers need tools
-              that save time and provide valuable data. Our mission is to
-              eliminate the hassle of manual attendance tracking and provide
-              educators with powerful, AI-driven analytics to better understand
-              student engagement and presence.
-            </p>
-            <p>
-              With features like instant face recognition and automated anomaly
-              detection, AttendEase transforms a routine task into an
-              opportunity for insight.
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div
+        className="max-w-5xl mx-auto space-y-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants}>
+          <Card className="text-center bg-card shadow-xl overflow-hidden">
+            <CardHeader className="bg-primary/5 p-10">
+              <h1 className="text-4xl font-bold tracking-tight text-primary">
+                Making attendance effortless, accurate, and fair.
+              </h1>
+            </CardHeader>
+            <CardContent className="p-10 text-lg text-muted-foreground">
+              <p className="max-w-3xl mx-auto">
+                AttendEase uses AI-driven face scans, photo uploads, and QR check-ins to save teachers time and give admins clear, actionable reports. Our mission is to eliminate the hassle of manual attendance tracking, transforming a routine task into an opportunity for insight.
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Database className="h-6 w-6" /> Data Source &amp; Storage
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-muted-foreground">
-            <p>
-              This application stores all of its data—including users, classes, students, and attendance records—in **Cloud Firestore**, a real-time database from Google Firebase. 
-            </p>
-            <p>
-              All data is stored securely under your unique User ID. When you first sign up, the application automatically seeds your database with sample data sourced from <code className="font-mono bg-muted/50 p-1 rounded-md text-sm">src/lib/data.ts</code>. Any changes you make, like adding a class or student, are saved directly to your personal Firestore database, ensuring your data is persistent and secure.
-            </p>
-          </CardContent>
-        </Card>
+        <motion.section variants={itemVariants}>
+          <h2 className="text-3xl font-bold text-center mb-8">Our Technology Pillars</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+              {techPillars.map((pillar) => (
+                 <Card key={pillar.title} className="text-center hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader className="items-center">
+                        <div className="p-4 bg-primary/10 rounded-full mb-4">
+                            {pillar.icon}
+                        </div>
+                        <CardTitle>{pillar.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{pillar.description}</p>
+                    </CardContent>
+                 </Card>
+              ))}
+          </div>
+        </motion.section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Core Features</CardTitle>
-          </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-6 text-muted-foreground">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground">
-                Seamless Registration
-              </h3>
-              <p>
-                Quickly register students and create classes. Capture student
-                photos for face recognition with a single click.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground">
-                AI-Powered Face Scan
-              </h3>
-              <p>
-                Take attendance for the entire class in seconds. Our AI
-                accurately recognizes registered students from a live camera
-                feed.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground">
-                Insightful Reporting
-              </h3>
-              <p>
-                Track attendance records over time. Filter by class, date, and
-                month to see the complete picture.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground">
-                Advanced Analytics
-              </h3>
-              <p>
-                Leverage the power of AI to generate attendance summaries and
-                detect unusual patterns, helping you identify students who may
-                need support.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <motion.section variants={itemVariants}>
+            <Card className="p-8">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+                           <Database className="h-8 w-8 text-primary" /> Data Source & Storage
+                        </h2>
+                        <div className="space-y-4 text-muted-foreground">
+                           <p>
+                              This application stores all of its data—including users, classes, students, and attendance records—in **Cloud Firestore**, a real-time database from Google Firebase. 
+                           </p>
+                           <p>
+                              All data is stored securely under your unique User ID. When you first sign up, the application automatically seeds your database with sample data sourced from <code className="font-mono bg-muted/50 p-1 rounded-md text-sm">src/lib/data.ts</code>. Any changes you make are saved directly to your personal Firestore database, ensuring your data is persistent and secure.
+                           </p>
+                        </div>
+                    </div>
+                     <div className="flex items-center justify-center">
+                        <img src="https://picsum.photos/seed/database-arch/400/300" alt="Database Architecture Diagram" className="rounded-lg shadow-md" data-ai-hint="database architecture" />
+                    </div>
+                </div>
+            </Card>
+        </motion.section>
+
+      </motion.div>
     </AppLayout>
   );
 }
