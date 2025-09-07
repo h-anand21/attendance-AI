@@ -31,15 +31,15 @@ export default function RegistrationPage() {
     <AppLayout pageTitle="Admin Dashboard">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <Card>
-          <CardHeader>
+           <CardHeader>
             <CardTitle>Teacher Reports</CardTitle>
-             <CardDescription>View and manage teacher reports.</CardDescription>
+            <CardDescription>View reports and manage teachers.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full">
+             <Button asChild className="w-full">
               <Link href="/reports/teacher">
                 <Users className="mr-2 h-4 w-4" />
-                View Reports
+                Manage Teachers
               </Link>
             </Button>
           </CardContent>
