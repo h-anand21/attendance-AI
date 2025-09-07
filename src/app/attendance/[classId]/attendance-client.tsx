@@ -165,7 +165,7 @@ export function AttendanceClient({
         const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
-        XLSX.writeFile(workbook, 'attendance.xlsx');
+        XLSX.writeFile(workbook, `attendance_${currentClass.name.replace(/\s/g, '_')}.xlsx`);
         
         toast({
             title: 'Export Successful',
