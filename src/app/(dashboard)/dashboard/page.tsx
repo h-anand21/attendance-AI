@@ -28,6 +28,11 @@ import {
 import { generateAttendanceSummary } from '@/ai/flows/generate-attendance-summary';
 import { useAttendance } from '@/hooks/use-attendance';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AttendancePieChart } from '@/app/reports/attendance-pie-chart';
+import { AttendanceBarChart } from '@/app/reports/attendance-bar-chart';
+import { subDays, format, eachDayOfInterval } from 'date-fns';
+import type { AttendanceStatus } from '@/types';
+
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
@@ -89,6 +94,61 @@ export default function DashboardPage() {
     </Card>
   )
 
+  const dateRange = useMemo(() => ({
+    from: subDays(new Date(), 29),
+    to: new Date(),
+  }), []);
+
+  const filteredRecords = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return [];
+
+    const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+    const toDate = format(new Date(), 'yyyy-MM-dd'); 
+
+    return attendanceRecords.filter(
+      (r) =>
+        r.date >= fromDate &&
+        r.date <= toDate
+    );
+  }, [attendanceRecords, dateRange]);
+
+
+  const pieChartData = useMemo(() => {
+    if (filteredRecords.length === 0) return [];
+    
+    const statusCounts = filteredRecords.reduce((acc, record) => {
+      acc[record.status] = (acc[record.status] || 0) + 1;
+      return acc;
+    }, {} as Record<AttendanceStatus, number>);
+
+    return Object.entries(statusCounts)
+      .map(([name, value]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value,
+      }));
+  }, [filteredRecords]);
+
+  const barChartData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return [];
+
+    const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
+    const interval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
+
+    interval.forEach(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
+    });
+
+    filteredRecords.forEach(record => {
+      if (dailyData[record.date]) {
+        dailyData[record.date][record.status]++;
+      }
+    });
+
+    return Object.entries(dailyData).map(([date, counts]) => ({ date, ...counts }));
+  }, [filteredRecords, dateRange]);
+
+
   if (loading) {
     return (
       <AppLayout pageTitle="Dashboard">
@@ -110,7 +170,16 @@ export default function DashboardPage() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
-            <div className="">
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="md:col-span-1">
+                 <AttendancePieChart data={pieChartData} />
+              </div>
+              <div className="md:col-span-2">
+                  <AttendanceBarChart data={barChartData} />
+              </div>
+            </div>
+
+            <div>
                 <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-semibold tracking-tight">
                     Your Classes
