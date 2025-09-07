@@ -8,8 +8,6 @@ import {
   onSnapshot,
   doc,
   runTransaction,
-  addDoc,
-  setDoc,
   updateDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -56,8 +54,8 @@ export function useStudents() {
     }, {} as Record<string, Student[]>);
   }, [allStudents]);
 
-  const addStudent = useCallback(async (studentData: Omit<Student, 'id' | 'classId' | 'qrCode'>, classId: string) => {
-    if (!user || !classId) return;
+  const addStudent = useCallback(async (studentData: Omit<Student, 'id' | 'classId' | 'qrCode'>, classId: string): Promise<string | null> => {
+    if (!user || !classId) return null;
 
     const classRef = doc(db, 'users', user.uid, 'classes', classId);
     const newStudentRef = doc(collection(db, 'users', user.uid, 'students'));
@@ -90,9 +88,12 @@ export function useStudents() {
 
       // 3. Update the student document with the generated QR code
       await updateDoc(newStudentRef, { qrCode: qrCodeDataUrl });
+      
+      return newStudentRef.id;
 
     } catch (e) {
       console.error("Transaction or QR code update failed: ", e);
+      return null;
     }
   }, [user]);
   
@@ -103,3 +104,5 @@ export function useStudents() {
 
   return { studentsByClass, addStudent, getStudentsForClass, loading };
 }
+
+    

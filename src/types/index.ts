@@ -12,7 +12,7 @@ export type Student = {
   name: string;
   avatar: string; // This will be a data URL for Firestore
   classId: string;
-  qrCode: string; // data URL of the QR code
+  qrCode?: string; // data URL of the QR code
 };
 
 export type Teacher = {
@@ -38,3 +38,5 @@ export type Task = {
   text: string;
   completed: boolean;
 };
+
+    
