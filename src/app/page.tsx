@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ScanFace, Upload, QrCode, UserPlus, FileBarChart, CheckCircle, School, User, BarChart2 } from 'lucide-react';
+import { ScanFace, Upload, QrCode, UserPlus, FileBarChart, CheckCircle, School, User } from 'lucide-react';
 import Image from 'next/image';
 import MarketingLayout from './(marketing)/layout';
 
