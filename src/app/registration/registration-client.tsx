@@ -52,6 +52,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Camera, UserPlus, Loader2, PlusCircle, QrCodeIcon } from 'lucide-react';
 import { CreateClassDialog } from '../(dashboard)/dashboard/create-class-dialog';
+import { PhotoUploadModal } from '../attendance/[classId]/photo-upload-modal';
 
 
 const studentFormSchema = z.object({
@@ -85,9 +86,10 @@ export function RegistrationClient() {
   useEffect(() => {
     // Set initial selected class when classes load
     if (classes.length > 0 && !selectedClass) {
-      setSelectedClass(classes[0].id);
+      const latestClass = [...classes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      setSelectedClass(latestClass.id);
     }
-  }, [classes, selectedClass]);
+  }, [classes]);
 
   useEffect(() => {
     // Sync selected class with the form
