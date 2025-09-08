@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -64,9 +64,10 @@ const LogoIcon = () => {
   return (
     <Link
       href="/dashboard"
-      className="relative z-20 flex items-center justify-center py-1 text-sm font-normal"
+      className="relative z-20 flex items-center justify-center gap-2 py-1 text-sm font-semibold text-sidebar-foreground"
     >
       <AppLogo className="h-8 w-8" />
+      <span className="md:hidden lg:inline-block">AttendEase</span>
     </Link>
   );
 };
