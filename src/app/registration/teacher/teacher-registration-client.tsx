@@ -202,7 +202,7 @@ export function TeacherRegistrationClient() {
                   <FormItem>
                     <FormLabel>Subjects</FormLabel>
                     <FormControl>
-                      <>
+                      <div>
                         <Input 
                           placeholder="Type a subject and press Enter" 
                           value={currentSubject}
@@ -219,7 +219,7 @@ export function TeacherRegistrationClient() {
                             </Badge>
                           ))}
                         </div>
-                      </>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
