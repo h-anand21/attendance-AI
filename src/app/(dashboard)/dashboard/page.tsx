@@ -46,13 +46,13 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 
-const gradientPresets = [
-  'from-indigo-500 via-purple-500 to-pink-500',
-  'from-green-400 to-teal-500',
-  'from-orange-400 to-pink-500',
-  'from-blue-400 to-cyan-500',
-  'from-fuchsia-500 to-purple-600',
-  'from-lime-400 to-green-500'
+const classColorAccents = [
+  'border-t-primary',
+  'border-t-green-500',
+  'border-t-yellow-500',
+  'border-t-sky-500',
+  'border-t-orange-500',
+  'border-t-fuchsia-500'
 ];
 
 const cardVariants = {
@@ -223,25 +223,25 @@ export default function DashboardPage() {
                 {classes.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {classes.map((cls, index) => (
-                      <Link 
-                        href={`/attendance/${cls.id}`} 
-                        key={cls.id}
-                        className={cn(
-                          "bg-gradient-to-br rounded-2xl shadow-xl text-white p-6 flex flex-col justify-between transition hover:scale-105 hover:shadow-2xl cursor-pointer",
-                          gradientPresets[index % gradientPresets.length]
-                        )}
-                      >
-                        <div className="space-y-1">
+                      <Link href={`/attendance/${cls.id}`} key={cls.id}>
+                        <Card className={cn(
+                          "hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group border-t-4",
+                           classColorAccents[index % classColorAccents.length]
+                        )}>
+                          <CardHeader>
                             <div className="flex justify-between items-start">
-                              <h3 className="text-xl font-bold">{cls.name}</h3>
-                              <Badge variant="secondary" className="bg-black/20 text-white border-white/30">Sec. {cls.section}</Badge>
+                              <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                              <Badge variant="secondary">Sec. {cls.section}</Badge>
                             </div>
-                            <p className="text-white/80 text-sm">Click to start attendance</p>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-white/80 mt-4">
-                            <Users className="h-4 w-4" />
-                            <span>{(studentsByClass[cls.id] || []).length} Students</span>
-                        </div>
+                            <CardDescription>Click to start attendance</CardDescription>
+                          </CardHeader>
+                          <CardContent className="mt-auto">
+                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <Users className="h-4 w-4" />
+                              <span>{(studentsByClass[cls.id] || []).length} Students</span>
+                            </div>
+                          </CardContent>
+                        </Card>
                       </Link>
                     ))}
                 </div>
@@ -333,5 +333,7 @@ export default function DashboardPage() {
     </AppLayout>
   );
 }
+
+    
 
     
