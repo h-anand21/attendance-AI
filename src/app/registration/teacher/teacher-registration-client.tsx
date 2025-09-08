@@ -35,8 +35,26 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, UserPlus, Loader2, X } from 'lucide-react';
+import { Camera, UserPlus, Loader2, X, Check, ChevronsUpDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
+const subjectsList = [
+    { value: 'mathematics', label: 'Mathematics' },
+    { value: 'physics', label: 'Physics' },
+    { value: 'chemistry', label: 'Chemistry' },
+    { value: 'biology', label: 'Biology' },
+    { value: 'computer_science', label: 'Computer Science' },
+    { value: 'english', label: 'English' },
+    { value: 'history', label: 'History' },
+    { value: 'geography', label: 'Geography' },
+    { value: 'art', label: 'Art' },
+    { value: 'music', label: 'Music' },
+    { value: 'physical_education', label: 'Physical Education' },
+] as const;
+
 
 const teacherFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -53,7 +71,8 @@ export function TeacherRegistrationClient() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentSubject, setCurrentSubject] = useState('');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
 
   const form = useForm<z.infer<typeof teacherFormSchema>>({
     resolver: zodResolver(teacherFormSchema),
@@ -119,25 +138,10 @@ export function TeacherRegistrationClient() {
       description: `${values.name} has been successfully registered.`,
     });
     form.reset();
-    setCurrentSubject('');
     setCapturedImage(null);
     setIsSubmitting(false);
   };
   
-  const handleSubjectKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Enter' || e.key === ',') && currentSubject) {
-      e.preventDefault();
-      const newSubjects = [...form.getValues('subjects'), currentSubject.trim()];
-      form.setValue('subjects', newSubjects);
-      setCurrentSubject('');
-    }
-  };
-  
-  const removeSubject = (subjectToRemove: string) => {
-    const newSubjects = form.getValues('subjects').filter(s => s !== subjectToRemove);
-    form.setValue('subjects', newSubjects);
-  };
-
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       <Card className="lg:col-span-1">
@@ -199,28 +203,80 @@ export function TeacherRegistrationClient() {
                 control={form.control}
                 name="subjects"
                 render={({ field }) => (
-                  <FormItem>
+                    <FormItem className="flex flex-col">
                     <FormLabel>Subjects</FormLabel>
-                    <FormControl>
-                      <div>
-                        <Input 
-                          placeholder="Type a subject and press Enter" 
-                          value={currentSubject}
-                          onChange={(e) => setCurrentSubject(e.target.value)}
-                          onKeyDown={handleSubjectKeyDown}
-                        />
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((subject, index) => (
-                            <Badge key={index} variant="secondary">
-                              {subject}
-                              <button type="button" onClick={() => removeSubject(subject)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </FormControl>
+                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                        <PopoverTrigger asChild>
+                           <FormControl>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                "w-full justify-between",
+                                !field.value.length && "text-muted-foreground"
+                                )}
+                            >
+                                <div className="flex gap-1 flex-wrap">
+                                {field.value.length > 0 ? (
+                                    subjectsList
+                                    .filter((sub) => field.value.includes(sub.value))
+                                    .map((sub) => (
+                                        <Badge
+                                            variant="secondary"
+                                            key={sub.value}
+                                            className="mr-1 mb-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                field.onChange(field.value.filter(v => v !== sub.value));
+                                            }}
+                                        >
+                                            {sub.label}
+                                            <X className="ml-1 h-3 w-3" />
+                                        </Badge>
+                                    ))
+                                ) : (
+                                    "Select subjects"
+                                )}
+                                </div>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                           </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                            <Command>
+                                <CommandInput placeholder="Search subjects..." />
+                                <CommandList>
+                                    <CommandEmpty>No results found.</CommandEmpty>
+                                    <CommandGroup>
+                                    {subjectsList.map((subject) => (
+                                        <CommandItem
+                                        key={subject.value}
+                                        onSelect={() => {
+                                            const currentValues = field.value || [];
+                                            const isSelected = currentValues.includes(subject.value);
+                                            if (isSelected) {
+                                                field.onChange(currentValues.filter(v => v !== subject.value));
+                                            } else {
+                                                field.onChange([...currentValues, subject.value]);
+                                            }
+                                        }}
+                                        >
+                                        <Check
+                                            className={cn(
+                                            "mr-2 h-4 w-4",
+                                            (field.value || []).includes(subject.value)
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                        />
+                                        {subject.label}
+                                        </CommandItem>
+                                    ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -272,9 +328,12 @@ export function TeacherRegistrationClient() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {teacher.subjects?.map(subject => (
-                            <Badge key={subject} variant="outline">{subject}</Badge>
-                          ))}
+                          {teacher.subjects?.map(subjectValue => {
+                             const subject = subjectsList.find(s => s.value === subjectValue);
+                             return (
+                                <Badge key={subjectValue} variant="outline">{subject ? subject.label : subjectValue}</Badge>
+                             )
+                          })}
                         </div>
                       </TableCell>
                     </TableRow>
