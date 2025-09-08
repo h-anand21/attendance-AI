@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -13,26 +13,14 @@ import {
   LineChart,
   ClipboardCheck,
   Users,
+  PanelLeft,
 } from "lucide-react";
 import {
-  SidebarProvider,
   Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
+  SidebarBody,
+  SidebarLink,
+  useSidebar
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,171 +35,164 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const Logo = () => {
+  return (
+    <Link
+      href="/dashboard"
+      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+    >
+      <AppLogo className="h-6 w-6" />
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="font-medium whitespace-pre text-black dark:text-white text-lg"
+      >
+        AttendEase
+      </motion.span>
+    </Link>
+  );
+};
+
+const LogoIcon = () => {
+  return (
+    <Link
+      href="/dashboard"
+      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+    >
+      <AppLogo className="h-6 w-6" />
+    </Link>
+  );
+};
 
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
-  const [isReportsOpen, setIsReportsOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (pathname.startsWith('/reports')) {
-      setIsReportsOpen(true);
-    }
-  }, [pathname]);
+  const links = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: (
+        <Home className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      active: pathname === "/dashboard",
+      visible: true,
+    },
+    {
+      label: "Attendance",
+      href: "/attendance",
+      icon: (
+        <ClipboardCheck className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      active: pathname.startsWith("/attendance"),
+      visible: true,
+    },
+    {
+      label: "Student Directory",
+      href: "/registration/details",
+      icon: (
+        <Users className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      active: pathname.startsWith("/registration/details"),
+      visible: userRole === 'admin',
+    },
+    {
+        label: "Teacher Directory",
+        href: "/registration/teacher",
+        icon: (
+            <UserPlus className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        ),
+        active: pathname.startsWith("/registration/teacher"),
+        visible: userRole === 'admin',
+    },
+    {
+      label: "Reports",
+      href: "/reports",
+      icon: (
+        <LineChart className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      active: pathname.startsWith("/reports"),
+      visible: userRole === 'admin',
+    },
+    {
+      label: "About",
+      href: "/about",
+      icon: (
+        <Info className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      active: pathname === "/about",
+      visible: true,
+    },
+  ];
 
   return (
-    <Sidebar collapsible="icon" side="left" variant="sidebar">
-      <SidebarHeader>
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <AppLogo className="h-8 w-8" />
-          <span className="text-xl font-bold group-data-[collapsible=icon]:hidden">
-            AttendEase
-          </span>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/dashboard"}
-              tooltip={{ children: "Dashboard" }}
-            >
-              <Link href="/dashboard">
-                <Home />
-                <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-           <SidebarMenuItem>
-                <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith("/attendance")}
-                tooltip={{ children: "Attendance" }}
-                >
-                <Link href="/attendance">
-                    <ClipboardCheck />
-                    <span>Attendance</span>
-                </Link>
-                </SidebarMenuButton>
-          </SidebarMenuItem>
-          {userRole === 'admin' && (
-            <>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/registration/details')}
-                  tooltip={{ children: 'Student Directory' }}
-                >
-                  <Link href="/registration/details">
-                    <Users />
-                    <span>Student Directory</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/registration/teacher')}
-                  tooltip={{ children: 'Teacher Directory' }}
-                >
-                  <Link href="/registration/teacher">
-                    <UserPlus />
-                    <span>Teacher Directory</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem asChild>
-                <Collapsible open={isReportsOpen} onOpenChange={setIsReportsOpen}>
-                  <CollapsibleTrigger asChild>
-                     <SidebarMenuButton
-                        isActive={pathname.startsWith("/reports")}
-                        tooltip={{ children: "Reports" }}
-                        className="justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <LineChart />
-                          <span>Reports</span>
-                        </div>
-                      </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                        <SidebarMenuSubButton asChild isActive={pathname === '/reports'}>
-                            <Link href="/reports">Attendance</Link>
-                        </SidebarMenuSubButton>
-                         <SidebarMenuSubButton asChild isActive={pathname === '/reports/teacher'}>
-                            <Link href="/reports/teacher">Teacher Activity</Link>
-                        </SidebarMenuSubButton>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-            </>
-          )}
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/about"}
-              tooltip={{ children: "About" }}
-            >
-              <Link href="/about">
-                <Info />
-                <span>About</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="w-full">
-              <SidebarMenuButton
-                className="w-full"
-                tooltip={{ children: "User Profile" }}
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={user?.photoURL || "https://picsum.photos/seed/user/40/40"}
-                    alt={user?.displayName || "User"}
-                    data-ai-hint="person"
-                  />
-                  <AvatarFallback>
-                    {user?.displayName?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate">{user?.displayName || "User"}</span>
-              </SidebarMenuButton>
+    <Sidebar open={open} setOpen={setOpen}>
+      <SidebarBody className="justify-between gap-10">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            {open ? <Logo /> : <LogoIcon />}
+            <div className="mt-8 flex flex-col gap-2">
+                {links.filter(l => l.visible).map((link, idx) => (
+                    <SidebarLink key={idx} link={link} className={cn(link.active && "bg-neutral-200 dark:bg-neutral-700")} />
+                ))}
             </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {user?.displayName}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarFooter>
+        </div>
+        <div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <div className="w-full cursor-pointer">
+                    <SidebarLink
+                    link={{
+                        label: user?.displayName || "User",
+                        href: "#",
+                        icon: (
+                        <img
+                            src={user?.photoURL || "https://picsum.photos/seed/user/40/40"}
+                            className="h-7 w-7 shrink-0 rounded-full"
+                            width={50}
+                            height={50}
+                            alt="Avatar"
+                        />
+                        ),
+                    }}
+                    />
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                    {user?.displayName}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                    </p>
+                </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </SidebarBody>
     </Sidebar>
   );
 }
 
+
 function Header({ pageTitle }: { pageTitle: string }) {
+  // useSidebar hook is not available here, so we manage mobile menu state separately
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
-      <SidebarTrigger className="md:hidden"/>
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+       <div className="md:hidden">
+         {/* This button will only be visible on mobile and will be handled by the MobileSidebar component */}
+       </div>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
        <ThemeToggle />
       <Button variant="ghost" size="icon" className="rounded-full">
@@ -247,14 +228,14 @@ export function AppLayout({
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header pageTitle={pageTitle} />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
+        <AppSidebar />
+        <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
+            <Header pageTitle={pageTitle} />
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                {children}
+            </main>
+        </div>
+    </div>
   );
 }
