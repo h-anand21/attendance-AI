@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,6 +15,9 @@ import {
   Users,
   PanelLeft,
   User,
+  Settings,
+  HelpCircle,
+  ChevronsUpDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,22 +44,19 @@ import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Separator } from "./ui/separator";
 
 const Logo = () => {
+  const { user } = useAuth();
   return (
-    <Link
-      href="/dashboard"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <AppLogo className="h-6 w-6" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white text-lg"
-      >
-        AttendEase
-      </motion.span>
-    </Link>
+    <div className="flex items-center gap-3 px-3">
+        <AppLogo className="h-10 w-10" />
+        <div className="flex flex-col">
+            <p className="font-semibold text-lg text-sidebar-foreground">AttendEase</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+        </div>
+        <ChevronsUpDown className="h-4 w-4 ml-auto text-muted-foreground" />
+    </div>
   );
 };
 
@@ -64,9 +64,9 @@ const LogoIcon = () => {
   return (
     <Link
       href="/dashboard"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+      className="relative z-20 flex items-center justify-center py-1 text-sm font-normal"
     >
-      <AppLogo className="h-6 w-6" />
+      <AppLogo className="h-8 w-8" />
     </Link>
   );
 };
@@ -74,14 +74,14 @@ const LogoIcon = () => {
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
-  const { open, setOpen } = useSidebar();
+  const { open } = useSidebar();
 
-  const links = [
+  const mainLinks = [
     {
       label: "Dashboard",
       href: "/dashboard",
       icon: (
-        <Home className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <Home className="h-5 w-5 shrink-0" />
       ),
       active: pathname === "/dashboard",
       visible: true,
@@ -90,7 +90,7 @@ function AppSidebar() {
       label: "Attendance",
       href: "/attendance",
       icon: (
-        <ClipboardCheck className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <ClipboardCheck className="h-5 w-5 shrink-0" />
       ),
       active: pathname.startsWith("/attendance"),
       visible: true,
@@ -99,7 +99,7 @@ function AppSidebar() {
       label: "Student Directory",
       href: "/registration/details",
       icon: (
-        <Users className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <Users className="h-5 w-5 shrink-0" />
       ),
       active: pathname.startsWith("/registration/details"),
       visible: userRole === 'admin',
@@ -108,7 +108,7 @@ function AppSidebar() {
         label: "Teacher Directory",
         href: "/registration/teacher",
         icon: (
-            <UserPlus className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+            <UserPlus className="h-5 w-5 shrink-0" />
         ),
         active: pathname.startsWith("/registration/teacher"),
         visible: userRole === 'admin',
@@ -117,50 +117,64 @@ function AppSidebar() {
       label: "Reports",
       href: "/reports",
       icon: (
-        <LineChart className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <LineChart className="h-5 w-5 shrink-0" />
       ),
       active: pathname.startsWith("/reports"),
       visible: userRole === 'admin',
     },
-    {
+  ];
+
+  const bottomLinks = [
+     {
       label: "About",
       href: "/about",
       icon: (
-        <Info className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <Info className="h-5 w-5 shrink-0" />
       ),
       active: pathname === "/about",
       visible: true,
     },
-  ];
+    {
+      label: "Settings",
+      href: "#",
+      icon: <Settings className="h-5 w-5 shrink-0" />,
+      active: false,
+      visible: true,
+    },
+  ]
 
   return (
     <Sidebar>
       <DesktopSidebar className="justify-between gap-10">
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
             {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-                {links.filter(l => l.visible).map((link, idx) => (
-                    <SidebarLink key={idx} link={link} className={cn(link.active && "bg-neutral-200 dark:bg-neutral-700")} />
+            <div className="mt-8 flex flex-col gap-1 px-3">
+                {mainLinks.filter(l => l.visible).map((link, idx) => (
+                    <SidebarLink key={idx} link={link} />
                 ))}
             </div>
         </div>
-        <div>
+        <div className="flex flex-col gap-1 px-3 pb-2">
+          {bottomLinks.filter(l => l.visible).map((link, idx) => (
+              <SidebarLink key={idx} link={link} />
+          ))}
+          <Separator className="my-2 bg-sidebar-border" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <div className="w-full cursor-pointer">
                     <SidebarLink
-                    link={{
+                      link={{
                         label: user?.displayName || "User",
                         href: "#",
                         icon: (
-                           <Avatar className="h-7 w-7 shrink-0">
+                           <Avatar className="h-8 w-8 shrink-0">
                             <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
                             <AvatarFallback>
                               <User className="h-4 w-4" />
                             </AvatarFallback>
                           </Avatar>
                         ),
-                    }}
+                      }}
                     />
                 </div>
             </DropdownMenuTrigger>
@@ -186,31 +200,35 @@ function AppSidebar() {
       </DesktopSidebar>
       <MobileSidebar>
          <SidebarBody className="justify-between gap-10">
-            <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
                 <Logo />
-                <div className="mt-8 flex flex-col gap-2">
-                    {links.filter(l => l.visible).map((link, idx) => (
-                        <SidebarLink key={idx} link={link} className={cn(link.active && "bg-neutral-200 dark:bg-neutral-700")} />
+                <div className="mt-8 flex flex-col gap-1 px-3">
+                    {mainLinks.filter(l => l.visible).map((link, idx) => (
+                        <SidebarLink key={idx} link={link} />
                     ))}
                 </div>
             </div>
-            <div>
+            <div className="flex flex-col gap-1 px-3 pb-2">
+            {bottomLinks.filter(l => l.visible).map((link, idx) => (
+              <SidebarLink key={idx} link={link} />
+            ))}
+            <Separator className="my-2 bg-sidebar-border" />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <div className="w-full cursor-pointer">
                         <SidebarLink
-                        link={{
+                          link={{
                             label: user?.displayName || "User",
                             href: "#",
                             icon: (
-                              <Avatar className="h-7 w-7 shrink-0">
+                              <Avatar className="h-8 w-8 shrink-0">
                                 <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
                                 <AvatarFallback>
                                   <User className="h-4 w-4" />
                                 </AvatarFallback>
                               </Avatar>
                             ),
-                        }}
+                          }}
                         />
                     </div>
                 </DropdownMenuTrigger>
