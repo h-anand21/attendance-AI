@@ -210,7 +210,7 @@ function AppSidebar() {
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6 sticky top-0 z-30">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
       <SidebarTrigger className="md:hidden"/>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
        <ThemeToggle />
