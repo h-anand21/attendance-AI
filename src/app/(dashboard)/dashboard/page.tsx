@@ -184,7 +184,14 @@ export default function DashboardPage() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-7">
         <div className="lg:col-span-5 space-y-4">
-            <AttendanceBarChart data={barChartData} />
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="md:col-span-3">
+                 <AttendanceBarChart data={barChartData} />
+              </div>
+              <div className="md:col-span-1">
+                <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance" />
+              </div>
+            </div>
             <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -238,7 +245,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-             <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance status" />
              <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
