@@ -8,6 +8,8 @@ import {
   onSnapshot,
   addDoc,
   orderBy,
+  doc,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Teacher } from '@/types';
@@ -50,7 +52,15 @@ export function useTeachers() {
     if (!user) return;
     try {
       const teachersCollection = collection(db, 'users', user.uid, 'teachers');
-      await addDoc(teachersCollection, newTeacherData);
+      const teacherDocRef = doc(teachersCollection);
+      
+      const finalTeacherData: Teacher = {
+        id: teacherDocRef.id,
+        ...newTeacherData,
+      }
+
+      await setDoc(teacherDocRef, finalTeacherData);
+
     } catch (error) {
       console.error('Error adding teacher: ', error);
     }

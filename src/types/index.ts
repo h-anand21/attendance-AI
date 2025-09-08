@@ -20,6 +20,8 @@ export type Teacher = {
   name: string;
   email: string;
   avatar: string; // This will be a data URL for Firestore
+  contact: string;
+  subjects: string[];
 }
 
 export type AttendanceStatus = 'present' | 'absent' | 'late';

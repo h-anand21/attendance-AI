@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,11 +35,14 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Camera, UserPlus, Loader2 } from 'lucide-react';
+import { Camera, UserPlus, Loader2, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const teacherFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
+  contact: z.string().min(10, { message: 'Please enter a valid contact number.' }),
+  subjects: z.array(z.string()).min(1, { message: 'At least one subject is required.' }),
 });
 
 export function TeacherRegistrationClient() {
@@ -50,12 +53,15 @@ export function TeacherRegistrationClient() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState('');
 
   const form = useForm<z.infer<typeof teacherFormSchema>>({
     resolver: zodResolver(teacherFormSchema),
     defaultValues: {
       name: '',
       email: '',
+      contact: '',
+      subjects: [],
     },
   });
 
@@ -113,8 +119,23 @@ export function TeacherRegistrationClient() {
       description: `${values.name} has been successfully registered.`,
     });
     form.reset();
+    setCurrentSubject('');
     setCapturedImage(null);
     setIsSubmitting(false);
+  };
+  
+  const handleSubjectKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Enter' || e.key === ',') && currentSubject) {
+      e.preventDefault();
+      const newSubjects = [...form.getValues('subjects'), currentSubject.trim()];
+      form.setValue('subjects', newSubjects);
+      setCurrentSubject('');
+    }
+  };
+  
+  const removeSubject = (subjectToRemove: string) => {
+    const newSubjects = form.getValues('subjects').filter(s => s !== subjectToRemove);
+    form.setValue('subjects', newSubjects);
   };
 
   return (
@@ -167,6 +188,43 @@ export function TeacherRegistrationClient() {
                   <FormMessage />
                 </FormItem>
               )} />
+              <FormField control={form.control} name="contact" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Number</FormLabel>
+                  <FormControl><Input placeholder="e.g. 9876543210" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField
+                control={form.control}
+                name="subjects"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subjects</FormLabel>
+                    <FormControl>
+                      <>
+                        <Input 
+                          placeholder="Type a subject and press Enter" 
+                          value={currentSubject}
+                          onChange={(e) => setCurrentSubject(e.target.value)}
+                          onKeyDown={handleSubjectKeyDown}
+                        />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {field.value.map((subject, index) => (
+                            <Badge key={index} variant="secondary">
+                              {subject}
+                              <button type="button" onClick={() => removeSubject(subject)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      </>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                 Register Teacher
@@ -187,8 +245,8 @@ export function TeacherRegistrationClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">Avatar</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Name & Contact</TableHead>
+                  <TableHead>Subjects</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -207,8 +265,18 @@ export function TeacherRegistrationClient() {
                           <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                       </TableCell>
-                      <TableCell className="font-medium">{teacher.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{teacher.email}</TableCell>
+                      <TableCell>
+                        <p className="font-medium">{teacher.name}</p>
+                        <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                        <p className="text-sm text-muted-foreground">{teacher.contact}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {teacher.subjects?.map(subject => (
+                            <Badge key={subject} variant="outline">{subject}</Badge>
+                          ))}
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
