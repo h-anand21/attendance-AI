@@ -14,6 +14,16 @@ import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
 import { Users, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+const classColorAccents = [
+  'border-t-primary',
+  'border-t-green-500',
+  'border-t-yellow-500',
+  'border-t-sky-500',
+  'border-t-orange-500',
+  'border-t-fuchsia-500'
+]
 
 export default function AllClassesPage() {
   const { classes, loading: classesLoading } = useClasses();
@@ -35,12 +45,15 @@ export default function AllClassesPage() {
     <AppLayout pageTitle="All Classes">
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {classes.map((cls) => (
+            {classes.map((cls, index) => (
               <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                <Card className="hover:border-primary/80 hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col">
+                <Card className={cn(
+                  "hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group border-t-4",
+                   classColorAccents[index % classColorAccents.length]
+                )}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{cls.name}</CardTitle>
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
                       <Badge variant="secondary">Section {cls.section}</Badge>
                     </div>
                     <CardDescription>Click to start attendance</CardDescription>
