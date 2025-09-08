@@ -14,12 +14,15 @@ import {
   ClipboardCheck,
   Users,
   PanelLeft,
+  User,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarBody,
   SidebarLink,
-  useSidebar
+  useSidebar,
+  DesktopSidebar,
+  MobileSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +73,7 @@ const LogoIcon = () => {
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = useSidebar();
 
   const links = [
     {
@@ -130,8 +133,8 @@ function AppSidebar() {
   ];
 
   return (
-    <Sidebar open={open} setOpen={setOpen}>
-      <SidebarBody className="justify-between gap-10">
+    <>
+      <DesktopSidebar className="justify-between gap-10">
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
@@ -149,13 +152,12 @@ function AppSidebar() {
                         label: user?.displayName || "User",
                         href: "#",
                         icon: (
-                        <img
-                            src={user?.photoURL || "https://picsum.photos/seed/user/40/40"}
-                            className="h-7 w-7 shrink-0 rounded-full"
-                            width={50}
-                            height={50}
-                            alt="Avatar"
-                        />
+                           <Avatar className="h-7 w-7 shrink-0">
+                            <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
+                            <AvatarFallback>
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
                         ),
                     }}
                     />
@@ -180,18 +182,72 @@ function AppSidebar() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </SidebarBody>
-    </Sidebar>
+      </DesktopSidebar>
+      <MobileSidebar>
+         <SidebarBody className="justify-between gap-10">
+            <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+                <Logo />
+                <div className="mt-8 flex flex-col gap-2">
+                    {links.filter(l => l.visible).map((link, idx) => (
+                        <SidebarLink key={idx} link={link} className={cn(link.active && "bg-neutral-200 dark:bg-neutral-700")} />
+                    ))}
+                </div>
+            </div>
+            <div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <div className="w-full cursor-pointer">
+                        <SidebarLink
+                        link={{
+                            label: user?.displayName || "User",
+                            href: "#",
+                            icon: (
+                              <Avatar className="h-7 w-7 shrink-0">
+                                <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
+                                <AvatarFallback>
+                                  <User className="h-4 w-4" />
+                                </AvatarFallback>
+                              </Avatar>
+                            ),
+                        }}
+                        />
+                    </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                        {user?.displayName}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
+        </SidebarBody>
+      </MobileSidebar>
+    </>
   );
 }
 
 
 function Header({ pageTitle }: { pageTitle: string }) {
-  // useSidebar hook is not available here, so we manage mobile menu state separately
+  const { open, setOpen } = useSidebar();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
        <div className="md:hidden">
-         {/* This button will only be visible on mobile and will be handled by the MobileSidebar component */}
+         <Button variant="ghost" size="icon" onClick={() => setOpen(!open)}>
+            <PanelLeft className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
        </div>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
        <ThemeToggle />
@@ -212,6 +268,7 @@ export function AppLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -229,7 +286,9 @@ export function AppLayout({
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
-        <AppSidebar />
+        <Sidebar open={open} setOpen={setOpen} animate={true}>
+            <AppSidebar />
+        </Sidebar>
         <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
             <Header pageTitle={pageTitle} />
             <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
