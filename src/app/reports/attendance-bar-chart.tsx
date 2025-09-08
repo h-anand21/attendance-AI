@@ -35,7 +35,7 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
   const { theme } = useTheme();
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle>Daily Trends</CardTitle>
         <CardDescription>
@@ -44,8 +44,8 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
       </CardHeader>
       <CardContent>
         {data.length > 0 ? (
-          <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-            <ResponsiveContainer width="100%" height={300}>
+          <ChartContainer config={chartConfig} className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                  <defs>
                     <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
@@ -94,7 +94,7 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
             </ResponsiveContainer>
           </ChartContainer>
         ) : (
-          <div className="flex h-[300px] items-center justify-center">
+          <div className="flex h-[350px] items-center justify-center">
             <p className="text-muted-foreground">No attendance data for this range.</p>
           </div>
         )}

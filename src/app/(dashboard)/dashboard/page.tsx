@@ -141,79 +141,71 @@ export default function DashboardPage() {
 
   return (
     <AppLayout pageTitle="Dashboard">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
-                <BookOpen className="h-5 w-5 text-muted-foreground" />
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{classes.length}</div>
             </CardContent>
         </Card>
-         <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
+                <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{totalStudents}</div>
             </CardContent>
         </Card>
-        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
-                <UserCheck className="h-5 w-5 text-muted-foreground" />
+                <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{attendanceRecords.length}</div>
                 <p className="text-xs text-muted-foreground">Total records logged</p>
             </CardContent>
         </Card>
-        <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
-                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <Button size="sm" className="w-full bg-accent hover:bg-accent/90" onClick={handleGenerateSummary}>Get Insights</Button>
-                <p className="text-xs text-muted-foreground">30-day attendance trends</p>
+                <Button size="sm" className="w-full" onClick={handleGenerateSummary}>Get Insights</Button>
+                <p className="text-xs text-muted-foreground mt-1">30-day attendance trends</p>
             </CardContent>
         </Card>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="md:col-span-1">
-                 <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance status" />
-              </div>
-              <div className="md:col-span-2">
-                  <AttendanceBarChart data={barChartData} />
-              </div>
-            </div>
-
+      <div className="mt-4 grid gap-4 lg:grid-cols-7">
+        <div className="lg:col-span-5 space-y-4">
+            <AttendanceBarChart data={barChartData} />
             <div>
-                <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-semibold tracking-tight">
-                    Your Classes
-                </h2>
-                <CreateClassDialog onClassCreate={addClass}>
-                    <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    New Class
-                    </Button>
-                </CreateClassDialog>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                      Your Classes
+                  </h2>
+                  <CreateClassDialog onClassCreate={addClass}>
+                      <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      New Class
+                      </Button>
+                  </CreateClassDialog>
                 </div>
                 {classes.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                     {classes.map((cls) => (
                     <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                        <Card className="hover:border-primary/80 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col group bg-gradient-to-br from-card to-secondary/50">
+                        <Card className="hover:border-primary/80 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group">
                         <CardHeader>
                             <div className="flex justify-between items-start">
-                            <CardTitle className="text-xl group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                            <Badge variant="secondary">Sec. {cls.section}</Badge>
+                              <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                              <Badge variant="secondary">Sec. {cls.section}</Badge>
                             </div>
                             <CardDescription>Click to start attendance</CardDescription>
                         </CardHeader>
@@ -245,29 +237,30 @@ export default function DashboardPage() {
             </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="lg:col-span-2 space-y-4">
+             <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance status" />
              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
-                            <Button variant="ghost" size="icon">
-                                <PlusCircle className="h-5 w-5" />
-                                <span className="sr-only">Publish new notice</span>
+                            <Button variant="outline" size="sm" className="absolute top-4 right-4">
+                                <PlusCircle className="h-4 w-4" />
+                                <span className="sr-only">Publish</span>
                             </Button>
                         </PublishNoticeDialog>
                     )}
                 </CardHeader>
                 <CardContent>
-                   <div className="space-y-4">
-                     {notices.length > 0 ? notices.map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10">
-                           <AlertTitle className="text-sm font-semibold">{notice.title}</AlertTitle>
-                           <AlertDescription className="text-xs text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
+                   <div className="space-y-3">
+                     {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
+                        <Alert key={notice.id} className="relative pr-10 text-xs">
+                           <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
+                           <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8">
+                                    <Button variant="ghost" size="icon" className="absolute top-1/2 right-0 -translate-y-1/2 h-7 w-7">
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -283,7 +276,7 @@ export default function DashboardPage() {
                      )) : (
                         <div className="text-center text-sm text-muted-foreground py-4">No notices yet.</div>
                      )}
-                     <Button variant="outline" className="w-full">View All Notices</Button>
+                     {notices.length > 5 && <Button variant="outline" size="sm" className="w-full">View All Notices</Button> }
                    </div>
                 </CardContent>
             </Card>

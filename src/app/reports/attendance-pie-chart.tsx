@@ -59,7 +59,7 @@ export function AttendancePieChart({ data, title, description }: AttendancePieCh
         {totalStudents > 0 ? (
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-[300px]"
+            className="mx-auto aspect-square max-h-[250px]"
           >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -81,7 +81,7 @@ export function AttendancePieChart({ data, title, description }: AttendancePieCh
             </ResponsiveContainer>
           </ChartContainer>
         ) : (
-          <div className="flex h-full min-h-[300px] items-center justify-center">
+          <div className="flex h-full min-h-[250px] items-center justify-center">
             <p className="text-muted-foreground">No attendance data for this range.</p>
           </div>
         )}
