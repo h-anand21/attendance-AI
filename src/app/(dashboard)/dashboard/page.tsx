@@ -43,6 +43,7 @@ import {
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { useNotices } from '@/hooks/use-notices';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 
 const classColorAccents = [
@@ -53,6 +54,19 @@ const classColorAccents = [
   'border-t-orange-500',
   'border-t-fuchsia-500'
 ]
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  }),
+};
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
@@ -149,51 +163,43 @@ export default function DashboardPage() {
     )
   }
 
+  const kpiCards = [
+    { title: 'Total Classes', value: classes.length, icon: BookOpen },
+    { title: 'Total Students', value: totalStudents, icon: Users },
+    { title: 'Attendance Events', value: attendanceRecords.length, subtext: 'Total records logged', icon: UserCheck },
+    { title: 'AI Summary', value: 'Get Insights', subtext: '30-day attendance trends', icon: TrendingUp, isButton: true, onClick: handleGenerateSummary }
+  ];
+
   return (
     <AppLayout pageTitle="Dashboard">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{classes.length}</div>
-            </CardContent>
-        </Card>
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{totalStudents}</div>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
-                <UserCheck className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{attendanceRecords.length}</div>
-                <p className="text-xs text-muted-foreground">Total records logged</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <Button size="sm" className="w-full" onClick={handleGenerateSummary}>Get Insights</Button>
-                <p className="text-xs text-muted-foreground mt-1">30-day attendance trends</p>
-            </CardContent>
-        </Card>
+        {kpiCards.map((kpi, index) => (
+          <motion.div key={kpi.title} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                  <kpi.icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  {kpi.isButton ? (
+                    <>
+                      <Button size="sm" className="w-full" onClick={kpi.onClick}>{kpi.value}</Button>
+                      {kpi.subtext && <p className="text-xs text-muted-foreground mt-1">{kpi.subtext}</p>}
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold">{kpi.value}</div>
+                      {kpi.subtext && <p className="text-xs text-muted-foreground">{kpi.subtext}</p>}
+                    </>
+                  )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-7">
-        <div className="lg:col-span-5 space-y-4">
+        <motion.div className="lg:col-span-5 space-y-4" custom={kpiCards.length} initial="hidden" animate="visible" variants={cardVariants}>
             <div className="grid gap-4 md:grid-cols-4">
               <div className="md:col-span-3">
                  <AttendanceBarChart data={barChartData} />
@@ -255,9 +261,9 @@ export default function DashboardPage() {
                 </Card>
                 )}
             </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-2 space-y-4">
+        <motion.div className="lg:col-span-2 space-y-4" custom={kpiCards.length + 1} initial="hidden" animate="visible" variants={cardVariants}>
              <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
@@ -299,7 +305,7 @@ export default function DashboardPage() {
                    </div>
                 </CardContent>
             </Card>
-        </div>
+        </motion.div>
       </div>
 
        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
