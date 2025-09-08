@@ -47,12 +47,12 @@ import { motion } from 'framer-motion';
 
 
 const classColorAccents = [
-  'border-t-primary',
-  'border-t-green-500',
-  'border-t-yellow-500',
-  'border-t-sky-500',
-  'border-t-orange-500',
-  'border-t-fuchsia-500'
+  'border-primary',
+  'border-green-500',
+  'border-yellow-500',
+  'border-sky-500',
+  'border-orange-500',
+  'border-fuchsia-500'
 ];
 
 const cardVariants = {
@@ -223,9 +223,13 @@ export default function DashboardPage() {
                 {classes.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {classes.map((cls, index) => (
-                      <Link href={`/attendance/${cls.id}`} key={cls.id}>
+                      <Link 
+                        href={`/attendance/${cls.id}`} 
+                        key={cls.id}
+                        className="group"
+                      >
                         <Card className={cn(
-                          "hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group border-t-4",
+                          "group-hover:shadow-primary/20 group-hover:shadow-lg transition-all duration-300 h-full flex flex-col border-t-4",
                            classColorAccents[index % classColorAccents.length]
                         )}>
                           <CardHeader>

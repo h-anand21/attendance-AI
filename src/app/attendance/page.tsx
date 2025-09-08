@@ -46,9 +46,13 @@ export default function AllClassesPage() {
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls, index) => (
-              <Link href={`/attendance/${cls.id}`} key={cls.id}>
+              <Link 
+                href={`/attendance/${cls.id}`} 
+                key={cls.id}
+                className="group"
+              >
                 <Card className={cn(
-                  "hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group border-t-4",
+                  "group-hover:shadow-primary/20 group-hover:shadow-lg transition-all duration-300 h-full flex flex-col border-t-4",
                    classColorAccents[index % classColorAccents.length]
                 )}>
                   <CardHeader>
