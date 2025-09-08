@@ -34,6 +34,7 @@ import { subDays, format, eachDayOfInterval, formatDistanceToNow } from 'date-fn
 import type { AttendanceStatus, Notice } from '@/types';
 import { PublishNoticeDialog } from './publish-notice-dialog';
 import { useAuth } from '@/hooks/use-auth';
+import { useNotices } from '@/hooks/use-notices';
 import {
   DropdownMenu,
   DropdownMenuContent,
