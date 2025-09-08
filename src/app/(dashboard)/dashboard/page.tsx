@@ -42,7 +42,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { useNotices } from '@/hooks/use-notices';
+import { cn } from '@/lib/utils';
 
+
+const classColorAccents = [
+  'border-t-primary',
+  'border-t-green-500',
+  'border-t-yellow-500',
+  'border-t-sky-500',
+  'border-t-orange-500',
+  'border-t-fuchsia-500'
+]
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
@@ -206,9 +216,12 @@ export default function DashboardPage() {
                 </div>
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
-                    {classes.map((cls) => (
+                    {classes.map((cls, index) => (
                     <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                        <Card className="hover:border-primary/80 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group">
+                        <Card className={cn(
+                          "hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group border-t-4",
+                          classColorAccents[index % classColorAccents.length]
+                        )}>
                         <CardHeader>
                             <div className="flex justify-between items-start">
                               <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
@@ -260,7 +273,7 @@ export default function DashboardPage() {
                 <CardContent>
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-black/20 border-white/10">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
