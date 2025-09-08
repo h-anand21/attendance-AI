@@ -23,6 +23,7 @@ import {
   useSidebar,
   DesktopSidebar,
   MobileSidebar,
+  SidebarProvider,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,7 +134,7 @@ function AppSidebar() {
   ];
 
   return (
-    <>
+    <Sidebar>
       <DesktopSidebar className="justify-between gap-10">
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {open ? <Logo /> : <LogoIcon />}
@@ -234,7 +235,7 @@ function AppSidebar() {
             </div>
         </SidebarBody>
       </MobileSidebar>
-    </>
+    </Sidebar>
   );
 }
 
@@ -268,7 +269,6 @@ export function AppLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -285,16 +285,16 @@ export function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
-        <Sidebar open={open} setOpen={setOpen} animate={true}>
-            <AppSidebar />
-        </Sidebar>
-        <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
-            <Header pageTitle={pageTitle} />
-            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                {children}
-            </main>
-        </div>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
+          <AppSidebar />
+          <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
+              <Header pageTitle={pageTitle} />
+              <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                  {children}
+              </main>
+          </div>
+      </div>
+    </SidebarProvider>
   );
 }
