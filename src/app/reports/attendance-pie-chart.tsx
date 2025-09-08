@@ -52,7 +52,7 @@ export function AttendancePieChart({ data, title, description }: AttendancePieCh
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>
-          {description}
+          {description} Total records: {totalStudents}.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -82,7 +82,7 @@ export function AttendancePieChart({ data, title, description }: AttendancePieCh
           </ChartContainer>
         ) : (
           <div className="flex h-full min-h-[300px] items-center justify-center">
-            <p className="text-muted-foreground">No attendance data for this period.</p>
+            <p className="text-muted-foreground">No attendance data for this range.</p>
           </div>
         )}
       </CardContent>

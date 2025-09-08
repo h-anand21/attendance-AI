@@ -22,10 +22,56 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { FileDown, Loader2 } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function TeacherReportsPage() {
   const { userRole } = useAuth();
   const { teachers, loading } = useTeachers();
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = () => {
+    if (teachers.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'No Data to Export',
+        description: 'There are no registered teachers to export.',
+      });
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const dataForSheet = teachers.map(teacher => ({
+        'Teacher ID': teacher.id,
+        'Name': teacher.name,
+        'Email': teacher.email,
+        'Contact': teacher.contact,
+        'Subjects': teacher.subjects.join(', '),
+      }));
+      
+      const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Teachers');
+      XLSX.writeFile(workbook, `teachers_report.xlsx`);
+      
+      toast({
+          title: 'Export Successful',
+          description: 'The teacher report has been downloaded.',
+      });
+    } catch (error) {
+      console.error("Error exporting teachers to Excel:", error);
+      toast({
+          variant: 'destructive',
+          title: 'Export Failed',
+          description: 'An error occurred while exporting the data.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
 
   if (userRole !== 'admin') {
     return (
@@ -56,9 +102,9 @@ export default function TeacherReportsPage() {
                 An overview of all registered teachers in the system.
               </CardDescription>
             </div>
-            <Button disabled>
-                <FileDown className='mr-2 h-4 w-4' />
-                Export Reports
+            <Button onClick={handleExport} disabled={isExporting || loading || teachers.length === 0}>
+                {isExporting ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <FileDown className='mr-2 h-4 w-4' />}
+                Export Report
             </Button>
           </div>
         </CardHeader>
@@ -68,13 +114,14 @@ export default function TeacherReportsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Teacher</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Email & Contact</TableHead>
+                  <TableHead>Subjects</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
                     </TableCell>
                   </TableRow>
@@ -94,12 +141,16 @@ export default function TeacherReportsPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{teacher.email}</TableCell>
+                      <TableCell>
+                        <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                        <p className="text-sm text-muted-foreground">{teacher.contact}</p>
+                      </TableCell>
+                       <TableCell className="text-muted-foreground">{teacher.subjects.join(', ')}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                        No teachers registered yet.
                     </TableCell>
                   </TableRow>

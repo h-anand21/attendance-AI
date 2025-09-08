@@ -82,14 +82,14 @@ export function ReportsClient() {
   const filteredRecords = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to || !selectedClassId) return [];
 
-    const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-    const toDate = format(addDays(dateRange.to, 1), 'yyyy-MM-dd'); // include the 'to' date
+    const fromDateStr = format(dateRange.from, 'yyyy-MM-dd');
+    const toDateStr = format(dateRange.to, 'yyyy-MM-dd');
 
     return attendanceRecords.filter(
       (r) =>
         r.classId === selectedClassId &&
-        r.date >= fromDate &&
-        r.date < toDate
+        r.date >= fromDateStr &&
+        r.date <= toDateStr
     );
   }, [attendanceRecords, selectedClassId, dateRange]);
 
@@ -367,7 +367,7 @@ export function ReportsClient() {
       
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1">
-            <AttendancePieChart data={pieChartData} />
+          <AttendancePieChart data={pieChartData} title="Overall Status" description="Summary for the selected date range." />
         </div>
         <div className="md:col-span-2">
             <AttendanceBarChart data={barChartData} />
