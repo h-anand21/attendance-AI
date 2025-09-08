@@ -1,12 +1,14 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import { useTeachers } from '@/hooks/use-teachers';
+import { useClasses } from '@/hooks/use-classes';
+import type { Class } from '@/types';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -41,31 +43,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
-const subjectsList = [
-    { value: 'mathematics', label: 'Mathematics' },
-    { value: 'physics', label: 'Physics' },
-    { value: 'chemistry', label: 'Chemistry' },
-    { value: 'biology', label: 'Biology' },
-    { value: 'computer_science', label: 'Computer Science' },
-    { value: 'english', label: 'English' },
-    { value: 'history', label: 'History' },
-    { value: 'geography', label: 'Geography' },
-    { value: 'art', label: 'Art' },
-    { value: 'music', label: 'Music' },
-    { value: 'physical_education', label: 'Physical Education' },
-] as const;
-
-
 const teacherFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   contact: z.string().min(10, { message: 'Please enter a valid contact number.' }),
-  subjects: z.array(z.string()).min(1, { message: 'At least one subject is required.' }),
+  classIds: z.array(z.string()).min(1, { message: 'At least one class must be assigned.' }),
 });
 
 export function TeacherRegistrationClient() {
   const { toast } = useToast();
-  const { teachers, addTeacher, loading } = useTeachers();
+  const { teachers, addTeacher, loading: teachersLoading } = useTeachers();
+  const { classes, loading: classesLoading } = useClasses();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
@@ -80,7 +68,7 @@ export function TeacherRegistrationClient() {
       name: '',
       email: '',
       contact: '',
-      subjects: [],
+      classIds: [],
     },
   });
 
@@ -142,6 +130,13 @@ export function TeacherRegistrationClient() {
     setIsSubmitting(false);
   };
   
+  const loading = teachersLoading || classesLoading;
+
+  const getClassLabel = (classId: string) => {
+    const classInfo = classes.find(c => c.id === classId);
+    return classInfo ? `${classInfo.name} - Sec. ${classInfo.section}` : classId;
+  }
+
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       <Card className="lg:col-span-1">
@@ -201,10 +196,10 @@ export function TeacherRegistrationClient() {
               )} />
               <FormField
                 control={form.control}
-                name="subjects"
+                name="classIds"
                 render={({ field }) => (
                     <FormItem className="flex flex-col">
-                    <FormLabel>Subjects</FormLabel>
+                    <FormLabel>Assign Classes</FormLabel>
                      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                         <PopoverTrigger asChild>
                            <FormControl>
@@ -212,30 +207,30 @@ export function TeacherRegistrationClient() {
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
-                                "w-full justify-between",
+                                "w-full justify-between h-auto",
                                 !field.value.length && "text-muted-foreground"
                                 )}
                             >
                                 <div className="flex gap-1 flex-wrap">
                                 {field.value.length > 0 ? (
-                                    subjectsList
-                                    .filter((sub) => field.value.includes(sub.value))
-                                    .map((sub) => (
+                                    classes
+                                    .filter((cls) => field.value.includes(cls.id))
+                                    .map((cls) => (
                                         <Badge
                                             variant="secondary"
-                                            key={sub.value}
+                                            key={cls.id}
                                             className="mr-1 mb-1"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                field.onChange(field.value.filter(v => v !== sub.value));
+                                                field.onChange(field.value.filter(v => v !== cls.id));
                                             }}
                                         >
-                                            {sub.label}
+                                            {getClassLabel(cls.id)}
                                             <X className="ml-1 h-3 w-3" />
                                         </Badge>
                                     ))
                                 ) : (
-                                    "Select subjects"
+                                    "Select classes to assign"
                                 )}
                                 </div>
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -244,32 +239,32 @@ export function TeacherRegistrationClient() {
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0">
                             <Command>
-                                <CommandInput placeholder="Search subjects..." />
+                                <CommandInput placeholder="Search classes..." />
                                 <CommandList>
                                     <CommandEmpty>No results found.</CommandEmpty>
                                     <CommandGroup>
-                                    {subjectsList.map((subject) => (
+                                    {classes.map((cls) => (
                                         <CommandItem
-                                        key={subject.value}
+                                        key={cls.id}
                                         onSelect={() => {
                                             const currentValues = field.value || [];
-                                            const isSelected = currentValues.includes(subject.value);
+                                            const isSelected = currentValues.includes(cls.id);
                                             if (isSelected) {
-                                                field.onChange(currentValues.filter(v => v !== subject.value));
+                                                field.onChange(currentValues.filter(v => v !== cls.id));
                                             } else {
-                                                field.onChange([...currentValues, subject.value]);
+                                                field.onChange([...currentValues, cls.id]);
                                             }
                                         }}
                                         >
                                         <Check
                                             className={cn(
                                             "mr-2 h-4 w-4",
-                                            (field.value || []).includes(subject.value)
+                                            (field.value || []).includes(cls.id)
                                                 ? "opacity-100"
                                                 : "opacity-0"
                                             )}
                                         />
-                                        {subject.label}
+                                        {getClassLabel(cls.id)}
                                         </CommandItem>
                                     ))}
                                     </CommandGroup>
@@ -281,7 +276,7 @@ export function TeacherRegistrationClient() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage || classes.length === 0}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                 Register Teacher
               </Button>
@@ -302,7 +297,7 @@ export function TeacherRegistrationClient() {
                 <TableRow>
                   <TableHead className="w-[80px]">Avatar</TableHead>
                   <TableHead>Name & Contact</TableHead>
-                  <TableHead>Subjects</TableHead>
+                  <TableHead>Assigned Classes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -328,10 +323,9 @@ export function TeacherRegistrationClient() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {teacher.subjects?.map(subjectValue => {
-                             const subject = subjectsList.find(s => s.value === subjectValue);
+                          {teacher.classIds?.map(classId => {
                              return (
-                                <Badge key={subjectValue} variant="outline">{subject ? subject.label : subjectValue}</Badge>
+                                <Badge key={classId} variant="outline">{getClassLabel(classId)}</Badge>
                              )
                           })}
                         </div>
