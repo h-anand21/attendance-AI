@@ -4,6 +4,7 @@
 import { AppLayout } from '@/components/app-layout';
 import { useAuth } from '@/hooks/use-auth';
 import { useTeachers } from '@/hooks/use-teachers';
+import { useClasses } from '@/hooks/use-classes';
 import {
   Card,
   CardContent,
@@ -25,12 +26,21 @@ import { FileDown, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 export default function TeacherReportsPage() {
   const { userRole } = useAuth();
-  const { teachers, loading } = useTeachers();
+  const { teachers, loading: teachersLoading } = useTeachers();
+  const { classes, loading: classesLoading } = useClasses();
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+
+  const loading = teachersLoading || classesLoading;
+
+  const getClassLabel = (classId: string) => {
+    const classInfo = classes.find(c => c.id === classId);
+    return classInfo ? `${classInfo.name} - Sec. ${classInfo.section}` : classId;
+  }
 
   const handleExport = () => {
     if (teachers.length === 0) {
@@ -48,7 +58,7 @@ export default function TeacherReportsPage() {
         'Name': teacher.name,
         'Email': teacher.email,
         'Contact': teacher.contact,
-        'Subjects': teacher.subjects.join(', '),
+        'Assigned Classes': teacher.classIds.map(getClassLabel).join(', '),
       }));
       
       const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
@@ -115,7 +125,7 @@ export default function TeacherReportsPage() {
                 <TableRow>
                   <TableHead>Teacher</TableHead>
                   <TableHead>Email & Contact</TableHead>
-                  <TableHead>Subjects</TableHead>
+                  <TableHead>Assigned Classes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -145,7 +155,13 @@ export default function TeacherReportsPage() {
                         <p className="text-sm text-muted-foreground">{teacher.email}</p>
                         <p className="text-sm text-muted-foreground">{teacher.contact}</p>
                       </TableCell>
-                       <TableCell className="text-muted-foreground">{teacher.subjects.join(', ')}</TableCell>
+                       <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {(teacher.classIds || []).map(classId => (
+                            <Badge key={classId} variant="outline">{getClassLabel(classId)}</Badge>
+                          ))}
+                        </div>
+                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
