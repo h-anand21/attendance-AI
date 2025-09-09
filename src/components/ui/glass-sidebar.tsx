@@ -135,7 +135,6 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
       <div className="mt-auto flex flex-col items-center">
         
         <div className="w-full mt-4">
-            <SidebarLink href="/settings" label="Settings" icon={<Settings className="h-5 w-5" />} isMobile={isMobile} />
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <div className="mt-2 w-full cursor-pointer rounded-lg px-2 py-3 text-foreground/80 transition-colors hover:bg-white/10 hover:text-foreground">
