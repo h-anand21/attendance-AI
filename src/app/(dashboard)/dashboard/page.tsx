@@ -247,16 +247,18 @@ export default function DashboardPage() {
 
         <div className="lg:col-span-2 space-y-4">
              <Card>
-                <CardHeader className="flex justify-between items-center">
+                <CardHeader>
+                  <div className="space-y-2">
                     <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="w-full">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Publish
+                                Publish New Notice
                             </Button>
                         </PublishNoticeDialog>
                     )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-3">
