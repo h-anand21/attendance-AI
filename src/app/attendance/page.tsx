@@ -14,6 +14,16 @@ import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
 import { Users, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+const classColorAccents = [
+  'border-t-primary',
+  'border-t-green-500',
+  'border-t-yellow-500',
+  'border-t-sky-500',
+  'border-t-orange-500',
+  'border-t-fuchsia-500'
+]
 
 export default function AllClassesPage() {
   const { classes, loading: classesLoading } = useClasses();
@@ -35,10 +45,23 @@ export default function AllClassesPage() {
     <AppLayout pageTitle="All Classes">
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+<<<<<<< HEAD
             {classes.map((cls) => (
               <Link href={`/attendance/${cls.id}`} key={cls.id} className="block relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-blue-500 rounded-3xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(209,38,197,0.5)]"></div>
                 <Card className="relative z-10 bg-[#181818] rounded-[28px] transition-all duration-300 h-full flex flex-col border-0">
+=======
+            {classes.map((cls, index) => (
+              <Link 
+                href={`/attendance/${cls.id}`} 
+                key={cls.id}
+                className="group"
+              >
+                <Card className={cn(
+                  "group-hover:shadow-primary/20 group-hover:shadow-lg transition-all duration-300 h-full flex flex-col border-t-4",
+                   classColorAccents[index % classColorAccents.length]
+                )}>
+>>>>>>> d147b035815b467dd03e6d13e837100045b03664
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>

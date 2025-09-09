@@ -34,6 +34,7 @@ import { subDays, format, eachDayOfInterval, formatDistanceToNow } from 'date-fn
 import type { AttendanceStatus, Notice } from '@/types';
 import { PublishNoticeDialog } from './publish-notice-dialog';
 import { useAuth } from '@/hooks/use-auth';
+import { useNotices } from '@/hooks/use-notices';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +42,69 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Trash2 } from 'lucide-react';
-import { useNotices } from '@/hooks/use-notices';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
+
+
+const classColorAccents = [
+  'border-primary',
+  'border-green-500',
+  'border-yellow-500',
+  'border-sky-500',
+  'border-orange-500',
+  'border-fuchsia-500'
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  }),
+};
+
+interface GridItemProps {
+  icon: React.ReactNode;
+  title: string;
+  description: React.ReactNode;
+  actionButton?: React.ReactNode;
+}
+
+const GridItem = ({ icon, title, description, actionButton }: GridItemProps) => {
+  return (
+    <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3 min-h-[14rem]">
+      <GlowingEffect
+        spread={40}
+        glow={true}
+        disabled={false}
+        proximity={64}
+        inactiveZone={0.01}
+      />
+      <div className="border-0.75 relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl p-6 md:p-6 dark:shadow-[0px_0px_27px_0px_#2D2D2D]">
+        <div className="relative flex flex-1 flex-col justify-between gap-3">
+          <div className="w-fit rounded-lg border border-gray-600 p-2">
+            {icon}
+          </div>
+          <div className="space-y-3">
+            <h3 className="-tracking-4 pt-0.5 font-sans text-xl/[1.375rem] font-semibold text-balance text-black md:text-2xl/[1.875rem] dark:text-white">
+              {title}
+            </h3>
+            <div className="font-sans text-sm/[1.125rem] text-black md:text-base/[1.375rem] dark:text-neutral-400">
+              {description}
+            </div>
+            {actionButton}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 export default function DashboardPage() {
@@ -139,44 +202,27 @@ export default function DashboardPage() {
     )
   }
 
+  const kpiCards = [
+    { title: `${classes.length} Classes`, description: 'Total classes managed.', icon: <BookOpen className="h-4 w-4 text-black dark:text-neutral-400" /> },
+    { title: `${totalStudents} Students`, description: 'Total students enrolled.', icon: <Users className="h-4 w-4 text-black dark:text-neutral-400" /> },
+    { title: `${attendanceRecords.length} Events`, description: 'Total attendance records logged.', icon: <UserCheck className="h-4 w-4 text-black dark:text-neutral-400" /> },
+    { title: 'AI Summary', description: '30-day attendance trends.', icon: <TrendingUp className="h-4 w-4 text-black dark:text-neutral-400" />, actionButton: <Button size="sm" className="w-full mt-2" onClick={handleGenerateSummary}>Get Insights</Button> }
+  ];
+
   return (
     <AppLayout pageTitle="Dashboard">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
-          <div className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-medium text-foreground/80">Total Classes</CardTitle>
-            <BookOpen className="h-5 w-5 text-foreground/80" />
-          </div>
-          <div className="text-3xl font-bold">{classes.length}</div>
-        </Card>
-        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
-          <div className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-medium text-foreground/80">Total Students</CardTitle>
-            <Users className="h-5 w-5 text-foreground/80" />
-          </div>
-          <div className="text-3xl font-bold">{totalStudents}</div>
-        </Card>
-        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
-          <div className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-medium text-foreground/80">Attendance Events</CardTitle>
-            <UserCheck className="h-5 w-5 text-foreground/80" />
-          </div>
-          <div>
-            <div className="text-3xl font-bold">{attendanceRecords.length}</div>
-            <p className="text-xs text-foreground/70">Total records logged</p>
-          </div>
-        </Card>
-        <Card className="border-2 border-accent/50 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
-          <div className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-medium text-foreground/80">AI Summary</CardTitle>
-            <TrendingUp className="h-5 w-5 text-foreground/80" />
-          </div>
-          <div>
-            <Button size="sm" className="w-full" onClick={handleGenerateSummary} variant="accent">Get Insights</Button>
-            <p className="text-xs text-foreground/70 mt-1 text-center">30-day attendance trends</p>
-          </div>
-        </Card>
-      </div>
+      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiCards.map((kpi, index) => (
+           <motion.li key={kpi.title} custom={index} initial="hidden" animate="visible" variants={cardVariants} className="list-none">
+             <GridItem
+                icon={kpi.icon}
+                title={kpi.title}
+                description={kpi.description}
+                actionButton={kpi.actionButton}
+              />
+           </motion.li>
+        ))}
+      </ul>
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div className="md:col-span-2">
@@ -188,7 +234,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-7">
-        <div className="lg:col-span-5 space-y-4">
+        <motion.div className="lg:col-span-5 space-y-4" custom={kpiCards.length} initial="hidden" animate="visible" variants={cardVariants}>
             <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -202,26 +248,32 @@ export default function DashboardPage() {
                   </CreateClassDialog>
                 </div>
                 {classes.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                    {classes.map((cls) => (
-                    <Link href={`/attendance/${cls.id}`} key={cls.id} className="block relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-blue-500 rounded-3xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(209,38,197,0.5)]"></div>
-                        <Card className="relative z-10 bg-[#181818] rounded-[28px] transition-all duration-300 h-full flex flex-col border-0">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {classes.map((cls, index) => (
+                      <Link 
+                        href={`/attendance/${cls.id}`} 
+                        key={cls.id}
+                        className="group"
+                      >
+                        <Card className={cn(
+                          "group-hover:shadow-primary/20 group-hover:shadow-lg transition-all duration-300 h-full flex flex-col border-t-4",
+                           classColorAccents[index % classColorAccents.length]
+                        )}>
                           <CardHeader>
-                              <div className="flex justify-between items-start">
-                                <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                                <Badge variant="secondary">Sec. {cls.section}</Badge>
-                              </div>
-                              <CardDescription>Click to start attendance</CardDescription>
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                              <Badge variant="secondary">Sec. {cls.section}</Badge>
+                            </div>
+                            <CardDescription>Click to start attendance</CardDescription>
                           </CardHeader>
                           <CardContent className="mt-auto">
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                               <Users className="h-4 w-4" />
                               <span>{(studentsByClass[cls.id] || []).length} Students</span>
-                              </div>
+                            </div>
                           </CardContent>
                         </Card>
-                    </Link>
+                      </Link>
                     ))}
                 </div>
                 ) : (
@@ -240,9 +292,9 @@ export default function DashboardPage() {
                 </Card>
                 )}
             </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-2 space-y-4">
+        <motion.div className="lg:col-span-2 space-y-4" custom={kpiCards.length + 1} initial="hidden" animate="visible" variants={cardVariants}>
              <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -260,7 +312,7 @@ export default function DashboardPage() {
                 <CardContent>
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-black/20 border-white/10">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
@@ -286,7 +338,7 @@ export default function DashboardPage() {
                    </div>
                 </CardContent>
             </Card>
-        </div>
+        </motion.div>
       </div>
 
        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
@@ -314,3 +366,5 @@ export default function DashboardPage() {
     </AppLayout>
   );
 }
+
+    

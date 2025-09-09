@@ -67,10 +67,10 @@ export function AttendanceClient({
       });
       setIsAttendanceConfirmed(true);
     } else {
-      // If no records for today, default everyone to present
+      // If no records for today, default everyone to absent
       initialAttendance = classStudents.map(student => ({
         studentId: student.id,
-        status: 'present',
+        status: 'absent',
       }));
       setIsAttendanceConfirmed(false);
     }
