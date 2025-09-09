@@ -41,18 +41,18 @@ function SidebarLink({ href, label, icon, isMobile = false }: SidebarLinkProps) 
   const LinkContent = () => (
     <div
       className={cn(
-        'group relative flex cursor-pointer items-center gap-4 rounded-lg px-4 py-3 text-foreground/80 transition-all duration-300',
+        'group relative flex cursor-pointer items-center rounded-lg text-foreground/80 transition-all duration-300',
         isActive && 'text-foreground font-semibold'
       )}
     >
       {/* 3D "stack" effect spans, visible on group-hover */}
       <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-20" />
-      <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:opacity-40" />
+      <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-40" />
 
       {/* Main content that "pops out" on hover */}
       <div
         className={cn(
-          'flex w-full items-center gap-4 rounded-lg bg-white/5 p-0 transition-all duration-300 group-hover:translate-x-3 group-hover:-translate-y-3 group-hover:bg-white/10 group-hover:shadow-lg',
+          'flex w-full items-center gap-4 rounded-lg p-0 transition-all duration-300 group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:bg-white/10 group-hover:shadow-lg',
           isActive ? 'bg-white/10' : 'bg-transparent'
         )}
       >
@@ -116,8 +116,8 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-full w-56 flex-col border-r border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-      <Link href="/dashboard" className="mb-8 flex items-center gap-2 px-4">
+    <aside className="fixed left-0 top-0 z-40 flex h-full w-52 flex-col border-r border-white/10 bg-white/5 p-4 pr-6 backdrop-blur-sm">
+      <Link href="/dashboard" className="mb-8 flex items-center gap-2 px-2">
         <AppLogo className="h-8 w-8 text-primary" />
         <span className="text-xl font-bold">AttendEase</span>
       </Link>
@@ -134,7 +134,7 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
             <SidebarLink href="/settings" label="Settings" icon={<Settings className="h-5 w-5" />} isMobile={isMobile} />
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="mt-2 w-full cursor-pointer rounded-lg px-4 py-3 text-foreground/80 transition-colors hover:bg-white/10 hover:text-foreground">
+                <div className="mt-2 w-full cursor-pointer rounded-lg px-2 py-3 text-foreground/80 transition-colors hover:bg-white/10 hover:text-foreground">
                 <div className="flex items-center gap-4">
                     <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
@@ -147,7 +147,7 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
                 </div>
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
+            <DropdownMenuContent className="w-52 mb-2" align="end" forceMount>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
