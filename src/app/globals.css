@@ -5,21 +5,21 @@
 @layer base {
   :root {
     --background: 215.3 25% 26.7%;
-    --foreground: 210 20% 98%;
+    --foreground: 0 0% 0%; /* Black text for light mode */
     --card: 215.3 25% 30.7%;
-    --card-foreground: 210 20% 98%;
+    --card-foreground: 0 0% 0%;
     --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --popover-foreground: 0 0% 0%;
     --primary: 217 91% 60%;
     --primary-foreground: 210 20% 98%;
     --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary-foreground: 0 0% 0%;
     --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted-foreground: 217.9 10.6% 44.9%; /* Darker muted text */
     --accent: 38 92% 50%;
-    --accent-foreground: 210 20% 98%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 0 0% 0%;
     --border: 215 27.9% 16.9%;
     --input: 215 27.9% 16.9%;
     --ring: 217 91% 60%;
