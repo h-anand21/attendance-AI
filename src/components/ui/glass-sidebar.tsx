@@ -39,15 +39,31 @@ function SidebarLink({ href, label, icon, isMobile = false }: SidebarLinkProps) 
   const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
 
   const LinkContent = () => (
-    <div className={cn(
-      'relative flex items-center gap-4 rounded-lg px-4 py-3 text-foreground/80 transition-colors hover:text-foreground',
-      isActive && 'text-foreground'
-    )}>
-      {isActive && (
-        <div className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary shadow-[0_0_10px] shadow-primary" />
+    <div
+      className={cn(
+        'group relative flex cursor-pointer items-center gap-4 rounded-lg px-4 py-3 text-foreground/80 transition-all duration-300',
+        isActive && 'text-foreground font-semibold'
       )}
-      {icon}
-      <span>{label}</span>
+    >
+      {/* 3D "stack" effect spans, visible on group-hover */}
+      <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-20" />
+      <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:opacity-40" />
+
+      {/* Main content that "pops out" on hover */}
+      <div
+        className={cn(
+          'flex w-full items-center gap-4 rounded-lg bg-white/5 p-0 transition-all duration-300 group-hover:translate-x-3 group-hover:-translate-y-3 group-hover:bg-white/10 group-hover:shadow-lg',
+          isActive ? 'bg-white/10' : 'bg-transparent'
+        )}
+      >
+        <div className="relative flex w-full items-center gap-4 p-3">
+           {isActive && (
+            <div className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary shadow-[0_0_10px] shadow-primary" />
+          )}
+          {icon}
+          <span>{label}</span>
+        </div>
+      </div>
     </div>
   );
 
