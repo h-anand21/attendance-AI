@@ -44,8 +44,6 @@ import {
 import { MoreVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { GlowingEffect } from '@/components/ui/glowing-effect';
-
 
 const classColorAccents = [
   'border-primary',
@@ -68,44 +66,6 @@ const cardVariants = {
     },
   }),
 };
-
-interface GridItemProps {
-  icon: React.ReactNode;
-  title: string;
-  description: React.ReactNode;
-  actionButton?: React.ReactNode;
-}
-
-const GridItem = ({ icon, title, description, actionButton }: GridItemProps) => {
-  return (
-    <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3 min-h-[14rem]">
-      <GlowingEffect
-        spread={40}
-        glow={true}
-        disabled={false}
-        proximity={64}
-        inactiveZone={0.01}
-      />
-      <div className="border-0.75 relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl p-6 md:p-6 dark:shadow-[0px_0px_27px_0px_#2D2D2D]">
-        <div className="relative flex flex-1 flex-col justify-between gap-3">
-          <div className="w-fit rounded-lg border border-gray-600 p-2">
-            {icon}
-          </div>
-          <div className="space-y-3">
-            <h3 className="-tracking-4 pt-0.5 font-sans text-xl/[1.375rem] font-semibold text-balance text-black md:text-2xl/[1.875rem] dark:text-white">
-              {title}
-            </h3>
-            <div className="font-sans text-sm/[1.125rem] text-black md:text-base/[1.375rem] dark:text-neutral-400">
-              {description}
-            </div>
-            {actionButton}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 
 export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
@@ -202,27 +162,48 @@ export default function DashboardPage() {
     )
   }
 
-  const kpiCards = [
-    { title: `${classes.length} Classes`, description: 'Total classes managed.', icon: <BookOpen className="h-4 w-4 text-black dark:text-neutral-400" /> },
-    { title: `${totalStudents} Students`, description: 'Total students enrolled.', icon: <Users className="h-4 w-4 text-black dark:text-neutral-400" /> },
-    { title: `${attendanceRecords.length} Events`, description: 'Total attendance records logged.', icon: <UserCheck className="h-4 w-4 text-black dark:text-neutral-400" /> },
-    { title: 'AI Summary', description: '30-day attendance trends.', icon: <TrendingUp className="h-4 w-4 text-black dark:text-neutral-400" />, actionButton: <Button size="sm" className="w-full mt-2" onClick={handleGenerateSummary}>Get Insights</Button> }
-  ];
-
   return (
     <AppLayout pageTitle="Dashboard">
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpiCards.map((kpi, index) => (
-           <motion.li key={kpi.title} custom={index} initial="hidden" animate="visible" variants={cardVariants} className="list-none">
-             <GridItem
-                icon={kpi.icon}
-                title={kpi.title}
-                description={kpi.description}
-                actionButton={kpi.actionButton}
-              />
-           </motion.li>
-        ))}
-      </ul>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{classes.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalStudents}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{attendanceRecords.length}</div>
+            <p className="text-xs text-muted-foreground">Total records logged</p>
+          </CardContent>
+        </Card>
+        <Card className="border-primary">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <Button size="sm" className="w-full" onClick={handleGenerateSummary}>Get Insights</Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">30-day attendance trends</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div className="md:col-span-2">
@@ -234,7 +215,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-7">
-        <motion.div className="lg:col-span-5 space-y-4" custom={kpiCards.length} initial="hidden" animate="visible" variants={cardVariants}>
+        <motion.div className="lg:col-span-5 space-y-4" custom={4} initial="hidden" animate="visible" variants={cardVariants}>
             <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -294,7 +275,7 @@ export default function DashboardPage() {
             </div>
         </motion.div>
 
-        <motion.div className="lg:col-span-2 space-y-4" custom={kpiCards.length + 1} initial="hidden" animate="visible" variants={cardVariants}>
+        <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
              <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -312,7 +293,7 @@ export default function DashboardPage() {
                 <CardContent>
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-black/20 border-white/10">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-secondary/70">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
@@ -366,5 +347,3 @@ export default function DashboardPage() {
     </AppLayout>
   );
 }
-
-    

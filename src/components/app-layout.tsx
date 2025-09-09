@@ -16,13 +16,12 @@ import {
   PanelLeft,
   User,
   Settings,
-  HelpCircle,
-  ChevronsUpDown,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarBody,
   SidebarLink,
+  SidebarUser,
   useSidebar,
   DesktopSidebar,
   MobileSidebar,
@@ -37,26 +36,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
 
 const Logo = () => {
-  const { user } = useAuth();
   return (
-    <div className="flex items-center gap-3 px-3">
-        <AppLogo className="h-10 w-10" />
-        <div className="flex flex-col">
-            <p className="font-semibold text-lg text-sidebar-foreground">AttendEase</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-        </div>
-        <ChevronsUpDown className="h-4 w-4 ml-auto text-muted-foreground" />
-    </div>
+    <Link
+      href="/dashboard"
+      className="relative z-20 flex items-center justify-start gap-2 py-1 text-lg font-semibold text-sidebar-foreground"
+    >
+      <AppLogo className="h-6 w-6" />
+      <span className="md:hidden lg:inline-block">AttendEase</span>
+    </Link>
   );
 };
 
@@ -67,14 +60,13 @@ const LogoIcon = () => {
       className="relative z-20 flex items-center justify-center gap-2 py-1 text-sm font-semibold text-sidebar-foreground"
     >
       <AppLogo className="h-8 w-8" />
-      <span className="md:hidden lg:inline-block">AttendEase</span>
     </Link>
   );
 };
 
 function AppSidebar() {
   const pathname = usePathname();
-  const { user, userRole, signOut } = useAuth();
+  const { userRole, signOut } = useAuth();
   const { open } = useSidebar();
 
   const mainLinks = [
@@ -146,10 +138,12 @@ function AppSidebar() {
 
   return (
     <Sidebar>
-      <DesktopSidebar className="justify-between gap-10">
+      <DesktopSidebar className="justify-between gap-10 border-r">
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-1 px-3">
+            <div className="px-3">
+              {open ? <Logo /> : <LogoIcon />}
+            </div>
+            <div className="mt-8 flex flex-col gap-1">
                 {mainLinks.filter(l => l.visible).map((link, idx) => (
                     <SidebarLink key={idx} link={link} />
                 ))}
@@ -159,38 +153,13 @@ function AppSidebar() {
           {bottomLinks.filter(l => l.visible).map((link, idx) => (
               <SidebarLink key={idx} link={link} />
           ))}
-          <Separator className="my-2 bg-sidebar-border" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="w-full cursor-pointer">
-                    <SidebarLink
-                      link={{
-                        label: user?.displayName || "User",
-                        href: "#",
-                        icon: (
-                           <Avatar className="h-8 w-8 shrink-0">
-                            <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
-                            <AvatarFallback>
-                              <User className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        ),
-                      }}
-                    />
+                <div className="w-full cursor-pointer mt-2">
+                    <SidebarUser />
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                    {user?.displayName}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                    </p>
-                </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
@@ -203,54 +172,29 @@ function AppSidebar() {
          <SidebarBody className="justify-between gap-10">
             <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
                 <Logo />
-                <div className="mt-8 flex flex-col gap-1 px-3">
+                <div className="mt-8 flex flex-col gap-1">
                     {mainLinks.filter(l => l.visible).map((link, idx) => (
                         <SidebarLink key={idx} link={link} />
                     ))}
                 </div>
             </div>
             <div className="flex flex-col gap-1 px-3 pb-2">
-            {bottomLinks.filter(l => l.visible).map((link, idx) => (
-              <SidebarLink key={idx} link={link} />
-            ))}
-            <Separator className="my-2 bg-sidebar-border" />
-            <DropdownMenu>
+              {bottomLinks.filter(l => l.visible).map((link, idx) => (
+                <SidebarLink key={idx} link={link} />
+              ))}
+               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <div className="w-full cursor-pointer">
-                        <SidebarLink
-                          link={{
-                            label: user?.displayName || "User",
-                            href: "#",
-                            icon: (
-                              <Avatar className="h-8 w-8 shrink-0">
-                                <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
-                                <AvatarFallback>
-                                  <User className="h-4 w-4" />
-                                </AvatarFallback>
-                              </Avatar>
-                            ),
-                          }}
-                        />
+                    <div className="w-full cursor-pointer mt-2">
+                        <SidebarUser />
                     </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                        {user?.displayName}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                        {user?.email}
-                        </p>
-                    </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
+              </DropdownMenu>
             </div>
         </SidebarBody>
       </MobileSidebar>
@@ -262,7 +206,7 @@ function AppSidebar() {
 function Header({ pageTitle }: { pageTitle: string }) {
   const { open, setOpen } = useSidebar();
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
        <div className="md:hidden">
          <Button variant="ghost" size="icon" onClick={() => setOpen(!open)}>
             <PanelLeft className="h-5 w-5" />

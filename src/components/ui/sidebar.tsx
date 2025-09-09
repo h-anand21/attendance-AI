@@ -5,6 +5,8 @@ import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 interface Links {
   label: string;
@@ -42,7 +44,7 @@ export const SidebarProvider = ({
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   animate?: boolean;
 }) => {
-  const [openState, setOpenState] = useState(false);
+  const [openState, setOpenState] = useState(true);
 
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
@@ -91,14 +93,12 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-2 py-4 hidden md:flex md:flex-col bg-sidebar text-sidebar-foreground w-[260px] shrink-0",
+          "h-screen px-4 py-4 hidden md:flex md:flex-col bg-sidebar-background text-sidebar-foreground w-[260px] shrink-0",
           className
         )}
         animate={{
           width: animate ? (open ? "260px" : "72px") : "260px",
         }}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
         {...props}
       >
         {children}
@@ -138,7 +138,7 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-sidebar text-sidebar-foreground p-4 z-[100] flex flex-col justify-between",
+                "fixed h-full w-full inset-0 bg-sidebar-background text-sidebar-foreground p-4 z-[100] flex flex-col justify-between",
                 className
               )}
             >
@@ -171,13 +171,13 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-3 rounded-lg hover:bg-sidebar-accent group/sidebar p-3 transition-colors duration-200",
+        "flex items-center justify-start gap-3 rounded-lg hover:bg-sidebar-accent group/sidebar px-3 py-2 transition-colors duration-200",
         link.active && "bg-sidebar-accent font-semibold",
         className
       )}
       {...props}
     >
-      <div className="text-muted-foreground group-hover:text-sidebar-foreground transition-colors">
+      <div className="text-sidebar-foreground group-hover:text-sidebar-foreground transition-colors">
         {link.icon}
       </div>
       <motion.span
@@ -192,3 +192,29 @@ export const SidebarLink = ({
     </Link>
   );
 };
+
+export const SidebarUser = () => {
+    const { user } = useAuth();
+    const { open } = useSidebar();
+    return (
+        <div className={cn(
+            "flex items-center justify-start gap-3 rounded-lg bg-sidebar-accent group/sidebar px-3 py-2 transition-colors duration-200",
+        )}>
+            <div className="text-sidebar-foreground group-hover:text-sidebar-foreground transition-colors">
+                <Avatar className="h-6 w-6">
+                    <AvatarImage src={user?.photoURL || ''} />
+                    <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+            </div>
+            <motion.span
+                animate={{
+                display: open ? "inline-block" : "none",
+                opacity: open ? 1 : 0,
+                }}
+                className="text-sidebar-foreground text-sm whitespace-pre inline-block"
+            >
+                {user?.displayName}
+            </motion.span>
+        </div>
+    )
+}
