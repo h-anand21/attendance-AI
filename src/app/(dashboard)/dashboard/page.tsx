@@ -153,50 +153,72 @@ export default function DashboardPage() {
     )
   }
 
+  const statCards = [
+    {
+      title: 'Total Classes',
+      value: classes.length,
+      icon: BookOpen,
+      description: null,
+    },
+    {
+      title: 'Total Students',
+      value: totalStudents,
+      icon: Users,
+      description: null,
+    },
+    {
+      title: 'Attendance Events',
+      value: attendanceRecords.length,
+      icon: UserCheck,
+      description: 'Total records logged',
+    },
+    {
+      title: 'AI Summary',
+      value: null,
+      icon: TrendingUp,
+      description: '30-day attendance trends',
+      action: (
+        <Button size="sm" className="w-full mt-2" onClick={handleGenerateSummary}>Get Insights</Button>
+      ),
+    },
+  ];
+
   return (
     <AppLayout pageTitle="Dashboard">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{classes.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStudents}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{attendanceRecords.length}</div>
-            <p className="text-xs text-muted-foreground">Total records logged</p>
-          </CardContent>
-        </Card>
-        <Card className="border-primary">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <Button size="sm" className="w-full" onClick={handleGenerateSummary}>Get Insights</Button>
-            <p className="text-xs text-muted-foreground mt-2 text-center">30-day attendance trends</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((card, i) => (
+          <motion.div
+            key={card.title}
+            custom={i}
+            initial="hidden"
+            animate="visible"
+            variants={cardVariants}
+            whileHover={{ y: -5, scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <Card className={cn(
+              "h-full transition-all duration-300",
+              card.title === 'AI Summary' && 'border-primary/50'
+            )}>
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <CardTitle className="text-base font-medium">{card.title}</CardTitle>
+                <card.icon className="h-5 w-5 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {card.value !== null && (
+                  <div className="text-3xl font-bold">{card.value}</div>
+                )}
+                {card.description && (
+                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                )}
+                {card.action}
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
+      <div className="mt-6 grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2">
             <AttendanceBarChart data={barChartData} />
         </div>
@@ -205,7 +227,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-7">
+      <div className="mt-6 grid gap-6 lg:grid-cols-7">
         <motion.div className="lg:col-span-5 space-y-4" custom={4} initial="hidden" animate="visible" variants={cardVariants}>
             <div>
                 <div className="flex items-center justify-between mb-4">
