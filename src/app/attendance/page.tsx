@@ -36,11 +36,12 @@ export default function AllClassesPage() {
         {classes.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {classes.map((cls) => (
-              <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                <Card className="hover:border-primary/80 hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col">
+              <Link href={`/attendance/${cls.id}`} key={cls.id} className="block relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-blue-500 rounded-3xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(209,38,197,0.5)]"></div>
+                <Card className="relative z-10 bg-[#181818] rounded-[28px] transition-all duration-300 h-full flex flex-col border-0">
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{cls.name}</CardTitle>
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
                       <Badge variant="secondary">Section {cls.section}</Badge>
                     </div>
                     <CardDescription>Click to start attendance</CardDescription>
