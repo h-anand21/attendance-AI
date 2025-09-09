@@ -5,23 +5,23 @@
 @layer base {
   :root {
     --background: 12 6.5% 15.1%;
-    --foreground: 224 10% 10%;
+    --foreground: 210 40% 98%;
     --card: 12 6.5% 18.1%;
-    --card-foreground: 224 10% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 10% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
     --primary: 217 91% 60%; /* Bright Blue */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 10% 10%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
     --accent: 38 92% 50%; /* Amber */
-    --accent-foreground: 224 10% 10%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
     --ring: 217 91% 60%;
     --radius: 0.75rem;
     --chart-1: 217 91% 60%;
@@ -31,7 +31,7 @@
     --chart-5: 0 72% 51%;
 
     /* Sidebar specific variables */
-    --sidebar-background: 222 47% 11%; /* Dark Blue */
+    --sidebar-background: hsl(222 47% 11% / 0.8);
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 210 40% 98%;
     --sidebar-primary-foreground: 222 47% 11%;
@@ -93,6 +93,68 @@
   }
   .slide-in-from-bottom {
     animation: slide-in-from-bottom 0.8s ease-in-out forwards;
+  }
+
+  /* Custom futuristic input styles */
+  .futuristic-input-container {
+    @apply relative flex items-center justify-center;
+  }
+  .futuristic-input-wrapper {
+    @apply relative;
+  }
+  .futuristic-input-glow,
+  .futuristic-input-dark-border,
+  .futuristic-input-white-border,
+  .futuristic-input-border {
+    @apply absolute h-full w-full rounded-xl overflow-hidden -z-10 blur-[3px];
+  }
+  
+  .futuristic-input-white-border { @apply blur-sm; }
+  .futuristic-input-border { @apply blur-[0.5px]; }
+  .futuristic-input-glow { @apply blur-3xl opacity-40; }
+
+  .futuristic-input-glow::before,
+  .futuristic-input-dark-border::before,
+  .futuristic-input-white-border::before,
+  .futuristic-input-border::before {
+    content: "";
+    @apply absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-no-repeat bg-center transition-transform duration-1000;
+    transform: translate(-50%, -50%) rotate(82deg);
+  }
+
+  .futuristic-input-container:hover .futuristic-input-glow::before { transform: translate(-50%, -50%) rotate(-120deg); }
+  .futuristic-input-container:hover .futuristic-input-dark-border::before { transform: translate(-50%, -50%) rotate(-98deg); }
+  .futuristic-input-container:hover .futuristic-input-white-border::before { transform: translate(-50%, -50%) rotate(-97deg); }
+  .futuristic-input-container:hover .futuristic-input-border::before { transform: translate(-50%, -50%) rotate(-110deg); }
+
+  .futuristic-input-wrapper:focus-within ~ .futuristic-input-glow::before { transform: translate(-50%, -50%) rotate(420deg); transition-duration: 4s; }
+  .futuristic-input-wrapper:focus-within ~ .futuristic-input-dark-border::before { transform: translate(-50%, -50%) rotate(442deg); transition-duration: 4s; }
+  .futuristic-input-wrapper:focus-within ~ .futuristic-input-white-border::before { transform: translate(-50%, -50%) rotate(443deg); transition-duration: 4s; }
+  .futuristic-input-wrapper:focus-within ~ .futuristic-input-border::before { transform: translate(-50%, -50%) rotate(430deg); transition-duration: 4s; }
+
+
+  .futuristic-input-glow::before {
+    background-image: conic-gradient(#000, #402fb5 5%, #000 38%, #000 50%, #cf30aa 60%, #000 87%);
+  }
+  .futuristic-input-dark-border::before {
+    background-image: conic-gradient(rgba(0,0,0,0), #18116a, rgba(0,0,0,0) 10%, rgba(0,0,0,0) 50%, #6e1b60, rgba(0,0,0,0) 60%);
+  }
+  .futuristic-input-white-border::before {
+    @apply brightness-150;
+    background-image: conic-gradient(rgba(0,0,0,0) 0%, #a099d8, rgba(0,0,0,0) 8%, rgba(0,0,0,0) 50%, #dfa2da, rgba(0,0,0,0) 58%);
+    transform: translate(-50%, -50%) rotate(83deg);
+  }
+  .futuristic-input-border::before {
+    @apply brightness-125;
+    background-image: conic-gradient(#1c191c, #402fb5 5%, #1c191c 14%, #1c191c 50%, #cf30aa 60%, #1c191c 64%);
+    transform: translate(-50%, -50%) rotate(70deg);
+  }
+
+  .futuristic-input {
+    @apply bg-[#010201] border-none rounded-lg text-white text-base h-12;
+  }
+  .futuristic-input:focus {
+    @apply outline-none ring-0;
   }
 }
 

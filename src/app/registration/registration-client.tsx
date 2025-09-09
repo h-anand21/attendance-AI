@@ -53,6 +53,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Camera, UserPlus, Loader2, PlusCircle, QrCodeIcon, Search } from 'lucide-react';
 import { CreateClassDialog } from '../(dashboard)/dashboard/create-class-dialog';
+import { cn } from '@/lib/utils';
 
 const studentFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -308,9 +309,17 @@ export function RegistrationClient() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Student Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. John Doe" {...field} />
-                      </FormControl>
+                       <div className="futuristic-input-container">
+                        <div className="futuristic-input-wrapper">
+                          <FormControl>
+                            <Input placeholder="e.g. John Doe" {...field} className="futuristic-input w-full" />
+                          </FormControl>
+                        </div>
+                        <div className="futuristic-input-glow" />
+                        <div className="futuristic-input-dark-border" />
+                        <div className="futuristic-input-white-border" />
+                        <div className="futuristic-input-border" />
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -322,24 +331,32 @@ export function RegistrationClient() {
                     <FormItem>
                       <FormLabel>Class</FormLabel>
                        <div className="flex gap-2">
-                        <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={classes.length === 0}
-                        >
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a class" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            {classes.map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                {c.name} - Section {c.section}
-                                </SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
+                         <div className="futuristic-input-container w-full">
+                           <div className="futuristic-input-wrapper w-full">
+                            <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={classes.length === 0}
+                            >
+                                <FormControl>
+                                <SelectTrigger className="futuristic-input w-full">
+                                    <SelectValue placeholder="Select a class" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {classes.map((c) => (
+                                    <SelectItem key={c.id} value={c.id}>
+                                    {c.name} - Section {c.section}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="futuristic-input-glow" />
+                          <div className="futuristic-input-dark-border" />
+                          <div className="futuristic-input-white-border" />
+                          <div className="futuristic-input-border" />
+                        </div>
                         <CreateClassDialog onClassCreate={onClassCreate}>
                             <Button type="button" variant="outline" size="icon" aria-label="Create new class">
                                 <PlusCircle className="h-4 w-4" />
@@ -431,7 +448,10 @@ export function RegistrationClient() {
                       <TableRow 
                         key={student.id} 
                         ref={student.id === highlightedStudentId ? newStudentRowRef : null}
-                        className={student.id === highlightedStudentId ? 'bg-primary/10 transition-colors duration-1000 ease-out' : ''}
+                        className={cn(
+                          'transition-colors duration-1000 ease-out',
+                          student.id === highlightedStudentId ? 'bg-primary/10' : ''
+                        )}
                       >
                         <TableCell>
                           <Avatar>
