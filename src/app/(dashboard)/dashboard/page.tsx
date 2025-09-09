@@ -252,7 +252,7 @@ export default function DashboardPage() {
                     <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
-                            <Button variant="outline" size="sm" className="w-full">
+                            <Button variant="outline" size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Publish New Notice
                             </Button>
