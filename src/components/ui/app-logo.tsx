@@ -8,14 +8,21 @@ export function AppLogo({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       className={cn("h-8 w-8", className)}
     >
-      <circle cx="12" cy="12" r="10" className="fill-primary" />
       <path
-        d="M8 12.5L10.5 15L16 9"
+        d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
+        className="fill-primary"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path 
+        d="M7 13.5L10 16.5L17 9.5"
         stroke="hsl(var(--primary-foreground))"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-      />
+       />
     </svg>
   )
 }

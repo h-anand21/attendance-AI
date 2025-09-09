@@ -13,26 +13,21 @@ import {
   LineChart,
   ClipboardCheck,
   Users,
+  PanelLeft,
+  User,
+  Settings,
+  HelpCircle,
+  ChevronsUpDown,
 } from "lucide-react";
 import {
-  SidebarProvider,
   Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
+  SidebarBody,
+  SidebarLink,
+  useSidebar,
+  DesktopSidebar,
+  MobileSidebar,
+  SidebarProvider,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,171 +42,233 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Separator } from "./ui/separator";
+
+const Logo = () => {
+  const { user } = useAuth();
+  return (
+    <div className="flex items-center gap-3 px-3">
+        <AppLogo className="h-10 w-10" />
+        <div className="flex flex-col">
+            <p className="font-semibold text-lg text-sidebar-foreground">AttendEase</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+        </div>
+        <ChevronsUpDown className="h-4 w-4 ml-auto text-muted-foreground" />
+    </div>
+  );
+};
+
+const LogoIcon = () => {
+  return (
+    <Link
+      href="/dashboard"
+      className="relative z-20 flex items-center justify-center gap-2 py-1 text-sm font-semibold text-sidebar-foreground"
+    >
+      <AppLogo className="h-8 w-8" />
+      <span className="md:hidden lg:inline-block">AttendEase</span>
+    </Link>
+  );
+};
 
 function AppSidebar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
-  const [isReportsOpen, setIsReportsOpen] = React.useState(false);
+  const { open } = useSidebar();
 
-  useEffect(() => {
-    if (pathname.startsWith('/reports')) {
-      setIsReportsOpen(true);
-    }
-  }, [pathname]);
+  const mainLinks = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: (
+        <Home className="h-5 w-5 shrink-0" />
+      ),
+      active: pathname === "/dashboard",
+      visible: true,
+    },
+    {
+      label: "Attendance",
+      href: "/attendance",
+      icon: (
+        <ClipboardCheck className="h-5 w-5 shrink-0" />
+      ),
+      active: pathname.startsWith("/attendance"),
+      visible: true,
+    },
+    {
+      label: "Student Directory",
+      href: "/registration/details",
+      icon: (
+        <Users className="h-5 w-5 shrink-0" />
+      ),
+      active: pathname.startsWith("/registration/details"),
+      visible: userRole === 'admin',
+    },
+    {
+        label: "Teacher Directory",
+        href: "/registration/teacher",
+        icon: (
+            <UserPlus className="h-5 w-5 shrink-0" />
+        ),
+        active: pathname.startsWith("/registration/teacher"),
+        visible: userRole === 'admin',
+    },
+    {
+      label: "Reports",
+      href: "/reports",
+      icon: (
+        <LineChart className="h-5 w-5 shrink-0" />
+      ),
+      active: pathname.startsWith("/reports"),
+      visible: userRole === 'admin',
+    },
+  ];
+
+  const bottomLinks = [
+     {
+      label: "About",
+      href: "/about",
+      icon: (
+        <Info className="h-5 w-5 shrink-0" />
+      ),
+      active: pathname === "/about",
+      visible: true,
+    },
+    {
+      label: "Settings",
+      href: "#",
+      icon: <Settings className="h-5 w-5 shrink-0" />,
+      active: false,
+      visible: true,
+    },
+  ]
 
   return (
-    <Sidebar collapsible="icon" side="left" variant="sidebar">
-      <SidebarHeader>
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <AppLogo className="h-8 w-8" />
-          <span className="text-xl font-bold group-data-[collapsible=icon]:hidden">
-            AttendEase
-          </span>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/dashboard"}
-              tooltip={{ children: "Dashboard" }}
-            >
-              <Link href="/dashboard">
-                <Home />
-                <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-           <SidebarMenuItem>
-                <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith("/attendance")}
-                tooltip={{ children: "Attendance" }}
-                >
-                <Link href="/attendance">
-                    <ClipboardCheck />
-                    <span>Attendance</span>
-                </Link>
-                </SidebarMenuButton>
-          </SidebarMenuItem>
-          {userRole === 'admin' && (
-            <>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/registration/details')}
-                  tooltip={{ children: 'Student Directory' }}
-                >
-                  <Link href="/registration/details">
-                    <Users />
-                    <span>Student Directory</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/registration/teacher')}
-                  tooltip={{ children: 'Teacher Directory' }}
-                >
-                  <Link href="/registration/teacher">
-                    <UserPlus />
-                    <span>Teacher Directory</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem asChild>
-                <Collapsible open={isReportsOpen} onOpenChange={setIsReportsOpen}>
-                  <CollapsibleTrigger asChild>
-                     <SidebarMenuButton
-                        isActive={pathname.startsWith("/reports")}
-                        tooltip={{ children: "Reports" }}
-                        className="justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <LineChart />
-                          <span>Reports</span>
-                        </div>
-                      </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent asChild>
-                    <SidebarMenuSub>
-                        <SidebarMenuSubButton asChild isActive={pathname === '/reports'}>
-                            <Link href="/reports">Attendance</Link>
-                        </SidebarMenuSubButton>
-                         <SidebarMenuSubButton asChild isActive={pathname === '/reports/teacher'}>
-                            <Link href="/reports/teacher">Teacher Activity</Link>
-                        </SidebarMenuSubButton>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
-            </>
-          )}
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/about"}
-              tooltip={{ children: "About" }}
-            >
-              <Link href="/about">
-                <Info />
-                <span>About</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="w-full">
-              <SidebarMenuButton
-                className="w-full"
-                tooltip={{ children: "User Profile" }}
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={user?.photoURL || "https://picsum.photos/seed/user/40/40"}
-                    alt={user?.displayName || "User"}
-                    data-ai-hint="person"
-                  />
-                  <AvatarFallback>
-                    {user?.displayName?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate">{user?.displayName || "User"}</span>
-              </SidebarMenuButton>
+    <Sidebar>
+      <DesktopSidebar className="justify-between gap-10">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
+            {open ? <Logo /> : <LogoIcon />}
+            <div className="mt-8 flex flex-col gap-1 px-3">
+                {mainLinks.filter(l => l.visible).map((link, idx) => (
+                    <SidebarLink key={idx} link={link} />
+                ))}
             </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {user?.displayName}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarFooter>
+        </div>
+        <div className="flex flex-col gap-1 px-3 pb-2">
+          {bottomLinks.filter(l => l.visible).map((link, idx) => (
+              <SidebarLink key={idx} link={link} />
+          ))}
+          <Separator className="my-2 bg-sidebar-border" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <div className="w-full cursor-pointer">
+                    <SidebarLink
+                      link={{
+                        label: user?.displayName || "User",
+                        href: "#",
+                        icon: (
+                           <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
+                            <AvatarFallback>
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        ),
+                      }}
+                    />
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                    {user?.displayName}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                    </p>
+                </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </DesktopSidebar>
+      <MobileSidebar>
+         <SidebarBody className="justify-between gap-10">
+            <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
+                <Logo />
+                <div className="mt-8 flex flex-col gap-1 px-3">
+                    {mainLinks.filter(l => l.visible).map((link, idx) => (
+                        <SidebarLink key={idx} link={link} />
+                    ))}
+                </div>
+            </div>
+            <div className="flex flex-col gap-1 px-3 pb-2">
+            {bottomLinks.filter(l => l.visible).map((link, idx) => (
+              <SidebarLink key={idx} link={link} />
+            ))}
+            <Separator className="my-2 bg-sidebar-border" />
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <div className="w-full cursor-pointer">
+                        <SidebarLink
+                          link={{
+                            label: user?.displayName || "User",
+                            href: "#",
+                            icon: (
+                              <Avatar className="h-8 w-8 shrink-0">
+                                <AvatarImage src={user?.photoURL || undefined} alt="Avatar" />
+                                <AvatarFallback>
+                                  <User className="h-4 w-4" />
+                                </AvatarFallback>
+                              </Avatar>
+                            ),
+                          }}
+                        />
+                    </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                        {user?.displayName}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
+        </SidebarBody>
+      </MobileSidebar>
     </Sidebar>
   );
 }
 
+
 function Header({ pageTitle }: { pageTitle: string }) {
+  const { open, setOpen } = useSidebar();
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
-      <SidebarTrigger className="md:hidden"/>
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+       <div className="md:hidden">
+         <Button variant="ghost" size="icon" onClick={() => setOpen(!open)}>
+            <PanelLeft className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+       </div>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
        <ThemeToggle />
       <Button variant="ghost" size="icon" className="rounded-full">
@@ -248,13 +305,15 @@ export function AppLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header pageTitle={pageTitle} />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
-        </main>
-      </SidebarInset>
+      <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
+          <AppSidebar />
+          <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
+              <Header pageTitle={pageTitle} />
+              <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                  {children}
+              </main>
+          </div>
+      </div>
     </SidebarProvider>
   );
 }

@@ -4,72 +4,67 @@
 
 @layer base {
   :root {
-    --background: 215.3 25% 26.7%;
-    --foreground: 0 0% 0%; /* Black text for light mode */
-    --card: 215.3 25% 30.7%;
-    --card-foreground: 0 0% 0%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 0 0% 0%;
+    --background: 240 5% 96.1%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
     --primary: 217 91% 60%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 44.9%; /* Darker muted text */
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 0%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+    --chart-1: 221 83% 53%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
-    --chart-4: 38 92% 50%;
+    --chart-4: 43 74% 66%;
     --chart-5: 0 72% 51%;
 
-    /* Sidebar specific variables */
-    --sidebar-background: hsl(222 47% 11% / 0.8);
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 40% 98%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: hsl(217 33% 17% / 0.5);
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: hsl(240 4% 15%);
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 4% 15%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 12 6.5% 15.1%;
-    --foreground: 210 20% 98%;
-    --card: 12 6.5% 18.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 4% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 217 91% 60%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 10%;
+    --muted-foreground: 240 4% 46%;
+    --accent: hsl(240 4% 15%);
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 15%;
+    --input: 240 4% 15%;
     --ring: 217 91% 60%;
 
-    /* Sidebar specific variables */
-    --sidebar-background: hsl(222 47% 11% / 0.8);
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 40% 98%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: hsl(217 33% 17% / 0.5);
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-background: hsl(0 0% 8.5%);
+    --sidebar-foreground: hsl(0 0% 94%);
+    --sidebar-accent: hsl(0 0% 14%);
+    --sidebar-border: hsl(0 0% 16%);
   }
 }
 
@@ -79,6 +74,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: linear-gradient(to bottom right, #020617, #111827, #020617);
   }
   section {
     @apply py-16 sm:py-24;
@@ -175,3 +171,5 @@
     opacity: 1;
   }
 }
+
+    
