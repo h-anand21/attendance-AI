@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
 import { motion } from "framer-motion";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "./ui/sheet";
 import { GlassSidebar } from "./ui/glass-sidebar";
 
 
@@ -31,6 +31,10 @@ function Header({ pageTitle }: { pageTitle: string }) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-56 border-r-0 bg-transparent p-0">
+             <SheetHeader className="sr-only">
+                <SheetTitle>Navigation Menu</SheetTitle>
+                <SheetDescription>Main menu for navigating the application.</SheetDescription>
+            </SheetHeader>
             <GlassSidebar isMobile={true} />
           </SheetContent>
         </Sheet>
