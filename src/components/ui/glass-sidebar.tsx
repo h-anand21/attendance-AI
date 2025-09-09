@@ -25,9 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Button } from './button';
 import { SheetClose } from './sheet';
-import { SocialLinks } from './social-links';
 
 type SidebarLinkProps = {
   href: string;
@@ -115,7 +113,7 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
       </nav>
 
       <div className="mt-auto flex flex-col items-center">
-        <SocialLinks />
+        
         <div className="w-full mt-4">
             <SidebarLink href="/settings" label="Settings" icon={<Settings className="h-5 w-5" />} isMobile={isMobile} />
             <DropdownMenu>
