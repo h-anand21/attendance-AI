@@ -176,51 +176,27 @@ export function TeacherRegistrationClient() {
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Teacher Name</FormLabel>
-                  <div className="futuristic-input-container">
-                    <div className="futuristic-input-wrapper">
-                      <FormControl>
-                        <Input placeholder="e.g. Jane Smith" {...field} className="futuristic-input w-full" />
-                      </FormControl>
-                    </div>
-                    <div className="futuristic-input-glow" />
-                    <div className="futuristic-input-dark-border" />
-                    <div className="futuristic-input-white-border" />
-                    <div className="futuristic-input-border" />
-                  </div>
+                  <FormControl>
+                    <Input placeholder="e.g. Jane Smith" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                   <div className="futuristic-input-container">
-                    <div className="futuristic-input-wrapper">
-                      <FormControl>
-                        <Input placeholder="e.g. j.smith@school.edu" {...field} className="futuristic-input w-full" />
-                      </FormControl>
-                    </div>
-                    <div className="futuristic-input-glow" />
-                    <div className="futuristic-input-dark-border" />
-                    <div className="futuristic-input-white-border" />
-                    <div className="futuristic-input-border" />
-                  </div>
+                   <FormControl>
+                    <Input placeholder="e.g. j.smith@school.edu" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="contact" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contact Number</FormLabel>
-                   <div className="futuristic-input-container">
-                    <div className="futuristic-input-wrapper">
-                      <FormControl>
-                        <Input placeholder="e.g. 9876543210" {...field} className="futuristic-input w-full" />
-                      </FormControl>
-                    </div>
-                    <div className="futuristic-input-glow" />
-                    <div className="futuristic-input-dark-border" />
-                    <div className="futuristic-input-white-border" />
-                    <div className="futuristic-input-border" />
-                  </div>
+                   <FormControl>
+                    <Input placeholder="e.g. 9876543210" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -230,102 +206,86 @@ export function TeacherRegistrationClient() {
                 render={({ field }) => (
                     <FormItem className="flex flex-col">
                     <FormLabel>Assign Classes</FormLabel>
-                    <div className="futuristic-input-container">
-                      <div className="futuristic-input-wrapper w-full">
-                        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    className={cn(
-                                    "futuristic-input w-full justify-between h-auto min-h-12 py-2 px-3",
-                                    !field.value.length && "text-muted-foreground"
-                                    )}
-                                >
-                                    <div className="flex gap-1 flex-wrap">
-                                    {field.value.length > 0 ? (
-                                        classes
-                                        .filter((cls) => field.value.includes(cls.id))
-                                        .map((cls) => (
-                                            <Badge
-                                                variant="secondary"
-                                                key={cls.id}
-                                                className="mr-1 mb-1"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    field.onChange(field.value.filter(v => v !== cls.id));
-                                                }}
-                                            >
-                                                {getClassLabel(cls.id)}
-                                                <X className="ml-1 h-3 w-3" />
-                                            </Badge>
-                                        ))
-                                    ) : (
-                                        "Select classes to assign"
-                                    )}
-                                    </div>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                                <Command>
-                                    <CommandInput placeholder="Search classes..." />
-                                    <CommandList>
-                                        <CommandEmpty>No results found.</CommandEmpty>
-                                        <CommandGroup>
-                                        {classes.map((cls) => (
-                                            <CommandItem
-                                            key={cls.id}
-                                            onSelect={() => {
-                                                const currentValues = field.value || [];
-                                                const isSelected = currentValues.includes(cls.id);
-                                                if (isSelected) {
-                                                    field.onChange(currentValues.filter(v => v !== cls.id));
-                                                } else {
-                                                    field.onChange([...currentValues, cls.id]);
-                                                }
-                                            }}
-                                            >
-                                            <Check
-                                                className={cn(
-                                                "mr-2 h-4 w-4",
-                                                (field.value || []).includes(cls.id)
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                                )}
-                                            />
-                                            {getClassLabel(cls.id)}
-                                            </CommandItem>
-                                        ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div className="futuristic-input-glow" />
-                      <div className="futuristic-input-dark-border" />
-                      <div className="futuristic-input-white-border" />
-                      <div className="futuristic-input-border" />
-                    </div>
+                      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                  "w-full justify-between h-auto min-h-10 py-2 px-3",
+                                  !field.value.length && "text-muted-foreground"
+                                  )}
+                              >
+                                  <div className="flex gap-1 flex-wrap">
+                                  {field.value.length > 0 ? (
+                                      classes
+                                      .filter((cls) => field.value.includes(cls.id))
+                                      .map((cls) => (
+                                          <Badge
+                                              variant="secondary"
+                                              key={cls.id}
+                                              className="mr-1 mb-1"
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  field.onChange(field.value.filter(v => v !== cls.id));
+                                              }}
+                                          >
+                                              {getClassLabel(cls.id)}
+                                              <X className="ml-1 h-3 w-3" />
+                                          </Badge>
+                                      ))
+                                  ) : (
+                                      "Select classes to assign"
+                                  )}
+                                  </div>
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                              <Command>
+                                  <CommandInput placeholder="Search classes..." />
+                                  <CommandList>
+                                      <CommandEmpty>No results found.</CommandEmpty>
+                                      <CommandGroup>
+                                      {classes.map((cls) => (
+                                          <CommandItem
+                                          key={cls.id}
+                                          onSelect={() => {
+                                              const currentValues = field.value || [];
+                                              const isSelected = currentValues.includes(cls.id);
+                                              if (isSelected) {
+                                                  field.onChange(currentValues.filter(v => v !== cls.id));
+                                              } else {
+                                                  field.onChange([...currentValues, cls.id]);
+                                              }
+                                          }}
+                                          >
+                                          <Check
+                                              className={cn(
+                                              "mr-2 h-4 w-4",
+                                              (field.value || []).includes(cls.id)
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                          />
+                                          {getClassLabel(cls.id)}
+                                          </CommandItem>
+                                      ))}
+                                      </CommandGroup>
+                                  </CommandList>
+                              </Command>
+                          </PopoverContent>
+                      </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="futuristic-input-container w-full pt-2">
-                  <div className="futuristic-input-wrapper w-full">
-                      <Button type="submit" className="w-full futuristic-input" disabled={isSubmitting || !capturedImage || classes.length === 0}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                        Register Teacher
-                      </Button>
-                  </div>
-                  <div className="futuristic-input-glow" />
-                  <div className="futuristic-input-dark-border" />
-                  <div className="futuristic-input-white-border" />
-                  <div className="futuristic-input-border" />
-              </div>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage || classes.length === 0}>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                Register Teacher
+              </Button>
             </form>
           </Form>
         </CardContent>

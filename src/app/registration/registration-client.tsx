@@ -309,17 +309,9 @@ export function RegistrationClient() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Student Name</FormLabel>
-                       <div className="futuristic-input-container">
-                        <div className="futuristic-input-wrapper">
-                          <FormControl>
-                            <Input placeholder="e.g. John Doe" {...field} className="futuristic-input w-full" />
-                          </FormControl>
-                        </div>
-                        <div className="futuristic-input-glow" />
-                        <div className="futuristic-input-dark-border" />
-                        <div className="futuristic-input-white-border" />
-                        <div className="futuristic-input-border" />
-                      </div>
+                      <FormControl>
+                        <Input placeholder="e.g. John Doe" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -331,32 +323,24 @@ export function RegistrationClient() {
                     <FormItem>
                       <FormLabel>Class</FormLabel>
                        <div className="flex gap-2">
-                         <div className="futuristic-input-container w-full">
-                           <div className="futuristic-input-wrapper w-full">
-                            <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                disabled={classes.length === 0}
-                            >
-                                <FormControl>
-                                <SelectTrigger className="futuristic-input w-full">
-                                    <SelectValue placeholder="Select a class" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                {classes.map((c) => (
-                                    <SelectItem key={c.id} value={c.id}>
-                                    {c.name} - Section {c.section}
-                                    </SelectItem>
-                                ))}
-                                </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="futuristic-input-glow" />
-                          <div className="futuristic-input-dark-border" />
-                          <div className="futuristic-input-white-border" />
-                          <div className="futuristic-input-border" />
-                        </div>
+                        <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={classes.length === 0}
+                        >
+                            <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Select a class" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            {classes.map((c) => (
+                                <SelectItem key={c.id} value={c.id}>
+                                {c.name} - Section {c.section}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
                         <CreateClassDialog onClassCreate={onClassCreate}>
                             <Button type="button" variant="outline" size="icon" aria-label="Create new class">
                                 <PlusCircle className="h-4 w-4" />
@@ -367,26 +351,18 @@ export function RegistrationClient() {
                     </FormItem>
                   )}
                 />
-                <div className="futuristic-input-container w-full pt-2">
-                    <div className="futuristic-input-wrapper w-full">
-                        <Button
-                          type="submit"
-                          className="w-full futuristic-input"
-                          disabled={isSubmitting || !capturedImage || classes.length === 0}
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <UserPlus className="mr-2 h-4 w-4" />
-                          )}
-                          Register Student
-                        </Button>
-                    </div>
-                    <div className="futuristic-input-glow" />
-                    <div className="futuristic-input-dark-border" />
-                    <div className="futuristic-input-white-border" />
-                    <div className="futuristic-input-border" />
-                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting || !capturedImage || classes.length === 0}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="mr-2 h-4 w-4" />
+                  )}
+                  Register Student
+                </Button>
               </form>
             </Form>
           </CardContent>
