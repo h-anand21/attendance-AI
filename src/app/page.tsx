@@ -316,7 +316,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5 }}
               >
                 <Image
-                  src="https://picsum.photos/seed/reports-ui/600/500"
+                  src="https://images.unsplash.com/photo-1542744173-05336fcc7ad4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxleGNlbCUyMHxlbnwwfHx8fDE3NTc0NDYzMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
                   alt="App reports page showing charts and data"
                   width={600}
                   height={500}
