@@ -103,7 +103,7 @@ export function PublishNoticeDialog({ children, onPublish }: PublishNoticeDialog
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Publish
+                Publish Notice
               </Button>
             </DialogFooter>
           </form>
