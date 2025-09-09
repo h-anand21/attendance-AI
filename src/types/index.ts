@@ -42,8 +42,18 @@ export type Task = {
 };
 
 export type Notice = {
-  id: string; // Firestore document ID
+  id:string; // Firestore document ID
   title: string;
   createdAt: string; // ISO date string
   userId: string;
 };
+
+export type MealVerification = {
+  id: string; // Firestore document ID
+  studentId: string;
+  date: string; // YYYY-MM-DD
+  verifiedAt: string; // ISO string
+  verifiedBy: string; // User ID of the staff
+  source: 'qr' | 'manual';
+  note?: string; // Reason for manual override, etc.
+}

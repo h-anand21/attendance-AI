@@ -12,6 +12,7 @@ import {
   Users,
   Settings,
   User,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -45,11 +46,8 @@ function SidebarLink({ href, label, icon, isMobile = false }: SidebarLinkProps) 
         isActive && 'text-foreground font-semibold'
       )}
     >
-      {/* 3D "stack" effect spans, visible on group-hover */}
       <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-20" />
       <span className="absolute -z-10 h-full w-full rounded-lg bg-white/5 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-40" />
-
-      {/* Main content that "pops out" on hover */}
       <div
         className={cn(
           'flex w-full items-center gap-4 rounded-lg p-0 transition-all duration-300 group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:bg-white/10 group-hover:shadow-lg',
@@ -93,6 +91,12 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
       label: 'Attendance',
       href: '/attendance',
       icon: <ClipboardCheck className="h-5 w-5" />,
+      visible: true,
+    },
+    {
+      label: 'Meal Verification',
+      href: '/meal-verification',
+      icon: <UtensilsCrossed className="h-5 w-5" />,
       visible: true,
     },
     {
