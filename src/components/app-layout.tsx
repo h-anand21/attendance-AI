@@ -31,7 +31,7 @@ import { GlassSidebar } from "./ui/glass-sidebar";
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6 md:pl-72">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6">
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
