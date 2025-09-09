@@ -238,7 +238,7 @@ export default function LandingPage() {
               }}
             >
               <motion.div variants={sectionVariants}>
-                <Card className="p-8 rounded-2xl shadow-lg h-full">
+                <Card className="p-8 rounded-2xl shadow-lg h-full bg-secondary">
                   <CardHeader className="p-0 flex-row items-center gap-4">
                     <div className="p-3 bg-primary/10 rounded-lg">
                       <School className="h-8 w-8 text-primary" />
@@ -262,7 +262,7 @@ export default function LandingPage() {
                 </Card>
               </motion.div>
               <motion.div variants={sectionVariants}>
-                <Card className="p-8 rounded-2xl shadow-lg h-full">
+                <Card className="p-8 rounded-2xl shadow-lg h-full bg-secondary">
                   <CardHeader className="p-0 flex-row items-center gap-4">
                     <div className="p-3 bg-primary/10 rounded-lg">
                       <User className="h-8 w-8 text-primary" />

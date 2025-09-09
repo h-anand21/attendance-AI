@@ -142,7 +142,7 @@ export default function DashboardPage() {
   return (
     <AppLayout pageTitle="Dashboard">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-transparent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold">{classes.length}</div>
             </CardContent>
         </Card>
-         <Card>
+         <Card className="bg-transparent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Students</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold">{totalStudents}</div>
             </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-transparent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
@@ -170,7 +170,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Total records logged</p>
             </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-transparent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
