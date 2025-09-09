@@ -367,18 +367,26 @@ export function RegistrationClient() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting || !capturedImage || classes.length === 0}
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
-                  )}
-                  Register Student
-                </Button>
+                <div className="futuristic-input-container w-full pt-2">
+                    <div className="futuristic-input-wrapper w-full">
+                        <Button
+                          type="submit"
+                          className="w-full futuristic-input"
+                          disabled={isSubmitting || !capturedImage || classes.length === 0}
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <UserPlus className="mr-2 h-4 w-4" />
+                          )}
+                          Register Student
+                        </Button>
+                    </div>
+                    <div className="futuristic-input-glow" />
+                    <div className="futuristic-input-dark-border" />
+                    <div className="futuristic-input-white-border" />
+                    <div className="futuristic-input-border" />
+                </div>
               </form>
             </Form>
           </CardContent>
