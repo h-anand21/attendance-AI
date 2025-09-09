@@ -47,6 +47,10 @@ const generateAttendanceSummaryFlow = ai.defineFlow(
     name: 'generateAttendanceSummaryFlow',
     inputSchema: GenerateAttendanceSummaryInputSchema,
     outputSchema: GenerateAttendanceSummaryOutputSchema,
+    retry: {
+      delay: '2s',
+      maxAttempts: 3,
+    }
   },
   async input => {
     const {output} = await prompt(input);
