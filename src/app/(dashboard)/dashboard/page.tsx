@@ -178,11 +178,11 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2">
             <AttendanceBarChart data={barChartData} />
         </div>
-        <div className="lg:col-span-1">
+        <div className="md:col-span-1">
              <AttendancePieChart data={pieChartData} title="Last 30 Days" description="Overall attendance status" />
         </div>
       </div>
