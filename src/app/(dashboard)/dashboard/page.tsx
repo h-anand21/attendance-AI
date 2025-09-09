@@ -45,15 +45,6 @@ import { MoreVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-const classColorAccents = [
-  'border-primary',
-  'border-green-500',
-  'border-yellow-500',
-  'border-sky-500',
-  'border-orange-500',
-  'border-fuchsia-500'
-];
-
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
@@ -231,34 +222,36 @@ export default function DashboardPage() {
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {classes.map((cls, index) => (
-                      <Link 
-                        href={`/attendance/${cls.id}`} 
+                       <motion.div
                         key={cls.id}
-                        className="group"
+                        whileHover={{ y: -5, scale: 1.02 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
                       >
-                        <Card className={cn(
-                          "group-hover:shadow-primary/20 group-hover:shadow-lg transition-all duration-300 h-full flex flex-col border-t-4",
-                           classColorAccents[index % classColorAccents.length]
-                        )}>
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                              <Badge variant="secondary">Sec. {cls.section}</Badge>
-                            </div>
-                            <CardDescription>Click to start attendance</CardDescription>
-                          </CardHeader>
-                          <CardContent className="mt-auto">
-                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>{(studentsByClass[cls.id] || []).length} Students</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
+                        <Link 
+                          href={`/attendance/${cls.id}`} 
+                          className="group"
+                        >
+                          <Card className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-md hover:shadow-primary/20 transition-all duration-300 h-full flex flex-col">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                                <Badge variant="secondary">Sec. {cls.section}</Badge>
+                              </div>
+                              <CardDescription>Click to start attendance</CardDescription>
+                            </CardHeader>
+                            <CardContent className="mt-auto">
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{(studentsByClass[cls.id] || []).length} Students</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </motion.div>
                     ))}
                 </div>
                 ) : (
-                <Card className="text-center py-12">
+                <Card className="text-center py-12 bg-white/5 backdrop-blur-sm border border-white/10 shadow-md">
                     <CardContent>
                         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
@@ -276,7 +269,7 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
-             <Card>
+             <Card className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-md">
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
@@ -293,7 +286,7 @@ export default function DashboardPage() {
                 <CardContent>
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-secondary/70">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-black/20 border-white/10">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
@@ -323,7 +316,7 @@ export default function DashboardPage() {
       </div>
 
        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-background/80 backdrop-blur-md border-white/20">
           <DialogHeader>
             <DialogTitle>AI Attendance Summary (Last 30 Days)</DialogTitle>
             <DialogDescription>
@@ -335,7 +328,7 @@ export default function DashboardPage() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto bg-secondary/50 p-4 rounded-md">
+            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto bg-black/20 p-4 rounded-md">
               <p>{summary}</p>
             </div>
           )}

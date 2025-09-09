@@ -16,6 +16,7 @@ import {
   PanelLeft,
   User,
   Settings,
+  Menu
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,179 +41,27 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
 import { ThemeToggle } from "./theme-toggle";
-
-const Logo = () => {
-  return (
-    <Link
-      href="/dashboard"
-      className="relative z-20 flex items-center justify-start gap-2 py-1 text-lg font-semibold text-sidebar-foreground"
-    >
-      <AppLogo className="h-6 w-6" />
-      <span className="md:hidden lg:inline-block">AttendEase</span>
-    </Link>
-  );
-};
-
-const LogoIcon = () => {
-  return (
-    <Link
-      href="/dashboard"
-      className="relative z-20 flex items-center justify-center gap-2 py-1 text-sm font-semibold text-sidebar-foreground"
-    >
-      <AppLogo className="h-8 w-8" />
-    </Link>
-  );
-};
-
-function AppSidebar() {
-  const pathname = usePathname();
-  const { userRole, signOut } = useAuth();
-  const { open } = useSidebar();
-
-  const mainLinks = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: (
-        <Home className="h-5 w-5 shrink-0" />
-      ),
-      active: pathname === "/dashboard",
-      visible: true,
-    },
-    {
-      label: "Attendance",
-      href: "/attendance",
-      icon: (
-        <ClipboardCheck className="h-5 w-5 shrink-0" />
-      ),
-      active: pathname.startsWith("/attendance"),
-      visible: true,
-    },
-    {
-      label: "Student Directory",
-      href: "/registration/details",
-      icon: (
-        <Users className="h-5 w-5 shrink-0" />
-      ),
-      active: pathname.startsWith("/registration/details"),
-      visible: userRole === 'admin',
-    },
-    {
-        label: "Teacher Directory",
-        href: "/registration/teacher",
-        icon: (
-            <UserPlus className="h-5 w-5 shrink-0" />
-        ),
-        active: pathname.startsWith("/registration/teacher"),
-        visible: userRole === 'admin',
-    },
-    {
-      label: "Reports",
-      href: "/reports",
-      icon: (
-        <LineChart className="h-5 w-5 shrink-0" />
-      ),
-      active: pathname.startsWith("/reports"),
-      visible: userRole === 'admin',
-    },
-  ];
-
-  const bottomLinks = [
-     {
-      label: "About",
-      href: "/about",
-      icon: (
-        <Info className="h-5 w-5 shrink-0" />
-      ),
-      active: pathname === "/about",
-      visible: true,
-    },
-    {
-      label: "Settings",
-      href: "#",
-      icon: <Settings className="h-5 w-5 shrink-0" />,
-      active: false,
-      visible: true,
-    },
-  ]
-
-  return (
-    <Sidebar>
-      <DesktopSidebar className="justify-between gap-10 border-r">
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
-            <div className="px-3">
-              {open ? <Logo /> : <LogoIcon />}
-            </div>
-            <div className="mt-8 flex flex-col gap-1">
-                {mainLinks.filter(l => l.visible).map((link, idx) => (
-                    <SidebarLink key={idx} link={link} />
-                ))}
-            </div>
-        </div>
-        <div className="flex flex-col gap-1 px-3 pb-2">
-          {bottomLinks.filter(l => l.visible).map((link, idx) => (
-              <SidebarLink key={idx} link={link} />
-          ))}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <div className="w-full cursor-pointer mt-2">
-                    <SidebarUser />
-                </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-                <DropdownMenuItem onClick={signOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </DesktopSidebar>
-      <MobileSidebar>
-         <SidebarBody className="justify-between gap-10">
-            <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-2">
-                <Logo />
-                <div className="mt-8 flex flex-col gap-1">
-                    {mainLinks.filter(l => l.visible).map((link, idx) => (
-                        <SidebarLink key={idx} link={link} />
-                    ))}
-                </div>
-            </div>
-            <div className="flex flex-col gap-1 px-3 pb-2">
-              {bottomLinks.filter(l => l.visible).map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <div className="w-full cursor-pointer mt-2">
-                        <SidebarUser />
-                    </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 mb-2" align="end" forceMount>
-                    <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-        </SidebarBody>
-      </MobileSidebar>
-    </Sidebar>
-  );
-}
+import { motion } from "framer-motion";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { GlassSidebar } from "./ui/glass-sidebar";
 
 
 function Header({ pageTitle }: { pageTitle: string }) {
-  const { open, setOpen } = useSidebar();
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-       <div className="md:hidden">
-         <Button variant="ghost" size="icon" onClick={() => setOpen(!open)}>
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-       </div>
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6 md:pl-80">
+      <div className="md:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="icon" variant="outline" className="bg-transparent hover:bg-white/10">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 border-r-0 bg-transparent p-0">
+            <GlassSidebar isMobile={true} />
+          </SheetContent>
+        </Sheet>
+      </div>
       <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
        <ThemeToggle />
       <Button variant="ghost" size="icon" className="rounded-full">
@@ -232,6 +81,7 @@ export function AppLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -248,16 +98,23 @@ export function AppLayout({
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
-          <AppSidebar />
-          <div className="flex flex-1 flex-col sm:gap-4 sm:py-4">
+      <div className="flex min-h-screen w-full flex-col bg-background/95">
+          <div className="hidden md:block">
+            <GlassSidebar />
+          </div>
+          <div className="flex flex-1 flex-col md:pl-72">
               <Header pageTitle={pageTitle} />
               <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                  {children}
+                  <motion.div
+                    key={pathname}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                   >
+                     {children}
+                   </motion.div>
               </main>
           </div>
       </div>
-    </SidebarProvider>
   );
 }
