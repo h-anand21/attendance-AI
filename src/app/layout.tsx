@@ -13,7 +13,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'AttendEase',
+  title: 'My App',
   description: 'Smart Attendance System',
 };
 
