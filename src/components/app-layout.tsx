@@ -6,16 +6,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
-  Home,
-  UserPlus,
-  LogOut,
-  Info,
-  LineChart,
-  ClipboardCheck,
-  Users,
-  PanelLeft,
-  User,
-  Settings,
   Menu
 } from "lucide-react";
 import {
@@ -29,14 +19,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "./ui/app-logo";
@@ -48,7 +31,7 @@ import { GlassSidebar } from "./ui/glass-sidebar";
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6 md:pl-80">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6 md:pl-72">
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
