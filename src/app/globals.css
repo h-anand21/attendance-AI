@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 12 6.5% 15.1%;
     --foreground: 224 10% 10%;
-    --card: 0 0% 100%;
+    --card: 12 6.5% 18.1%;
     --card-foreground: 224 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 10% 10%;
@@ -42,9 +42,9 @@
   }
 
   .dark {
-    --background: 222 47% 11%; /* Dark Slate Blue */
+    --background: 12 6.5% 15.1%; /* Dark Slate Blue */
     --foreground: 210 40% 98%;
-    --card: 217 33% 17%;
+    --card: 12 6.5% 18.1%;
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
