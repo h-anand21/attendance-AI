@@ -18,16 +18,16 @@ export function SocialLinks() {
         {socialLinks.map((item) => (
           <li key={item.name} className="iso-pro group relative cursor-pointer transition-transform duration-500">
             {/* These spans create the 3D isometric effect on hover */}
-            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-20" style={{ transform: 'translate(0px, 0px)', backgroundColor: 'hsl(var(--primary))' }}></span>
-            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-40" style={{ transform: 'translate(3px, -3px)', backgroundColor: 'hsl(var(--primary))' }}></span>
-            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-60" style={{ transform: 'translate(6px, -6px)', backgroundColor: 'hsl(var(--primary))' }}></span>
+            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-10" style={{ transform: 'translate(0px, 0px)', backgroundColor: 'hsl(var(--foreground))' }}></span>
+            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-20" style={{ transform: 'translate(3px, -3px)', backgroundColor: 'hsl(var(--foreground))' }}></span>
+            <span className="absolute h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-30" style={{ transform: 'translate(6px, -6px)', backgroundColor: 'hsl(var(--foreground))' }}></span>
 
-            <a href={item.href} target="_blank" rel="noopener noreferrer" className="relative block h-12 w-12 text-primary transition-transform duration-300 group-hover:translate-x-2 group-hover:-translate-y-2">
+            <a href={item.href} target="_blank" rel="noopener noreferrer" className="relative block h-12 w-12 text-foreground/80 transition-transform duration-300 group-hover:text-foreground group-hover:translate-x-2 group-hover:-translate-y-2">
               <div className="flex items-center justify-center h-full w-full rounded-full shadow-[inset_0_0_10px_rgba(255,255,255,0.2),inset_0_0_5px_rgba(255,255,255,0.3),0_5px_5px_rgba(0,0,0,0.1)]">
                 {item.icon}
               </div>
             </a>
-            <div className="absolute z-10 rounded py-1 px-2 text-xs text-primary-foreground bg-primary/80 opacity-0 transition-all duration-300 group-hover:opacity-100" style={{ transform: 'translate(45px, -30px) skew(-5deg)' }}>
+            <div className="absolute z-10 rounded py-1 px-2 text-xs text-background bg-foreground/80 opacity-0 transition-all duration-300 group-hover:opacity-100" style={{ transform: 'translate(45px, -30px) skew(-5deg)' }}>
               {item.name}
             </div>
           </li>
