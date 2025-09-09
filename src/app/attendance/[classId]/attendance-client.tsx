@@ -17,7 +17,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Download, QrCode, Upload, CheckCircle, Loader2 } from 'lucide-react';
+import { Download, QrCode, Upload, CheckCircle, Loader2, ScanFace } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
 import { FaceScanModal } from './face-scan-modal';
@@ -200,7 +200,7 @@ export function AttendanceClient({
             onClick={() => setFaceScanOpen(true)}
             disabled={loading || students.length === 0}
           >
-            <SparkleIcon />
+            <ScanFace className="h-6 w-6" />
             Start Face Scan
           </AnimatedButton>
           <Button 

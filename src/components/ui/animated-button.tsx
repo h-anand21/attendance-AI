@@ -1,8 +1,10 @@
+
 'use client';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { ScanFace } from 'lucide-react';
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -15,16 +17,16 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
       <motion.button
         ref={ref}
         className={cn(
-          'group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full bg-[hsl(0_0%_12%)] px-6 font-medium text-white transition-transform duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95 disabled:cursor-not-allowed disabled:opacity-50',
-          'before:absolute before:inset-0 before:z-0 before:rounded-full before:bg-card before:shadow-[inset_0_0.5px_hsl(0,0%,100%),inset_0_-1px_2px_0_hsl(0,0%,0%),0px_4px_10px_-4px_hsla(0,0%,0%)] before:transition-all before:duration-300 group-hover:before:scale-110',
-          'after:absolute after:inset-0 after:z-0 after:rounded-full after:bg-[radial-gradient(at_51%_89%,hsla(266,45%,74%,1)_0px,transparent_50%),radial-gradient(at_100%_100%,hsla(266,36%,60%,1)_0px,transparent_50%),radial-gradient(at_22%_91%,hsla(266,36%,60%,1)_0px,transparent_50%)] after:opacity-0 after:transition-opacity after:duration-300 group-hover:after:opacity-100',
+          'group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full bg-yellow-900/80 px-6 font-medium text-yellow-50 transition-transform duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95 disabled:cursor-not-allowed disabled:opacity-50',
+          'before:absolute before:inset-0 before:z-0 before:rounded-full before:bg-yellow-800/50 before:shadow-[inset_0_0.5px_hsl(48,100%,80%),inset_0_-1px_2px_0_hsl(48,100%,20%),0px_4px_10px_-4px_hsla(0,0%,0%)] before:transition-all before:duration-300 group-hover:before:scale-110',
+          'after:absolute after:inset-0 after:z-0 after:rounded-full after:bg-[radial-gradient(at_51%_89%,hsla(48,96%,57%,0.6)_0px,transparent_50%),radial-gradient(at_100%_100%,hsla(48,96%,57%,0.8)_0px,transparent_50%),radial-gradient(at_22%_91%,hsla(48,96%,57%,0.7)_0px,transparent_50%)] after:opacity-0 after:transition-opacity after:duration-300 group-hover:after:opacity-100',
           className
         )}
         {...props}
       >
         {/* Rotating dots border */}
         <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden rounded-full">
-          <div className="absolute left-1/2 top-1/2 h-[200%] w-full -translate-x-1/2 -translate-y-1/2 animate-border-spin bg-[conic-gradient(from_0deg,transparent_0_340deg,white_360deg)] group-hover:opacity-100" />
+          <div className="absolute left-1/2 top-1/2 h-[200%] w-full -translate-x-1/2 -translate-y-1/2 animate-border-spin bg-[conic-gradient(from_0deg,transparent_0_340deg,hsl(48,96%,57%)_360deg)] group-hover:opacity-100" />
         </div>
 
         {/* Content */}
