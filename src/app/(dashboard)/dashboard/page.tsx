@@ -176,7 +176,7 @@ export default function DashboardPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <Button size="sm" className="w-full" onClick={handleGenerateSummary}>Get Insights</Button>
+                <Button size="sm" className="w-full" onClick={handleGenerateSummary} variant="accent">Get Insights</Button>
                 <p className="text-xs text-muted-foreground mt-1">30-day attendance trends</p>
             </CardContent>
         </Card>
