@@ -261,5 +261,4 @@ export function AttendanceClient({
       />
     </div>
   );
-
-    
+}
