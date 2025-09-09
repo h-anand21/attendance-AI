@@ -142,7 +142,7 @@ export default function LandingPage() {
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
                     <Image
-                      src="https://picsum.photos/seed/dashboard-ui/1200/675"
+                      src="https://i.postimg.cc/gJf7dmf5/Screenshot-2025-09-09-233520.png"
                       alt="AttendEase App Dashboard"
                       width={1200}
                       height={675}

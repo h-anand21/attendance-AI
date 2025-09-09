@@ -37,6 +37,12 @@ const nextConfig: NextConfig = {
         hostname: 'hanand.dev',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.postimg.cc',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
