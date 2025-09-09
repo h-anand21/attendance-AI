@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils"
 
 export function AppLogo({ className }: { className?: string }) {
@@ -9,7 +10,6 @@ export function AppLogo({ className }: { className?: string }) {
       className={cn("h-8 w-8", className)}
     >
       <circle cx="12" cy="12" r="10" fill="#22C55E" />
-      <circle cx="12" cy="12" r="11.5" stroke="white" strokeWidth="1" />
       <path 
         d="M8 12.5L11 15.5L16 9.5"
         stroke="white"
