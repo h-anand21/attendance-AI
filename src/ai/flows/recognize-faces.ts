@@ -11,6 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { isToday, parseISO } from 'date-fns';
 
 const StudentPhotoSchema = z.object({
   studentId: z.string().describe('The unique ID of the student.'),
@@ -30,6 +31,12 @@ const RecognizeFacesInputSchema = z.object({
   studentPhotos: z
     .array(StudentPhotoSchema)
     .describe('An array of student photos to check against the scene.'),
+  photoCreationDate: z
+    .string()
+    .optional()
+    .describe(
+      'The creation date of the scene photo in ISO format (from EXIF data). If provided, it will be validated.'
+    ),
 });
 export type RecognizeFacesInput = z.infer<typeof RecognizeFacesInputSchema>;
 
@@ -82,6 +89,25 @@ const recognizeFacesFlow = ai.defineFlow(
     outputSchema: RecognizeFacesOutputSchema,
   },
   async (input) => {
+    // Validate photo creation date if provided
+    if (input.photoCreationDate) {
+      console.log(`Validating photo creation date: ${input.photoCreationDate}`);
+      try {
+        const photoDate = parseISO(input.photoCreationDate);
+        if (!isToday(photoDate)) {
+          console.error(
+            'Rejected: Photo was not taken today.',
+            `Photo date: ${photoDate.toDateString()}, Server date: ${new Date().toDateString()}`
+          );
+          throw new Error('Photo was not taken today. Please upload a recent photo.');
+        }
+        console.log('Accepted: Photo date is valid.');
+      } catch (e) {
+        console.error('Error parsing photo date. Proceeding without validation.', e);
+        // Optional: decide if you want to throw an error here or just proceed
+      }
+    }
+
     const { output } = await prompt(input);
     return output!;
   }

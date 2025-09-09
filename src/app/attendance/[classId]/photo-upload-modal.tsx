@@ -13,11 +13,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScanFace, UserCheck, UserX, Loader2, UploadCloud } from 'lucide-react';
+import { ScanFace, UserCheck, UserX, Loader2, UploadCloud, AlertCircle } from 'lucide-react';
 import type { Student } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { recognizeFaces } from '@/ai/flows/recognize-faces';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import ExifReader from 'exifreader';
+import { format } from 'date-fns';
 
 type PhotoUploadModalProps = {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export function PhotoUploadModal({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [photoCreationDate, setPhotoCreationDate] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetState = () => {
@@ -48,17 +50,46 @@ export function PhotoUploadModal({
     setIsLoading(false);
     setSelectedFile(null);
     setPreviewUrl(null);
+    setPhotoCreationDate(null);
+    if(fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      resetState(); // Reset previous state
       setSelectedFile(file);
+
+      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Extract EXIF data
+      try {
+        const tags = await ExifReader.load(file);
+        const dateTimeOriginal = tags['DateTimeOriginal']?.description;
+        if (dateTimeOriginal) {
+          // EXIF format is 'YYYY:MM:DD HH:MM:SS', convert to ISO 'YYYY-MM-DDTHH:MM:SS'
+          const [datePart, timePart] = dateTimeOriginal.split(' ');
+          const isoDateTime = `${datePart.replace(/:/g, '-')}T${timePart}`;
+          setPhotoCreationDate(isoDateTime);
+        } else {
+           setPhotoCreationDate(null); // No EXIF date found
+           toast({
+             variant: 'default',
+             title: 'No Date Metadata Found',
+             description: "Couldn't verify photo date. Proceeding without validation.",
+           });
+        }
+      } catch (error) {
+        console.error("Could not read EXIF data:", error);
+        setPhotoCreationDate(null);
+      }
     }
   };
 
@@ -72,7 +103,6 @@ export function PhotoUploadModal({
       return;
     }
 
-    setScanning(true);
     setIsLoading(true);
 
     try {
@@ -84,25 +114,32 @@ export function PhotoUploadModal({
       const result = await recognizeFaces({
         scenePhotoDataUri: previewUrl,
         studentPhotos,
+        photoCreationDate: photoCreationDate || undefined,
       });
-
+      
+      setScanning(true);
       const recognizedIds = result.recognizedStudentIds;
       setRecognizedCount(recognizedIds.length);
       setUnrecognizedCount(students.length - recognizedIds.length);
+      
+      onScanComplete(recognizedIds);
+      toast({
+        title: 'Scan Successful',
+        description: `${recognizedIds.length} student(s) marked as present.`,
+      });
 
+      // Close modal after a short delay
       setTimeout(() => {
-        onScanComplete(recognizedIds);
         onOpenChange(false);
-        resetState();
       }, 1500);
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Face recognition error:', error);
       toast({
         variant: 'destructive',
         title: 'Recognition Failed',
-        description: 'An error occurred during face recognition.',
+        description: error.message || 'An error occurred during face recognition.',
       });
-      setScanning(false);
       setIsLoading(false);
     }
   };
@@ -120,11 +157,11 @@ export function PhotoUploadModal({
         <DialogHeader>
           <DialogTitle>Upload Photo for Attendance</DialogTitle>
           <DialogDescription>
-            Select a group photo to automatically take attendance.
+            Select a group photo to automatically take attendance. The photo must have been taken today.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center space-y-4 py-8">
+        <div className="flex flex-col items-center justify-center space-y-4 py-4">
           <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
             {previewUrl ? (
               <img src={previewUrl} alt="Photo preview" className="h-full w-full object-contain" />
@@ -137,12 +174,19 @@ export function PhotoUploadModal({
           </div>
           
            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="picture">Picture</Label>
+              <Label htmlFor="picture">Class Photo</Label>
               <Input id="picture" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} ref={fileInputRef} />
             </div>
+          
+          {photoCreationDate && (
+             <div className="text-xs text-muted-foreground flex items-center gap-2">
+                <AlertCircle className="h-3 w-3" />
+                Photo taken on: {format(new Date(photoCreationDate), 'MMM dd, yyyy, hh:mm a')}
+             </div>
+          )}
 
           {isScanning && (
-            <div className="w-full space-y-2">
+            <div className="w-full space-y-2 pt-4">
               <div className="flex justify-between text-sm text-muted-foreground">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
@@ -175,7 +219,7 @@ export function PhotoUploadModal({
               <ScanFace className="mr-2 h-4 w-4" />
             )}
             {isLoading
-              ? 'Scanning...'
+              ? 'Validating & Scanning...'
               : isScanning
               ? 'Scan Complete'
               : 'Scan Photo'}
