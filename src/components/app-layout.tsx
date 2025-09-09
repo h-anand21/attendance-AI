@@ -8,16 +8,6 @@ import {
   Bell,
   Menu
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarLink,
-  SidebarUser,
-  useSidebar,
-  DesktopSidebar,
-  MobileSidebar,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -40,7 +30,7 @@ function Header({ pageTitle }: { pageTitle: string }) {
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 border-r-0 bg-transparent p-0">
+          <SheetContent side="left" className="w-56 border-r-0 bg-transparent p-0">
             <GlassSidebar isMobile={true} />
           </SheetContent>
         </Sheet>
@@ -85,7 +75,7 @@ export function AppLayout({
           <div className="hidden md:block">
             <GlassSidebar />
           </div>
-          <div className="flex flex-1 flex-col md:pl-72">
+          <div className="flex flex-1 flex-col md:pl-56">
               <Header pageTitle={pageTitle} />
               <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
                   <motion.div
