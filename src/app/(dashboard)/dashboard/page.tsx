@@ -142,43 +142,39 @@ export default function DashboardPage() {
   return (
     <AppLayout pageTitle="Dashboard">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-transparent">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{classes.length}</div>
-            </CardContent>
+        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-medium text-foreground/80">Total Classes</CardTitle>
+            <BookOpen className="h-5 w-5 text-foreground/80" />
+          </div>
+          <div className="text-3xl font-bold">{classes.length}</div>
         </Card>
-         <Card className="bg-transparent">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{totalStudents}</div>
-            </CardContent>
+        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-medium text-foreground/80">Total Students</CardTitle>
+            <Users className="h-5 w-5 text-foreground/80" />
+          </div>
+          <div className="text-3xl font-bold">{totalStudents}</div>
         </Card>
-        <Card className="bg-transparent">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Attendance Events</CardTitle>
-                <UserCheck className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{attendanceRecords.length}</div>
-                <p className="text-xs text-muted-foreground">Total records logged</p>
-            </CardContent>
+        <Card className="border-2 border-primary/50 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-medium text-foreground/80">Attendance Events</CardTitle>
+            <UserCheck className="h-5 w-5 text-foreground/80" />
+          </div>
+          <div>
+            <div className="text-3xl font-bold">{attendanceRecords.length}</div>
+            <p className="text-xs text-foreground/70">Total records logged</p>
+          </div>
         </Card>
-        <Card className="bg-transparent">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">AI Summary</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <Button size="sm" className="w-full" onClick={handleGenerateSummary} variant="accent">Get Insights</Button>
-                <p className="text-xs text-muted-foreground mt-1">30-day attendance trends</p>
-            </CardContent>
+        <Card className="border-2 border-accent/50 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 text-foreground p-4 flex flex-col justify-center gap-3 backdrop-blur-sm">
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-medium text-foreground/80">AI Summary</CardTitle>
+            <TrendingUp className="h-5 w-5 text-foreground/80" />
+          </div>
+          <div>
+            <Button size="sm" className="w-full" onClick={handleGenerateSummary} variant="accent">Get Insights</Button>
+            <p className="text-xs text-foreground/70 mt-1 text-center">30-day attendance trends</p>
+          </div>
         </Card>
       </div>
 
