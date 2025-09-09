@@ -204,21 +204,22 @@ export default function DashboardPage() {
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
                     {classes.map((cls) => (
-                    <Link href={`/attendance/${cls.id}`} key={cls.id}>
-                        <Card className="hover:border-primary/80 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col group">
-                        <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                              <Badge variant="secondary">Sec. {cls.section}</Badge>
-                            </div>
-                            <CardDescription>Click to start attendance</CardDescription>
-                        </CardHeader>
-                        <CardContent className="mt-auto">
-                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>{(studentsByClass[cls.id] || []).length} Students</span>
-                            </div>
-                        </CardContent>
+                    <Link href={`/attendance/${cls.id}`} key={cls.id} className="block relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-blue-500 rounded-3xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(209,38,197,0.5)]"></div>
+                        <Card className="relative z-10 bg-[#181818] rounded-[28px] transition-all duration-300 h-full flex flex-col border-0">
+                          <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                                <Badge variant="secondary">Sec. {cls.section}</Badge>
+                              </div>
+                              <CardDescription>Click to start attendance</CardDescription>
+                          </CardHeader>
+                          <CardContent className="mt-auto">
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <Users className="h-4 w-4" />
+                              <span>{(studentsByClass[cls.id] || []).length} Students</span>
+                              </div>
+                          </CardContent>
                         </Card>
                     </Link>
                     ))}
