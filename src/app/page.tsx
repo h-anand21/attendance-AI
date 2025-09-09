@@ -11,17 +11,17 @@ import { motion } from 'framer-motion';
 
 const features = [
   {
-    icon: <ScanFace className="h-8 w-8 text-accent" />,
+    icon: <ScanFace className="h-8 w-8 text-yellow-500" />,
     title: 'Face Scan Session',
     description: 'Take attendance for the whole class with a continuous, real-time face scan.',
   },
   {
-    icon: <Upload className="h-8 w-8 text-accent" />,
+    icon: <Upload className="h-8 w-8 text-yellow-500" />,
     title: 'Photo Upload',
     description: 'Process a single class photo to instantly mark everyone who is present.',
   },
   {
-    icon: <QrCode className="h-8 w-8 text-accent" />,
+    icon: <QrCode className="h-8 w-8 text-yellow-500" />,
     title: 'QR & RFID Check-in',
     description: 'Allow students to quickly scan their unique ID cards for attendance.',
   },
@@ -169,7 +169,7 @@ export default function LandingPage() {
                 <motion.div key={feature.title} variants={sectionVariants}>
                   <Card className="text-center p-6 bg-card rounded-2xl shadow-lg transition-transform duration-300 hover:-translate-y-2">
                     <CardHeader className="p-0 items-center">
-                      <div className="mb-4 inline-block p-4 bg-primary/10 rounded-xl">{feature.icon}</div>
+                      <div className="mb-4 inline-block p-4 bg-yellow-400/10 rounded-xl">{feature.icon}</div>
                       <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 mt-2 text-muted-foreground">
