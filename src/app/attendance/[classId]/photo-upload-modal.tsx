@@ -11,21 +11,28 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ScanFace, UserCheck, UserX, Loader2, UploadCloud, AlertCircle } from 'lucide-react';
 import type { Student } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { recognizeFaces } from '@/ai/flows/recognize-faces';
 import ExifReader from 'exifreader';
 import { format } from 'date-fns';
+import { FileUploader, FileUploaderContent, FileUploaderItem, FileInput } from '@/components/ui/file-upload';
+import { Paperclip } from 'lucide-react';
 
-type PhotoUploadModalProps = {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  students: Student[];
-  onScanComplete: (recognizedStudentIds: string[]) => void;
+const FileSvgDraw = () => {
+  return (
+    <>
+      <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+      <p className="mb-1 text-sm text-center text-muted-foreground">
+        <span className="font-semibold">Click to upload</span>
+        &nbsp; or drag and drop
+      </p>
+      <p className="text-xs text-center text-muted-foreground">A single JPG, PNG or WEBP file</p>
+    </>
+  );
 };
+
 
 export function PhotoUploadModal({
   isOpen,
@@ -38,29 +45,36 @@ export function PhotoUploadModal({
   const [recognizedCount, setRecognizedCount] = useState(0);
   const [unrecognizedCount, setUnrecognizedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[] | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [photoCreationDate, setPhotoCreationDate] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const dropZoneConfig = {
+    maxFiles: 1,
+    maxSize: 1024 * 1024 * 4, // 4MB
+    multiple: false,
+    accept: {
+      "image/jpeg": [],
+      "image/png": [],
+      "image/webp": [],
+    }
+  };
 
   const resetState = () => {
     setScanning(false);
     setRecognizedCount(0);
     setUnrecognizedCount(0);
     setIsLoading(false);
-    setSelectedFile(null);
+    setFiles(null);
     setPreviewUrl(null);
     setPhotoCreationDate(null);
-    if(fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   }
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      resetState(); // Reset previous state
-      setSelectedFile(file);
+  
+  const handleFileChange = async (newFiles: File[] | null) => {
+    if (newFiles && newFiles.length > 0) {
+      const file = newFiles[0];
+      resetState();
+      setFiles(newFiles);
 
       // Create preview URL
       const reader = new FileReader();
@@ -90,11 +104,14 @@ export function PhotoUploadModal({
         console.error("Could not read EXIF data:", error);
         setPhotoCreationDate(null);
       }
+    } else {
+      // Handle file removal
+      resetState();
     }
   };
 
   const handleScanPhoto = async () => {
-    if (!selectedFile || !previewUrl) {
+    if (!files || files.length === 0 || !previewUrl) {
       toast({
         variant: 'destructive',
         title: 'No Photo Selected',
@@ -162,21 +179,31 @@ export function PhotoUploadModal({
         </DialogHeader>
 
         <div className="flex flex-col items-center justify-center space-y-4 py-4">
-          <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-            {previewUrl ? (
-              <img src={previewUrl} alt="Photo preview" className="h-full w-full object-contain" />
-            ) : (
-              <div className="text-center text-muted-foreground p-4">
-                <UploadCloud className="mx-auto h-12 w-12" />
-                <p className="mt-2 text-sm">Upload a photo to get started.</p>
-              </div>
-            )}
-          </div>
-          
-           <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="picture">Class Photo</Label>
-              <Input id="picture" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} ref={fileInputRef} />
-            </div>
+            <FileUploader
+              value={files}
+              onValueChange={handleFileChange}
+              dropzoneOptions={dropZoneConfig}
+              className="relative bg-background rounded-lg p-2 border border-dashed border-muted-foreground/40 w-full"
+            >
+              <FileInput>
+                <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full">
+                  {previewUrl && files && files.length > 0 ? (
+                     <img src={previewUrl} alt="Photo preview" className="h-32 w-auto object-contain rounded-md" />
+                  ) : (
+                    <FileSvgDraw />
+                  )}
+                </div>
+              </FileInput>
+
+              <FileUploaderContent>
+                {files && files.length > 0 && (
+                  <FileUploaderItem index={0} className="h-10 px-2">
+                    <Paperclip className="h-4 w-4 stroke-current" />
+                    <span className="text-sm font-medium text-ellipsis overflow-hidden">{files[0].name}</span>
+                  </FileUploaderItem>
+                )}
+              </FileUploaderContent>
+            </FileUploader>
           
           {photoCreationDate && (
              <div className="text-xs text-muted-foreground flex items-center gap-2">
@@ -210,7 +237,7 @@ export function PhotoUploadModal({
             disabled={
               isLoading ||
               isScanning ||
-              !selectedFile
+              !files || files.length === 0
             }
           >
             {isLoading ? (
