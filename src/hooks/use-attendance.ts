@@ -15,6 +15,14 @@ import { db } from '@/lib/firebase';
 import type { AttendanceRecord } from '@/types';
 import { useAuth } from './use-auth';
 
+// Helper to get date string in YYYY-MM-DD format from a Date object, respecting local timezone.
+const toLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function useAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState<
     AttendanceRecord[]
@@ -60,25 +68,30 @@ export function useAttendance() {
           user.uid,
           'attendance'
         );
+        
+        // Use the local date for all records in this batch
+        const localDateString = toLocalDateString(new Date());
 
         for (const record of newRecords) {
+           const recordWithLocalDate = { ...record, date: localDateString };
+           
           const q = query(
             attendanceCollection,
-            where('studentId', '==', record.studentId),
-            where('date', '==', record.date),
-            where('classId', '==', record.classId)
+            where('studentId', '==', recordWithLocalDate.studentId),
+            where('date', '==', recordWithLocalDate.date),
+            where('classId', '==', recordWithLocalDate.classId)
           );
 
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
             const existingDoc = querySnapshot.docs[0];
-            batch.update(existingDoc.ref, { status: record.status });
+            batch.update(existingDoc.ref, { status: recordWithLocalDate.status });
           } else {
              const newDocRef = doc(attendanceCollection);
              const newRecord: AttendanceRecord = {
                 id: newDocRef.id,
-                ...record,
+                ...recordWithLocalDate,
                 userId: user.uid,
              } 
              batch.set(newDocRef, newRecord);

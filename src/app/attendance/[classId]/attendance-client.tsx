@@ -28,6 +28,12 @@ import { PhotoUploadModal } from './photo-upload-modal';
 import * as XLSX from 'xlsx';
 import { AnimatedButton, SparkleIcon } from '@/components/ui/animated-button';
 
+const toLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 type AttendanceClientProps = {
   currentClass: Class;
@@ -51,9 +57,9 @@ export function AttendanceClient({
     const classStudents = studentsByClass[currentClass.id] || [];
     setStudents(classStudents);
 
-    const today = new Date().toISOString().split('T')[0];
+    const todayStr = toLocalDateString(new Date());
     const todaysRecords = attendanceRecords.filter(
-      r => r.classId === currentClass.id && r.date === today
+      r => r.classId === currentClass.id && r.date === todayStr
     );
 
     let initialAttendance;
@@ -123,14 +129,13 @@ export function AttendanceClient({
   };
 
   const handleConfirmAttendance = () => {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const recordsToSave: AttendanceRecord[] = attendance.map(record => ({
+    // The date is now handled inside the useAttendance hook to ensure consistency
+    const recordsToSave: Omit<AttendanceRecord, 'date'>[] = attendance.map(record => ({
       ...record,
-      date: today,
       classId: currentClass.id,
     }));
     
-    addAttendanceRecords(recordsToSave);
+    addAttendanceRecords(recordsToSave as any);
     setIsAttendanceConfirmed(true);
 
     toast({
