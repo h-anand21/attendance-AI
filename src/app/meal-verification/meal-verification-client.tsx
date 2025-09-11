@@ -29,6 +29,14 @@ import { VerificationTable } from './verification-table';
 import { QrScanModal } from '@/app/attendance/[classId]/qr-scan-modal';
 import type { Student } from '@/types';
 
+// Helper to get date string in YYYY-MM-DD format regardless of timezone
+const toLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function MealVerificationClient() {
   const { classes } = useClasses();
   const { studentsByClass } = useStudents();
@@ -39,7 +47,7 @@ export function MealVerificationClient() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isQrScanOpen, setQrScanOpen] = useState(false);
 
-  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+  const selectedDateStr = toLocalDateString(selectedDate);
 
   const { presentStudents, verificationMap } = useMemo(() => {
     // Get all students marked as 'present' or 'late' on the selected date
@@ -149,4 +157,3 @@ export function MealVerificationClient() {
     </div>
   );
 }
-
