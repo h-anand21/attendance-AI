@@ -154,7 +154,7 @@ export function FaceScanModal({
         performScan();
         
         // Then set interval for subsequent scans
-        scanIntervalRef.current = setInterval(performScan, 5000); // Scan every 5 seconds
+        scanIntervalRef.current = setInterval(performScan, 2000); // Scan every 2 seconds
     }
   };
 
@@ -235,3 +235,5 @@ export function FaceScanModal({
     </Dialog>
   );
 }
+
+    
