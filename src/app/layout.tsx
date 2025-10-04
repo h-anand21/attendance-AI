@@ -15,6 +15,9 @@ const ptSans = PT_Sans({
 export const metadata: Metadata = {
   title: 'My App',
   description: 'Smart Attendance System',
+  icons: {
+    icon: 'https://i.postimg.cc/NfztPvvS/green-check-box-icon-3d-render-illustration.png',
+  },
 };
 
 export default function RootLayout({
