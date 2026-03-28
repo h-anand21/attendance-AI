@@ -9,7 +9,7 @@ import {
   GlassCardHeader,
   GlassCardTitle,
 } from '@/components/ui/glass-card';
-import { LogIn, User, School, Loader2 } from 'lucide-react';
+import { User, School, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AppLogo } from '@/components/ui/app-logo';
@@ -17,6 +17,28 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type Role = 'teacher' | 'admin';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
 
 export default function LoginPage() {
   const { user, signInWithGoogle, loading, setUserRoleForSignIn } = useAuth();
@@ -40,31 +62,8 @@ export default function LoginPage() {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: 'easeOut',
-      },
-    },
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/30 dark:bg-background/50 p-4 relative overflow-hidden">
-      {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
@@ -96,6 +95,7 @@ export default function LoginPage() {
               className="grid grid-cols-2 gap-4"
             >
               <button
+                type="button"
                 className={cn(
                   "flex flex-col items-center justify-center gap-3 rounded-2xl p-6 transition-all duration-300 border backdrop-blur-md",
                   selectedRole === 'teacher' 
@@ -110,6 +110,7 @@ export default function LoginPage() {
                 <span className="font-bold">Teacher</span>
               </button>
               <button
+                type="button"
                 className={cn(
                   "flex flex-col items-center justify-center gap-3 rounded-2xl p-6 transition-all duration-300 border backdrop-blur-md",
                   selectedRole === 'admin' 
@@ -137,9 +138,9 @@ export default function LoginPage() {
                   <svg
                     className="mr-2 h-6 w-6"
                     viewBox="0 0 488 512"
+                    fill="currentColor"
                   >
                     <path
-                      fill="currentColor"
                       d="M488 261.8C488 403.3 381.5 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-69.7 69.7C321.3 100.2 286.7 80 248 80c-82.3 0-149.3 67-149.3 149.3s67 149.3 149.3 149.3c58.5 0 109.2-31.5 133.8-78.2h-133.8v-92.7H488v.5z"
                     ></path>
                   </svg>
@@ -147,7 +148,7 @@ export default function LoginPage() {
                 Continue with Google
               </GlassButton>
             </motion.div>
-          </CardContent>
+          </GlassCardContent>
         </GlassCard>
       </motion.div>
     </div>
