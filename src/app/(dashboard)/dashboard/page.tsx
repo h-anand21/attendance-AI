@@ -1,19 +1,18 @@
-
 'use client';
 
 import Link from 'next/link';
 import { AppLayout } from '@/components/app-layout';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  GlassCard,
+  GlassCardContent,
+  GlassCardDescription,
+  GlassCardHeader,
+  GlassCardTitle,
+} from '@/components/ui/glass-card';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
-import { Users, BookOpen, Loader2, PlusCircle, TrendingUp, UserCheck, Megaphone } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Users, BookOpen, Loader2, PlusCircle, TrendingUp, UserCheck, Megaphone, MoreVertical, Trash2 } from 'lucide-react';
+import { GlassBadge } from '@/components/ui/glass-badge';
 import { useMemo, useState } from 'react';
 import { GlassButton } from '@/components/ui/glass-button';
 import {
@@ -40,7 +39,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -204,15 +202,15 @@ export default function DashboardPage() {
             whileHover={{ y: -5 }}
             transition={{ type: 'spring', stiffness: 300 }}
           >
-            <Card className={cn(
-              "h-full transition-all duration-300 flex flex-col glass border-white/10",
+            <GlassCard className={cn(
+              "h-full transition-all duration-300 flex flex-col border-white/10",
               card.title === 'AI Summary' && 'border-primary/50 bg-primary/5'
             )}>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+              <GlassCardHeader className="flex flex-row items-center justify-between pb-4">
+                <GlassCardTitle className="text-sm font-medium text-muted-foreground">{card.title}</GlassCardTitle>
                 <card.icon className="h-5 w-5 text-primary/70" />
-              </CardHeader>
-              <CardContent className="space-y-1 flex-grow flex flex-col justify-center">
+              </GlassCardHeader>
+              <GlassCardContent className="space-y-1 flex-grow flex flex-col justify-center">
                 {card.value !== null && (
                   <div className="text-3xl font-bold tracking-tight">{card.value}</div>
                 )}
@@ -220,8 +218,8 @@ export default function DashboardPage() {
                   <p className="text-xs text-muted-foreground">{card.description}</p>
                 )}
                 {card.action && <div className="pt-2">{card.action}</div>}
-              </CardContent>
-            </Card>
+              </GlassCardContent>
+            </GlassCard>
           </motion.div>
         ))}
       </div>
@@ -239,7 +237,7 @@ export default function DashboardPage() {
         <motion.div className="lg:col-span-5 space-y-4" custom={4} initial="hidden" animate="visible" variants={cardVariants}>
             <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-semibold tracking-tight">
+                  <h2 className="text-2xl font-bold tracking-tight">
                       Your Classes
                   </h2>
                   <PublishNoticeDialog onPublish={addNotice}>
@@ -261,46 +259,46 @@ export default function DashboardPage() {
                           href={`/attendance/${cls.id}`} 
                           className="group"
                         >
-                          <Card className="glass border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col">
-                            <CardHeader>
+                          <GlassCard className="border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col p-2">
+                            <GlassCardHeader>
                               <div className="flex justify-between items-start">
-                                <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                                <Badge variant="secondary" className="bg-white/5 border-white/10 text-xs">Sec. {cls.section}</Badge>
+                                <GlassCardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</GlassCardTitle>
+                                <GlassBadge variant="secondary" className="text-xs">Sec. {cls.section}</GlassBadge>
                               </div>
-                              <CardDescription className="text-xs">Click to start attendance</CardDescription>
-                            </CardHeader>
-                            <CardContent className="mt-auto">
+                              <GlassCardDescription className="text-xs">Click to start attendance</GlassCardDescription>
+                            </GlassCardHeader>
+                            <GlassCardContent className="mt-auto">
                               <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                                 <Users className="h-4 w-4" />
                                 <span>{(studentsByClass[cls.id] || []).length} Students</span>
                               </div>
-                            </CardContent>
-                          </Card>
+                            </GlassCardContent>
+                          </GlassCard>
                         </Link>
                       </motion.div>
                     ))}
                 </div>
                 ) : (
-                <Card className="text-center py-12 glass border-white/10">
-                    <CardContent>
-                        <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <GlassCard className="text-center py-12 border-white/10">
+                    <GlassCardContent>
+                        <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
                         <p className="text-muted-foreground mb-4">Create a new class to get started.</p>
                         <GlassButton variant="primary">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Create Your First Class
                         </GlassButton>
-                    </CardContent>
-                </Card>
+                    </GlassCardContent>
+                </GlassCard>
                 )}
             </div>
         </motion.div>
 
         <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
-             <Card className="glass border-white/10 h-full flex flex-col">
-                <CardHeader>
+             <GlassCard className="border-white/10 h-full flex flex-col">
+                <GlassCardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle className="flex items-center gap-2 text-lg font-semibold"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</CardTitle>
+                    <GlassCardTitle className="flex items-center gap-2 text-lg font-bold"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</GlassCardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
                             <GlassButton variant="primary" size="sm" className="h-8 px-3 text-xs">
@@ -310,11 +308,11 @@ export default function DashboardPage() {
                         </PublishNoticeDialog>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent className="flex-grow">
+                </GlassCardHeader>
+                <GlassCardContent className="flex-grow">
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/5 border-white/10 rounded-xl">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/5 border-white/10 rounded-xl backdrop-blur-md">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription className="text-[10px] text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
@@ -339,29 +337,29 @@ export default function DashboardPage() {
                      {notices.length > 5 && <GlassButton variant="outline" size="sm" className="w-full text-xs h-8">View All Notices</GlassButton> }
                    </div>
                 </CardContent>
-            </Card>
+            </GlassCard>
         </motion.div>
       </div>
 
        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
-        <DialogContent className="glass border-white/20">
+        <DialogContent className="glass border-white/20 p-8">
           <DialogHeader>
-            <DialogTitle>AI Attendance Summary (Last 30 Days)</DialogTitle>
-            <DialogDescription>
-              Here is an AI-generated summary of attendance trends across all classes.
+            <DialogTitle className="text-2xl font-bold">AI Attendance Summary</DialogTitle>
+            <DialogDescription className="text-base">
+              Analysis of trends across all classes for the last 30 days.
             </DialogDescription>
           </DialogHeader>
           {isSummaryLoading ? (
-            <div className="flex items-center justify-center h-24">
-              <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto bg-black/20 p-4 rounded-xl">
-              <p className="text-sm leading-relaxed">{summary}</p>
+            <div className="prose prose-sm dark:prose-invert max-h-80 overflow-y-auto bg-black/20 p-6 rounded-2xl border border-white/10">
+              <p className="text-base leading-relaxed">{summary}</p>
             </div>
           )}
-          <DialogFooter>
-            <GlassButton onClick={() => setSummaryModalOpen(false)}>Close</GlassButton>
+          <DialogFooter className="pt-4">
+            <GlassButton onClick={() => setSummaryModalOpen(false)} className="w-full sm:w-auto">Close Insights</GlassButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
