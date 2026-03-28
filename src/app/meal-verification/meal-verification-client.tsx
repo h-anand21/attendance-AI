@@ -1,16 +1,14 @@
-
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { DateRange } from 'react-day-picker';
+import { useState, useMemo } from 'react';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+  GlassCard,
+  GlassCardContent,
+  GlassCardHeader,
+  GlassCardTitle,
+  GlassCardDescription,
+} from '@/components/ui/glass-card';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
   Popover,
   PopoverContent,
@@ -21,15 +19,13 @@ import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
 import { useMealVerifications } from '@/hooks/use-meal-verifications';
-import { CalendarIcon, QrCode, Loader2 } from 'lucide-react';
+import { CalendarIcon, QrCode } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { VerificationTable } from './verification-table';
 import { QrScanModal } from '@/app/attendance/[classId]/qr-scan-modal';
-import type { Student } from '@/types';
 
-// Helper to get date string in YYYY-MM-DD format regardless of timezone
 const toLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -50,7 +46,6 @@ export function MealVerificationClient() {
   const selectedDateStr = toLocalDateString(selectedDate);
 
   const { presentStudents, verificationMap } = useMemo(() => {
-    // Get all students marked as 'present' or 'late' on the selected date
     const presentRecords = attendanceRecords.filter(
       r => r.date === selectedDateStr && (r.status === 'present' || r.status === 'late')
     );
@@ -59,7 +54,6 @@ export function MealVerificationClient() {
     const allStudents = Object.values(studentsByClass).flat();
     const presentStudents = allStudents.filter(s => presentStudentIds.has(s.id));
     
-    // Create a map of verifications for the selected date for quick lookup
     const dailyVerifications = verifications.filter(v => v.date === selectedDateStr);
     const verificationMap = new Map(
         dailyVerifications.map(v => [v.studentId, v])
@@ -75,7 +69,7 @@ export function MealVerificationClient() {
         toast({
             variant: 'destructive',
             title: 'Student Not Marked Present',
-            description: 'This student is not on the list of present students for today. Please check their attendance record.',
+            description: 'This student is not on the list of present students for today.',
         });
         return;
     }
@@ -88,32 +82,27 @@ export function MealVerificationClient() {
         return;
     }
 
-    const success = await addMealVerification({
+    await addMealVerification({
       studentId,
       date: selectedDateStr,
       source: 'qr',
     });
-
-    if (success) {
-      // The real-time listener will update the UI.
-    }
   };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Meal Verification Controls</CardTitle>
-          <CardDescription>
+      <GlassCard>
+        <GlassCardHeader>
+          <GlassCardTitle>Meal Verification Controls</GlassCardTitle>
+          <GlassCardDescription>
             Select a date and scan student QR codes to verify meal distribution.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-4">
+          </GlassCardDescription>
+        </GlassCardHeader>
+        <GlassCardContent className="flex flex-wrap items-center gap-4">
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                id="date"
-                variant={'outline'}
+              <GlassButton
+                variant="outline"
                 className={cn(
                   'w-[300px] justify-start text-left font-normal',
                   !selectedDate && 'text-muted-foreground'
@@ -121,9 +110,9 @@ export function MealVerificationClient() {
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedDate ? format(selectedDate, 'PPP') : <span>Pick a date</span>}
-              </Button>
+              </GlassButton>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 glass" align="start">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -133,12 +122,12 @@ export function MealVerificationClient() {
               />
             </PopoverContent>
           </Popover>
-          <Button onClick={() => setQrScanOpen(true)}>
+          <GlassButton variant="primary" onClick={() => setQrScanOpen(true)}>
             <QrCode className="mr-2 h-4 w-4" />
             Scan to Verify
-          </Button>
-        </CardContent>
-      </Card>
+          </GlassButton>
+        </GlassCardContent>
+      </GlassCard>
       
       <VerificationTable 
         students={presentStudents}

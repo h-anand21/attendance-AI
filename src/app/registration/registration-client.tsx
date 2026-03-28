@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -8,18 +7,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useStudents } from '@/hooks/use-students';
 import { useClasses } from '@/hooks/use-classes';
 import { useToast } from '@/hooks/use-toast';
-import type { Student, Class } from '@/types';
+import type { Student } from '@/types';
 import { motion } from 'framer-motion';
 
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+  GlassCard,
+  GlassCardContent,
+  GlassCardDescription,
+  GlassCardHeader,
+  GlassCardTitle,
+} from '@/components/ui/glass-card';
+import { GlassInput } from '@/components/ui/glass-input';
 import {
   Select,
   SelectContent,
@@ -100,16 +99,14 @@ export function RegistrationClient() {
   });
 
   useEffect(() => {
-    // Set initial selected class when classes load for the first time
     if (classes.length > 0 && !selectedClass) {
-      const latestClass = [...classes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-      setSelectedClass(latestClass.id);
+      const sortedClasses = [...classes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setSelectedClass(sortedClasses[0].id);
     }
   }, [classes, selectedClass]);
 
 
   useEffect(() => {
-    // Sync selected class with the form
     if (selectedClass) {
       studentForm.setValue('classId', selectedClass);
     }
@@ -118,7 +115,6 @@ export function RegistrationClient() {
 
   const setupCamera = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-       console.error("Camera not supported on this browser");
        setHasCameraPermission(false);
        return;
     }
@@ -137,7 +133,6 @@ export function RegistrationClient() {
   useEffect(() => {
     setupCamera();
     return () => {
-      // Turn off camera when component unmounts
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
@@ -152,7 +147,6 @@ export function RegistrationClient() {
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Flip the image horizontally for a mirror effect
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
@@ -173,7 +167,6 @@ export function RegistrationClient() {
     }
 
     setIsSubmitting(true);
-    
     const newStudentId = await addStudent({ name: values.name, avatar: capturedImage }, values.classId);
 
     if (newStudentId) {
@@ -185,12 +178,12 @@ export function RegistrationClient() {
         studentForm.setValue('classId', values.classId);
         setCapturedImage(null);
         setHighlightedStudentId(newStudentId);
-        setTimeout(() => setHighlightedStudentId(null), 3000); // Highlight for 3 seconds
+        setTimeout(() => setHighlightedStudentId(null), 3000);
     } else {
          toast({
             variant: 'destructive',
             title: 'Registration Failed',
-            description: 'Could not register the student. Please try again.',
+            description: 'Could not register the student.',
         });
     }
     setIsSubmitting(false);
@@ -205,20 +198,6 @@ export function RegistrationClient() {
   const onClassCreate = async (newClassData: {name: string, section: string}) => {
      await addClass(newClassData);
   }
-
-  useEffect(() => {
-      // When classes list updates (e.g., a new class is added),
-      // select the most recently created one.
-      if (classes.length > 0) {
-        const sortedClasses = [...classes].sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        const latestClass = sortedClasses[0];
-        if (latestClass.id !== selectedClass) {
-            setSelectedClass(latestClass.id);
-        }
-      }
-  }, [classes]);
 
   const filteredStudents = useMemo(() => {
     const studentsInSelectedClass = studentsByClass[selectedClass] || [];
@@ -243,15 +222,15 @@ export function RegistrationClient() {
     <>
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       <motion.div variants={cardVariants} initial="hidden" animate="visible" transition={{ delay: 0.1 }}>
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Register New Student</CardTitle>
-            <CardDescription>
+        <GlassCard>
+          <GlassCardHeader>
+            <GlassCardTitle>Register New Student</GlassCardTitle>
+            <GlassCardDescription>
               Fill in the details and capture a photo.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+            </GlassCardDescription>
+          </GlassCardHeader>
+          <GlassCardContent className="space-y-6">
+            <div className="relative h-48 w-full rounded-2xl bg-black/40 flex items-center justify-center overflow-hidden border border-white/10 shadow-inner">
               <video
                 ref={videoRef}
                 className="w-full aspect-video rounded-md transform -scale-x-100"
@@ -260,9 +239,9 @@ export function RegistrationClient() {
                 playsInline
               />
               {hasCameraPermission === undefined && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <p className='ml-2'>Starting camera...</p>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className='ml-2 text-sm text-primary font-medium'>Starting camera...</p>
                 </div>
               )}
               {capturedImage && (
@@ -277,26 +256,24 @@ export function RegistrationClient() {
             </div>
 
             {hasCameraPermission === false && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="glass border-destructive/50">
                  <Camera className="h-4 w-4" />
                 <AlertTitle>Camera Access Required</AlertTitle>
                 <AlertDescription>
-                  Please allow camera access in your browser settings to use this feature.
+                  Please allow camera access in your browser settings.
                 </AlertDescription>
               </Alert>
             )}
 
-            <div className="flex gap-2">
-              <Button
-                className="w-full"
-                onClick={handleCapture}
-                disabled={!hasCameraPermission}
-                variant="outline"
-              >
-                <Camera className="mr-2 h-4 w-4" />
-                {capturedImage ? 'Retake Photo' : 'Capture Photo'}
-              </Button>
-            </div>
+            <GlassButton
+              className="w-full"
+              onClick={handleCapture}
+              disabled={!hasCameraPermission}
+              variant="outline"
+            >
+              <Camera className="mr-2 h-4 w-4" />
+              {capturedImage ? 'Retake Photo' : 'Capture Photo'}
+            </GlassButton>
 
             <Form {...studentForm}>
               <form
@@ -310,7 +287,7 @@ export function RegistrationClient() {
                     <FormItem>
                       <FormLabel>Student Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. John Doe" {...field} />
+                        <GlassInput placeholder="e.g. John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -329,11 +306,11 @@ export function RegistrationClient() {
                             disabled={classes.length === 0}
                         >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="glass h-12 rounded-xl border-white/10">
                                   <SelectValue placeholder="Select a class" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="glass">
                             {classes.map((c) => (
                                 <SelectItem key={c.id} value={c.id}>
                                 {c.name} - Section {c.section}
@@ -342,50 +319,51 @@ export function RegistrationClient() {
                             </SelectContent>
                         </Select>
                         <CreateClassDialog onClassCreate={onClassCreate}>
-                            <Button type="button" variant="outline" size="icon" aria-label="Create new class">
-                                <PlusCircle className="h-4 w-4" />
-                            </Button>
+                            <GlassButton type="button" variant="outline" size="icon" className="h-12 w-12 shrink-0">
+                                <PlusCircle className="h-5 w-5" />
+                            </GlassButton>
                         </CreateClassDialog>
                        </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
+                <GlassButton
                   type="submit"
-                  className="w-full"
+                  variant="primary"
+                  className="w-full h-14 text-lg"
                   disabled={isSubmitting || !capturedImage || classes.length === 0}
                 >
                   {isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                   ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
+                    <UserPlus className="mr-2 h-6 w-6" />
                   )}
                   Register Student
-                </Button>
+                </GlassButton>
               </form>
             </Form>
-          </CardContent>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
       </motion.div>
 
       <motion.div className="lg:col-span-2" variants={cardVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
-        <Card>
-          <CardHeader>
+        <GlassCard>
+          <GlassCardHeader>
             <div className="flex justify-between items-center flex-wrap gap-4">
               <div>
-                <CardTitle>Registered Students</CardTitle>
-                <CardDescription>
+                <GlassCardTitle>Registered Students</GlassCardTitle>
+                <GlassCardDescription>
                   Manage and view student records.
-                </CardDescription>
+                </GlassCardDescription>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                  <div className="relative flex-1 sm:flex-initial">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <GlassInput
                         type="search"
-                        placeholder="Search by name or ID..."
-                        className="pl-8"
+                        placeholder="Search..."
+                        className="pl-10 h-10 rounded-xl"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -395,24 +373,24 @@ export function RegistrationClient() {
                   onValueChange={setSelectedClass}
                   disabled={classes.length === 0}
                 >
-                  <SelectTrigger className="w-full sm:w-[250px]">
-                    <SelectValue placeholder="Filter by class" />
+                  <SelectTrigger className="w-full sm:w-[200px] glass h-10 rounded-xl border-white/10">
+                    <SelectValue placeholder="Filter" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass">
                     {classes.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name} - Sec. {c.section}
+                        {c.name} (Sec. {c.section})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
+          </GlassCardHeader>
+          <GlassCardContent>
+            <div className="rounded-2xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-white/5">
                   <TableRow>
                     <TableHead className="w-[80px]">Avatar</TableHead>
                     <TableHead>Student Name</TableHead>
@@ -424,7 +402,7 @@ export function RegistrationClient() {
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={4} className="h-24 text-center">
-                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                       </TableCell>
                     </TableRow>
                   ) : filteredStudents.length > 0 ? (
@@ -433,8 +411,8 @@ export function RegistrationClient() {
                         key={student.id} 
                         ref={student.id === highlightedStudentId ? newStudentRowRef : null}
                         className={cn(
-                          'transition-colors duration-1000 ease-out',
-                          student.id === highlightedStudentId ? 'bg-primary/10' : ''
+                          'transition-colors duration-1000 ease-out hover:bg-white/5',
+                          student.id === highlightedStudentId ? 'bg-primary/20' : ''
                         )}
                       >
                         <TableCell>
@@ -452,53 +430,51 @@ export function RegistrationClient() {
                         <TableCell className="font-medium">
                           {student.name}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-xs uppercase">
                           {student.id}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleShowQrCode(student)} disabled={!student.qrCode}>
+                          <GlassButton variant="ghost" size="icon" onClick={() => handleShowQrCode(student)} disabled={!student.qrCode}>
                              <QrCodeIcon className="h-5 w-5" />
-                          </Button>
+                          </GlassButton>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-48 text-center">
-                        {searchQuery ? `No students found for "${searchQuery}".` : (classes.length === 0 ? 'Create a class to begin registering students.' : 'No students registered for this class yet.')}
+                      <TableCell colSpan={4} className="h-48 text-center text-muted-foreground">
+                        {searchQuery ? `No results for "${searchQuery}".` : 'No students found.'}
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
       </motion.div>
     </div>
     <Dialog open={isQrCodeModalOpen} onOpenChange={setQrCodeModalOpen}>
-        <DialogContent>
+        <DialogContent className="glass border-white/20">
             <DialogHeader>
                 <DialogTitle>QR Code for {selectedStudentForQr?.name}</DialogTitle>
             </DialogHeader>
             {selectedStudentForQr?.qrCode ? (
-                <div className="flex flex-col items-center justify-center p-4 gap-4">
-                    <img src={selectedStudentForQr.qrCode} alt={`QR Code for ${selectedStudentForQr.name}`} className="w-64 h-64 rounded-lg shadow-md" />
-                    <Button onClick={() => {
+                <div className="flex flex-col items-center justify-center p-4 gap-6">
+                    <img src={selectedStudentForQr.qrCode} alt="QR Code" className="w-64 h-64 rounded-2xl shadow-2xl border-4 border-white/20" />
+                    <GlassButton variant="primary" className="w-full" onClick={() => {
                         const link = document.createElement('a');
                         link.href = selectedStudentForQr.qrCode!;
-                        link.download = `QR_Code_${selectedStudentForQr.name.replace(/\s/g, '_')}.jpeg`;
-                        document.body.appendChild(link);
+                        link.download = `QR_${selectedStudentForQr.name.replace(/\s/g, '_')}.jpeg`;
                         link.click();
-                        document.body.removeChild(link);
                     }}>
                         Download QR Code
-                    </Button>
+                    </GlassButton>
                 </div>
             ) : (
-              <div className="flex items-center justify-center p-8 text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <p>Generating QR Code...</p>
+              <div className="flex items-center justify-center p-8 text-primary">
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                <p>Generating...</p>
               </div>
             )}
         </DialogContent>

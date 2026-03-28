@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,14 +8,14 @@ import type {
   AttendanceRecord,
   AttendanceStatus,
 } from '@/types';
-import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+  GlassCard,
+  GlassCardContent,
+  GlassCardHeader,
+  GlassCardTitle,
+  GlassCardDescription,
+} from '@/components/ui/glass-card';
+import { GlassButton } from '@/components/ui/glass-button';
 import { Download, QrCode, Upload, CheckCircle, Loader2, ScanFace } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './attendance-table';
@@ -26,7 +25,7 @@ import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
 import { PhotoUploadModal } from './photo-upload-modal';
 import * as XLSX from 'xlsx';
-import { AnimatedButton, SparkleIcon } from '@/components/ui/animated-button';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 const toLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
@@ -64,17 +63,15 @@ export function AttendanceClient({
 
     let initialAttendance;
     if (todaysRecords.length > 0) {
-      // If records for today exist, use them
       initialAttendance = classStudents.map(student => {
         const record = todaysRecords.find(r => r.studentId === student.id);
         return {
           studentId: student.id,
-          status: record ? record.status : 'absent', // Default to absent if student has no record today
+          status: record ? record.status : 'absent',
         };
       });
       setIsAttendanceConfirmed(true);
     } else {
-      // If no records for today, default everyone to absent
       initialAttendance = classStudents.map(student => ({
         studentId: student.id,
         status: 'absent',
@@ -92,7 +89,6 @@ export function AttendanceClient({
         record.studentId === studentId ? { ...record, status } : record
       )
     );
-    // Any change should allow re-confirmation
     setIsAttendanceConfirmed(false);
   };
 
@@ -121,7 +117,7 @@ export function AttendanceClient({
         : record
     );
     setAttendance(updatedAttendance);
-    setIsAttendanceConfirmed(false); // Changes were made, allow confirmation
+    setIsAttendanceConfirmed(false);
     toast({
       title: 'Face Scan Complete',
       description: `${recognizedStudentIds.length} students marked as present.`,
@@ -129,7 +125,6 @@ export function AttendanceClient({
   };
 
   const handleConfirmAttendance = () => {
-    // The date is now handled inside the useAttendance hook to ensure consistency
     const recordsToSave: Omit<AttendanceRecord, 'date'>[] = attendance.map(record => ({
       ...record,
       classId: currentClass.id,
@@ -193,41 +188,42 @@ export function AttendanceClient({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Take Attendance</CardTitle>
-          <CardDescription>
+      <GlassCard>
+        <GlassCardHeader>
+          <GlassCardTitle>Take Attendance</GlassCardTitle>
+          <GlassCardDescription>
             Use one of the methods below for {currentClass.name}. Today's date is {format(new Date(), 'dd / MM / yyyy')}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4">
+          </GlassCardDescription>
+        </GlassCardHeader>
+        <GlassCardContent className="flex flex-wrap gap-4">
           <AnimatedButton
             onClick={() => setFaceScanOpen(true)}
             disabled={loading || students.length === 0}
+            className="h-12"
           >
             <ScanFace className="h-6 w-6" />
             Start Face Scan
           </AnimatedButton>
-          <Button 
+          <GlassButton 
             variant="outline"
             onClick={() => setPhotoUploadOpen(true)}
             disabled={loading || students.length === 0}
           >
             <Upload className="mr-2 h-4 w-4" /> Upload Photo
-          </Button>
-          <Button 
+          </GlassButton>
+          <GlassButton 
             variant="outline"
             onClick={() => setQrScanOpen(true)}
             disabled={loading || students.length === 0}
           >
             <QrCode className="mr-2 h-4 w-4" /> Scan RFID/QR
-          </Button>
-          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+          </GlassButton>
+          <GlassButton variant="outline" onClick={handleExport} disabled={isExporting}>
             {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Download Excel
-          </Button>
-        </CardContent>
-      </Card>
+          </GlassButton>
+        </GlassCardContent>
+      </GlassCard>
 
       <AttendanceTable
         students={students}
@@ -237,14 +233,15 @@ export function AttendanceClient({
       />
 
       <div className="flex justify-end">
-        <button
+        <GlassButton
+          variant="primary"
           onClick={handleConfirmAttendance}
           disabled={students.length === 0 || isAttendanceConfirmed}
-          className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(48,100%,63%),hsl(54,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(48,100%,63%),hsl(54,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(48,100%,63%),hsl(54,100%,63%))] hover:scale-105 active:scale-95 h-11 px-8 inline-flex"
+          className="h-14 px-10 rounded-2xl font-bold shadow-2xl"
         >
-          <CheckCircle className="mr-2 h-5 w-5" />
+          <CheckCircle className="mr-2 h-6 w-6" />
           {isAttendanceConfirmed ? 'Attendance Saved' : 'Confirm Attendance'}
-        </button>
+        </GlassButton>
       </div>
 
       <FaceScanModal

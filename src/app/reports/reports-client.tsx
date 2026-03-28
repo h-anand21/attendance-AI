@@ -1,16 +1,15 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DateRange } from 'react-day-picker';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+  GlassCard,
+  GlassCardContent,
+  GlassCardHeader,
+  GlassCardTitle,
+  GlassCardDescription,
+} from '@/components/ui/glass-card';
 import {
   Select,
   SelectContent,
@@ -18,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
   Popover,
   PopoverContent,
@@ -28,26 +27,18 @@ import { Calendar } from '@/components/ui/calendar';
 import { useClasses } from '@/hooks/use-classes';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { AttendancePieChart } from './attendance-pie-chart';
 import { AttendanceBarChart } from './attendance-bar-chart';
 import { AnomalyChart } from './anomaly-chart';
 import type { AttendanceStatus } from '@/types';
 import { CalendarIcon, AlertTriangle, Loader2, Download } from 'lucide-react';
-import { format, subDays, addDays, eachDayOfInterval } from 'date-fns';
+import { format, subDays, eachDayOfInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 export function ReportsClient() {
   const { classes } = useClasses();
@@ -73,7 +64,6 @@ export function ReportsClient() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    // If selectedClassId is not set and classes are loaded, set it to the first class.
     if (!selectedClassId && classes.length > 0) {
       setSelectedClassId(classes[0].id);
     }
@@ -107,11 +97,10 @@ export function ReportsClient() {
         });
         setAnomalies(result.anomalies);
     } catch(error) {
-        console.error("Error analyzing anomalies:", error);
-         toast({
+        toast({
             variant: 'destructive',
             title: 'AI Analysis Failed',
-            description: 'An error occurred while analyzing anomalies.',
+            description: 'Could not analyze data.',
         });
     } finally {
         setIsAnalyzing(false);
@@ -123,7 +112,7 @@ export function ReportsClient() {
       toast({
         variant: 'destructive',
         title: 'No Data to Export',
-        description: 'There are no records for the selected class and date range.',
+        description: 'Records not found for the selected filter.',
       });
       return;
     }
@@ -131,68 +120,41 @@ export function ReportsClient() {
 
     try {
         const studentsInClass = studentsByClass[selectedClassId] || [];
-        const studentMap = new Map(studentsInClass.map(s => [s.id, s.name]));
-
-        // Sheet 1: Student Summary
         const studentSummary: any[] = [];
         if (dateRange?.from && dateRange?.to) {
-            const dateInterval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
             const classDays = new Set(filteredRecords.map(r => r.date));
             const totalClasses = classDays.size;
     
             studentsInClass.forEach(student => {
                 const studentRecords = filteredRecords.filter(r => r.studentId === student.id);
                 const presentCount = studentRecords.filter(r => r.status === 'present').length;
-                const absentCount = totalClasses - presentCount; // Simplified logic
+                const absentCount = totalClasses - presentCount;
                 studentSummary.push({
                     'Student Name': student.name,
                     'Student ID': student.id,
-                    'Total Classes in Range': totalClasses,
-                    'Classes Attended': presentCount,
-                    'Classes Absent': absentCount,
+                    'Total Classes': totalClasses,
+                    'Attended': presentCount,
+                    'Absent': absentCount,
                     'Attendance %': totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) + '%' : 'N/A'
                 });
             });
         }
-        const studentSheet = XLSX.utils.json_to_sheet(studentSummary);
-
-        // Sheet 2: Daily Log
-        const dailyLog: any[] = [];
-        const classDays = new Set(filteredRecords.map(r => r.date));
-        classDays.forEach(date => {
-            const recordsForDay = filteredRecords.filter(r => r.date === date);
-            const presentCount = recordsForDay.filter(r => r.status === 'present').length;
-            const absentCount = recordsForDay.filter(r => r.status === 'absent').length;
-            const lateCount = recordsForDay.filter(r => r.status === 'late').length;
-            dailyLog.push({
-                'Date': date,
-                'Present': presentCount,
-                'Absent': absentCount,
-                'Late': lateCount,
-                'Total Students': presentCount + absentCount + lateCount
-            });
-        });
-        const dailySheet = XLSX.utils.json_to_sheet(dailyLog);
         
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, studentSheet, 'Student Summary');
-        XLSX.utils.book_append_sheet(workbook, dailySheet, 'Daily Log');
-
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(studentSummary), 'Summary');
         const currentClass = classes.find(c => c.id === selectedClassId);
-        const fileName = `Attendance_Report_${currentClass?.name.replace(/\s/g, '_')}_${format(dateRange?.from || new Date(), 'yyyyMMdd')}_to_${format(dateRange?.to || new Date(), 'yyyyMMdd')}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
+        XLSX.writeFile(workbook, `Report_${currentClass?.name.replace(/\s/g, '_')}.xlsx`);
 
          toast({
             title: 'Export Successful',
-            description: 'The attendance report has been downloaded.',
+            description: 'Report downloaded.',
         });
 
     } catch (error) {
-         console.error("Error exporting to Excel:", error);
         toast({
             variant: 'destructive',
             title: 'Export Failed',
-            description: 'An error occurred while exporting the data.',
+            description: 'Error generating file.',
         });
     } finally {
         setIsExporting(false);
@@ -201,173 +163,106 @@ export function ReportsClient() {
 
   const pieChartData = useMemo(() => {
     if (filteredRecords.length === 0) return [];
-    
     const statusCounts = filteredRecords.reduce((acc, record) => {
       acc[record.status] = (acc[record.status] || 0) + 1;
       return acc;
     }, {} as Record<AttendanceStatus, number>);
-
-    return Object.entries(statusCounts)
-      .map(([name, value]) => ({
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        value,
-      }));
+    return Object.entries(statusCounts).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
   }, [filteredRecords]);
 
   const barChartData = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return [];
-
     const dailyData: { [date: string]: { present: number; absent: number; late: number } } = {};
-    const dateInterval = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
-
-    dateInterval.forEach(day => {
-        const dateStr = format(day, 'yyyy-MM-dd');
-        dailyData[dateStr] = { present: 0, absent: 0, late: 0 };
+    eachDayOfInterval({ start: dateRange.from, end: dateRange.to }).forEach(day => {
+        dailyData[format(day, 'yyyy-MM-dd')] = { present: 0, absent: 0, late: 0 };
     });
-    
     filteredRecords.forEach(record => {
-      if (dailyData[record.date]) {
-        dailyData[record.date][record.status]++;
-      }
+      if (dailyData[record.date]) dailyData[record.date][record.status]++;
     });
-
     return Object.entries(dailyData).map(([date, counts]) => ({ date, ...counts }));
   }, [filteredRecords, dateRange]);
 
-
-  const studentsInClass = studentsByClass[selectedClassId] || [];
-
   const getStudentName = (studentId: string) => {
-    const student = studentsInClass.find((s) => s.id === studentId);
-    return student?.name || 'Unknown Student';
+    return (studentsByClass[selectedClassId] || []).find(s => s.id === studentId)?.name || 'Unknown';
   };
   
   const anomalyChartData = useMemo(() => {
     if (anomalies.length === 0) return [];
-    
-    const anomalyCounts = anomalies.reduce((acc, anomaly) => {
-        const studentName = getStudentName(anomaly.studentId);
-        acc[studentName] = (acc[studentName] || 0) + 1;
+    const counts = anomalies.reduce((acc, a) => {
+        const name = getStudentName(a.studentId);
+        acc[name] = (acc[name] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
-
-    return Object.entries(anomalyCounts)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a,b) => b.count - a.count);
-  }, [anomalies, studentsInClass]);
-  
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
+  }, [anomalies, selectedClassId]);
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter Reports</CardTitle>
-          <CardDescription>
-            Select a class and a date range to view the attendance report.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-4">
-          <Select
-            value={selectedClassId}
-            onValueChange={setSelectedClassId}
-            disabled={classes.length === 0}
-          >
-            <SelectTrigger className="flex-1 min-w-[200px]">
-              <SelectValue placeholder="Select a class" />
+      <GlassCard>
+        <GlassCardHeader>
+          <GlassCardTitle>Filter Reports</GlassCardTitle>
+          <GlassCardDescription>Select class and date range for analysis.</GlassCardDescription>
+        </GlassCardHeader>
+        <GlassCardContent className="flex flex-wrap items-center gap-4">
+          <Select value={selectedClassId} onValueChange={setSelectedClassId} disabled={classes.length === 0}>
+            <SelectTrigger className="flex-1 min-w-[200px] glass h-12 rounded-xl border-white/10">
+              <SelectValue placeholder="Select Class" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="glass">
               {classes.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name} - Section {c.section}
-                </SelectItem>
+                <SelectItem key={c.id} value={c.id}>{c.name} (Sec. {c.section})</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                id="date"
-                variant={'outline'}
-                className={cn(
-                  "flex-1 min-w-[200px] justify-start text-left font-normal",
-                  !dateRange && "text-muted-foreground"
-                )}
-              >
+              <GlassButton variant="outline" className="flex-1 min-w-[250px] justify-start text-left h-12">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateRange?.from ? (
-                  dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "LLL dd, y")} -{" "}
-                      {format(dateRange.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(dateRange.from, "LLL dd, y")
-                  )
-                ) : (
-                  <span>Pick a date</span>
-                )}
-              </Button>
+                {dateRange?.from ? (dateRange.to ? `${format(dateRange.from, "LLL dd")} - ${format(dateRange.to, "LLL dd, y")}` : format(dateRange.from, "LLL dd, y")) : "Pick range"}
+              </GlassButton>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={dateRange?.from}
-                selected={dateRange}
-                onSelect={setDateRange}
-                numberOfMonths={2}
-              />
+            <PopoverContent className="w-auto p-0 glass" align="start">
+              <Calendar initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} />
             </PopoverContent>
           </Popover>
-           <Button onClick={handleAnalyzeAnomalies} disabled={isAnalyzing || filteredRecords.length === 0}>
+           <GlassButton variant="primary" onClick={handleAnalyzeAnomalies} disabled={isAnalyzing || filteredRecords.length === 0}>
                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <AlertTriangle className="mr-2 h-4 w-4" />}
-                Analyze with AI
-            </Button>
-            <Button onClick={handleExport} disabled={isExporting || filteredRecords.length === 0}>
+                Analyze AI
+            </GlassButton>
+            <GlassButton variant="outline" onClick={handleExport} disabled={isExporting || filteredRecords.length === 0}>
                 {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                Download Report
-            </Button>
-        </CardContent>
-      </Card>
+                Export
+            </GlassButton>
+        </GlassCardContent>
+      </GlassCard>
 
-        {isAnalyzing && (
-            <div className="flex items-center justify-center rounded-lg border border-dashed p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-        )}
-      
       {anomalies.length > 0 && (
-          <Card>
-              <CardHeader>
-                  <CardTitle>AI-Powered Anomaly Detection</CardTitle>
-                  <CardDescription>The following insights and potential issues were detected in the selected period.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h4 className="font-semibold mb-2">Anomaly Details</h4>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                    {anomalies.map((anomaly, index) => (
-                      <Alert key={index} className="mb-2">
-                         <AlertTriangle className="h-4 w-4" />
-                          <AlertTitle>{anomaly.anomalyType} - {getStudentName(anomaly.studentId)}</AlertTitle>
-                          <AlertDescription>
-                              {anomaly.description} (On: {new Date(anomaly.date).toLocaleDateString()})
-                          </AlertDescription>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <GlassCard>
+                <GlassCardHeader>
+                    <GlassCardTitle>AI Insights</GlassCardTitle>
+                </GlassCardHeader>
+                <GlassCardContent className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                    {anomalies.map((a, i) => (
+                      <Alert key={i} className="glass border-white/10 text-xs">
+                          <AlertTriangle className="h-4 w-4 text-primary" />
+                          <AlertTitle className="font-bold">{getStudentName(a.studentId)}</AlertTitle>
+                          <AlertDescription>{a.description}</AlertDescription>
                       </Alert>
                     ))}
-                    </div>
-                </div>
-                <div>
-                   <h4 className="font-semibold mb-2">Students with Most Anomalies</h4>
-                   <AnomalyChart data={anomalyChartData} />
-                </div>
-              </CardContent>
-          </Card>
+                  </div>
+                  <div>
+                     <AnomalyChart data={anomalyChartData} />
+                  </div>
+                </GlassCardContent>
+            </GlassCard>
+          </motion.div>
       )}
       
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1">
-          <AttendancePieChart data={pieChartData} title="Overall Status" description="Summary for the selected date range." />
+          <AttendancePieChart data={pieChartData} title="Summary" description="Status distribution" />
         </div>
         <div className="md:col-span-2">
             <AttendanceBarChart data={barChartData} />

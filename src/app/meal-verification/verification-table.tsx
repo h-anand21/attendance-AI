@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -10,15 +9,15 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { GlassBadge } from '@/components/ui/glass-badge';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  GlassCard,
+  GlassCardContent,
+  GlassCardDescription,
+  GlassCardHeader,
+  GlassCardTitle,
+} from '@/components/ui/glass-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
@@ -50,17 +49,17 @@ export function VerificationTable({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Present Students ({selectedDate})</CardTitle>
-        <CardDescription>
+    <GlassCard>
+      <GlassCardHeader>
+        <GlassCardTitle>Present Students ({selectedDate})</GlassCardTitle>
+        <GlassCardDescription>
           List of all students marked as present or late today. Total: {students.length}.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
+        </GlassCardDescription>
+      </GlassCardHeader>
+      <GlassCardContent>
+        <div className="rounded-2xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-white/5">
               <TableRow>
                 <TableHead>Student</TableHead>
                 <TableHead>Class</TableHead>
@@ -88,7 +87,7 @@ export function VerificationTable({
                 students.map((student) => {
                   const verification = verificationMap.get(student.id);
                   return (
-                    <TableRow key={student.id}>
+                    <TableRow key={student.id} className="hover:bg-white/5">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar>
@@ -101,7 +100,7 @@ export function VerificationTable({
                           </Avatar>
                           <div>
                             <p className="font-medium">{student.name}</p>
-                            <p className="text-xs text-muted-foreground">{student.id}</p>
+                            <p className="text-xs text-muted-foreground uppercase">{student.id}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -113,27 +112,25 @@ export function VerificationTable({
                            <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                  <Badge variant="default" className="cursor-help bg-green-600 hover:bg-green-700">
+                                  <GlassBadge variant="primary" className="cursor-help">
                                     <CheckCircle className="h-3.5 w-3.5 mr-1" />
                                     Verified
-                                  </Badge>
+                                  </GlassBadge>
                               </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs">
-                                    Verified {formatDistanceToNow(new Date(verification.verifiedAt), { addSuffix: true })}
-                                    <br/>
-                                    Source: {verification.source.toUpperCase()}
-                                    {verification.note && <br/>}
-                                    {verification.note && `Note: ${verification.note}`}
-                                </p>
+                              <TooltipContent className="glass">
+                                <div className="text-xs p-1">
+                                    <p>Verified {formatDistanceToNow(new Date(verification.verifiedAt), { addSuffix: true })}</p>
+                                    <p className="opacity-70">Source: {verification.source.toUpperCase()}</p>
+                                    {verification.note && <p className="mt-1 border-t border-white/10 pt-1">Note: {verification.note}</p>}
+                                </div>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         ) : (
-                           <Badge variant="secondary">
+                           <GlassBadge variant="secondary">
                             <HelpCircle className="h-3.5 w-3.5 mr-1" />
                             Pending
-                           </Badge>
+                           </GlassBadge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
@@ -143,10 +140,10 @@ export function VerificationTable({
                           selectedDate={selectedDate}
                           disabled={!!verification}
                         >
-                            <Button variant="ghost" size="sm" disabled={!!verification}>
+                            <GlassButton variant="ghost" size="sm" disabled={!!verification}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Manual
-                            </Button>
+                            </GlassButton>
                         </ManualVerifyDialog>
                       </TableCell>
                     </TableRow>
@@ -156,8 +153,7 @@ export function VerificationTable({
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
+      </GlassCardContent>
+    </GlassCard>
   );
 }
-

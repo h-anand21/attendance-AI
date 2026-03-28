@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -8,17 +7,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import { useTeachers } from '@/hooks/use-teachers';
 import { useClasses } from '@/hooks/use-classes';
-import type { Class } from '@/types';
 
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+  GlassCard,
+  GlassCardContent,
+  GlassCardDescription,
+  GlassCardHeader,
+  GlassCardTitle,
+} from '@/components/ui/glass-card';
+import { GlassInput } from '@/components/ui/glass-input';
 import {
   Form,
   FormControl,
@@ -38,16 +36,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Camera, UserPlus, Loader2, X, Check, ChevronsUpDown } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { GlassBadge } from '@/components/ui/glass-badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const teacherFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  contact: z.string().min(10, { message: 'Please enter a valid contact number.' }),
-  classIds: z.array(z.string()).min(1, { message: 'At least one class must be assigned.' }),
+  email: z.string().email({ message: 'Valid email required.' }),
+  contact: z.string().min(10, { message: 'Contact number required.' }),
+  classIds: z.array(z.string()).min(1, { message: 'Assign at least one class.' }),
 });
 
 export function TeacherRegistrationClient() {
@@ -80,7 +79,6 @@ export function TeacherRegistrationClient() {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
       setHasCameraPermission(false);
     }
   }, []);
@@ -114,7 +112,7 @@ export function TeacherRegistrationClient() {
       toast({
         variant: 'destructive',
         title: 'No Photo Captured',
-        description: 'Please capture a photo for the teacher.',
+        description: 'Teacher photo is required.',
       });
       return;
     }
@@ -123,7 +121,7 @@ export function TeacherRegistrationClient() {
     await addTeacher({ ...values, avatar: capturedImage });
     toast({
       title: 'Teacher Registered',
-      description: `${values.name} has been successfully registered.`,
+      description: `${values.name} successfully registered.`,
     });
     form.reset();
     setCapturedImage(null);
@@ -134,222 +132,216 @@ export function TeacherRegistrationClient() {
 
   const getClassLabel = (classId: string) => {
     const classInfo = classes.find(c => c.id === classId);
-    return classInfo ? `${classInfo.name} - Sec. ${classInfo.section}` : classId;
+    return classInfo ? `${classInfo.name} (Sec. ${classInfo.section})` : classId;
   }
 
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="lg:col-span-1">
-        <CardHeader>
-          <CardTitle>Register New Teacher</CardTitle>
-          <CardDescription>Fill in the details and capture a photo.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="relative h-48 w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-            <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
-            {hasCameraPermission === undefined && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            )}
-            {capturedImage && (
-              <div className="absolute inset-0">
-                <img src={capturedImage} alt="Captured teacher" className="w-full h-full object-cover" />
-              </div>
-            )}
-          </div>
+      <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+        <GlassCard className="h-full">
+          <GlassCardHeader>
+            <GlassCardTitle>Register New Teacher</GlassCardTitle>
+            <GlassCardDescription>Fill in the details and capture a photo.</GlassCardDescription>
+          </GlassCardHeader>
+          <GlassCardContent className="space-y-6">
+            <div className="relative h-48 w-full rounded-2xl bg-black/40 flex items-center justify-center overflow-hidden border border-white/10 shadow-inner">
+              <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
+              {hasCameraPermission === undefined && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              {capturedImage && (
+                <div className="absolute inset-0">
+                  <img src={capturedImage} alt="Teacher" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
 
-          {hasCameraPermission === false && (
-            <Alert variant="destructive">
-              <AlertTitle>Camera Access Required</AlertTitle>
-              <AlertDescription>Please allow camera access to use this feature.</AlertDescription>
-            </Alert>
-          )}
+            <GlassButton onClick={handleCapture} disabled={!hasCameraPermission} variant="outline" className="w-full">
+              <Camera className="mr-2 h-4 w-4" />
+              {capturedImage ? 'Retake Photo' : 'Capture Photo'}
+            </GlassButton>
 
-          <Button onClick={handleCapture} disabled={!hasCameraPermission} variant="outline" className="w-full">
-            <Camera className="mr-2 h-4 w-4" />
-            {capturedImage ? 'Retake Photo' : 'Capture Photo'}
-          </Button>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teacher Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Jane Smith" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                   <FormControl>
-                    <Input placeholder="e.g. j.smith@school.edu" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="contact" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Number</FormLabel>
-                   <FormControl>
-                    <Input placeholder="e.g. 9876543210" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField
-                control={form.control}
-                name="classIds"
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                    <FormLabel>Assign Classes</FormLabel>
-                      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className={cn(
-                                  "w-full justify-between h-auto min-h-10 py-2 px-3",
-                                  !field.value.length && "text-muted-foreground"
-                                  )}
-                              >
-                                  <div className="flex gap-1 flex-wrap">
-                                  {field.value.length > 0 ? (
-                                      classes
-                                      .filter((cls) => field.value.includes(cls.id))
-                                      .map((cls) => (
-                                          <Badge
-                                              variant="secondary"
-                                              key={cls.id}
-                                              className="mr-1 mb-1"
-                                              onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  field.onChange(field.value.filter(v => v !== cls.id));
-                                              }}
-                                          >
-                                              {getClassLabel(cls.id)}
-                                              <X className="ml-1 h-3 w-3" />
-                                          </Badge>
-                                      ))
-                                  ) : (
-                                      "Select classes to assign"
-                                  )}
-                                  </div>
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                              <Command>
-                                  <CommandInput placeholder="Search classes..." />
-                                  <CommandList>
-                                      <CommandEmpty>No results found.</CommandEmpty>
-                                      <CommandGroup>
-                                      {classes.map((cls) => (
-                                          <CommandItem
-                                          key={cls.id}
-                                          onSelect={() => {
-                                              const currentValues = field.value || [];
-                                              const isSelected = currentValues.includes(cls.id);
-                                              if (isSelected) {
-                                                  field.onChange(currentValues.filter(v => v !== cls.id));
-                                              } else {
-                                                  field.onChange([...currentValues, cls.id]);
-                                              }
-                                          }}
-                                          >
-                                          <Check
-                                              className={cn(
-                                              "mr-2 h-4 w-4",
-                                              (field.value || []).includes(cls.id)
-                                                  ? "opacity-100"
-                                                  : "opacity-0"
-                                              )}
-                                          />
-                                          {getClassLabel(cls.id)}
-                                          </CommandItem>
-                                      ))}
-                                      </CommandGroup>
-                                  </CommandList>
-                              </Command>
-                          </PopoverContent>
-                      </Popover>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teacher Name</FormLabel>
+                    <FormControl>
+                      <GlassInput placeholder="e.g. Jane Smith" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isSubmitting || !capturedImage || classes.length === 0}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                Register Teacher
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                     <FormControl>
+                      <GlassInput placeholder="e.g. j.smith@school.edu" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="contact" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Number</FormLabel>
+                     <FormControl>
+                      <GlassInput placeholder="e.g. 9876543210" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField
+                  control={form.control}
+                  name="classIds"
+                  render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                      <FormLabel>Assign Classes</FormLabel>
+                        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <GlassButton
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                    "w-full justify-between h-auto min-h-12 py-3 px-4 rounded-xl",
+                                    !field.value.length && "text-muted-foreground"
+                                    )}
+                                >
+                                    <div className="flex gap-1 flex-wrap">
+                                    {field.value.length > 0 ? (
+                                        classes
+                                        .filter((cls) => field.value.includes(cls.id))
+                                        .map((cls) => (
+                                            <GlassBadge
+                                                variant="primary"
+                                                key={cls.id}
+                                                className="mr-1 mb-1"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    field.onChange(field.value.filter(v => v !== cls.id));
+                                                }}
+                                            >
+                                                {getClassLabel(cls.id)}
+                                                <X className="ml-1 h-3 w-3" />
+                                            </GlassBadge>
+                                        ))
+                                    ) : (
+                                        "Select classes"
+                                    )}
+                                    </div>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </GlassButton>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0 glass border-white/20">
+                                <Command className="bg-transparent">
+                                    <CommandInput placeholder="Search classes..." className="text-foreground" />
+                                    <CommandList>
+                                        <CommandEmpty>No results.</CommandEmpty>
+                                        <CommandGroup>
+                                        {classes.map((cls) => (
+                                            <CommandItem
+                                            key={cls.id}
+                                            className="hover:bg-white/10"
+                                            onSelect={() => {
+                                                const currentValues = field.value || [];
+                                                const isSelected = currentValues.includes(cls.id);
+                                                if (isSelected) {
+                                                    field.onChange(currentValues.filter(v => v !== cls.id));
+                                                } else {
+                                                    field.onChange([...currentValues, cls.id]);
+                                                }
+                                            }}
+                                            >
+                                            <Check
+                                                className={cn(
+                                                "mr-2 h-4 w-4 text-primary",
+                                                (field.value || []).includes(cls.id) ? "opacity-100" : "opacity-0"
+                                                )}
+                                            />
+                                            {getClassLabel(cls.id)}
+                                            </CommandItem>
+                                        ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <GlassButton type="submit" variant="primary" className="w-full h-14 text-lg" disabled={isSubmitting || !capturedImage || classes.length === 0}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <UserPlus className="mr-2 h-6 w-6" />}
+                  Register Teacher
+                </GlassButton>
+              </form>
+            </Form>
+          </GlassCardContent>
+        </GlassCard>
+      </motion.div>
 
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>Registered Teachers</CardTitle>
-          <CardDescription>A list of all teachers in the system.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">Avatar</TableHead>
-                  <TableHead>Name & Contact</TableHead>
-                  <TableHead>Assigned Classes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
+      <motion.div className="lg:col-span-2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+        <GlassCard className="h-full">
+          <GlassCardHeader>
+            <GlassCardTitle>Registered Teachers</GlassCardTitle>
+            <GlassCardDescription>List of all teachers in the system.</GlassCardDescription>
+          </GlassCardHeader>
+          <GlassCardContent>
+            <div className="rounded-2xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm">
+              <Table>
+                <TableHeader className="bg-white/5">
                   <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
-                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
-                    </TableCell>
+                    <TableHead className="w-[80px]">Avatar</TableHead>
+                    <TableHead>Name & Contact</TableHead>
+                    <TableHead>Assigned Classes</TableHead>
                   </TableRow>
-                ) : teachers.length > 0 ? (
-                  teachers.map((teacher) => (
-                    <TableRow key={teacher.id}>
-                      <TableCell>
-                        <Avatar>
-                          <AvatarImage src={teacher.avatar} alt={teacher.name} data-ai-hint="person portrait" />
-                          <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                      </TableCell>
-                      <TableCell>
-                        <p className="font-medium">{teacher.name}</p>
-                        <p className="text-sm text-muted-foreground">{teacher.email}</p>
-                        <p className="text-sm text-muted-foreground">{teacher.contact}</p>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {teacher.classIds?.map(classId => {
-                             return (
-                                <Badge key={classId} variant="outline">{getClassLabel(classId)}</Badge>
-                             )
-                          })}
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-24 text-center">
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
-                      No teachers registered yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  ) : teachers.length > 0 ? (
+                    teachers.map((teacher) => (
+                      <TableRow key={teacher.id} className="hover:bg-white/5">
+                        <TableCell>
+                          <Avatar>
+                            <AvatarImage src={teacher.avatar} alt={teacher.name} data-ai-hint="person portrait" />
+                            <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        </TableCell>
+                        <TableCell>
+                          <p className="font-medium">{teacher.name}</p>
+                          <p className="text-xs text-muted-foreground">{teacher.email}</p>
+                          <p className="text-xs text-muted-foreground">{teacher.contact}</p>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {teacher.classIds?.map(classId => (
+                               <GlassBadge key={classId} variant="outline" className="text-[10px]">{getClassLabel(classId)}</GlassBadge>
+                            ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                        No teachers registered.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </GlassCardContent>
+        </GlassCard>
+      </motion.div>
     </div>
   );
 }

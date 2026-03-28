@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -10,7 +9,6 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -21,12 +19,12 @@ import {
 import type { Student, AttendanceRecord, AttendanceStatus } from '@/types';
 import { cn } from '@/lib/utils';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  GlassCard,
+  GlassCardContent,
+  GlassCardDescription,
+  GlassCardHeader,
+  GlassCardTitle,
+} from '@/components/ui/glass-card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type AttendanceTableProps = {
@@ -46,31 +44,18 @@ export function AttendanceTable({
     return attendance.find((r) => r.studentId === studentId)?.status ?? 'absent';
   };
 
-  const getStatusVariant = (status: AttendanceStatus) => {
-    switch (status) {
-      case 'present':
-        return 'default';
-      case 'absent':
-        return 'destructive';
-      case 'late':
-        return 'secondary';
-      default:
-        return 'outline';
-    }
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Student List</CardTitle>
-        <CardDescription>
+    <GlassCard>
+      <GlassCardHeader>
+        <GlassCardTitle>Student List</GlassCardTitle>
+        <GlassCardDescription>
           Review and manually adjust attendance status for each student.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
+        </GlassCardDescription>
+      </GlassCardHeader>
+      <GlassCardContent>
+        <div className="rounded-2xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-white/5">
               <TableRow>
                 <TableHead className="w-[80px]">Avatar</TableHead>
                 <TableHead>Student Name</TableHead>
@@ -98,7 +83,7 @@ export function AttendanceTable({
                 students.map((student) => {
                   const status = getStatusForStudent(student.id);
                   return (
-                    <TableRow key={student.id}>
+                    <TableRow key={student.id} className="hover:bg-white/5">
                       <TableCell>
                         <Avatar>
                           <AvatarImage
@@ -110,7 +95,7 @@ export function AttendanceTable({
                         </Avatar>
                       </TableCell>
                       <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-xs uppercase">
                         {student.id}
                       </TableCell>
                       <TableCell className="text-right">
@@ -122,17 +107,17 @@ export function AttendanceTable({
                         >
                           <SelectTrigger
                             className={cn(
-                              'w-32 ml-auto',
+                              'w-32 ml-auto rounded-xl border-white/10 bg-white/5',
                               status === 'present' &&
-                                'border-primary/50 text-primary',
+                                'border-primary/50 text-primary bg-primary/5',
                               status === 'absent' &&
-                                'border-destructive/50 text-destructive',
-                              status === 'late' && 'border-secondary'
+                                'border-destructive/50 text-destructive bg-destructive/5',
+                              status === 'late' && 'border-secondary/50 bg-secondary/5'
                             )}
                           >
                             <SelectValue>{status.charAt(0).toUpperCase() + status.slice(1)}</SelectValue>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="glass">
                             <SelectItem value="present">Present</SelectItem>
                             <SelectItem value="absent">Absent</SelectItem>
                             <SelectItem value="late">Late</SelectItem>
@@ -146,7 +131,7 @@ export function AttendanceTable({
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
+      </GlassCardContent>
+    </GlassCard>
   );
 }
