@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -61,9 +62,20 @@
     @apply bg-background text-foreground;
   }
   .dark body {
-    background-image: radial-gradient(circle at 10% 20%, hsl(var(--primary)/0.1) 0%, transparent 25%),
-                      radial-gradient(circle at 80% 70%, hsl(217, 89%, 61%, 0.1) 0%, transparent 25%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
     background-attachment: fixed;
+  }
+  .dark body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 20%, hsla(var(--primary), 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, hsla(217, 89%, 61%, 0.15) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
   }
   section {
     @apply py-16 sm:py-24;
@@ -71,30 +83,10 @@
 }
 
 @layer utilities {
-  .fade-in {
-    animation: fade-in 0.8s ease-in-out forwards;
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl;
   }
-  .slide-in-from-bottom {
-    animation: slide-in-from-bottom 0.8s ease-in-out forwards;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-from-bottom {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl;
   }
 }

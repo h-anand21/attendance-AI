@@ -15,8 +15,7 @@ import { useStudents } from '@/hooks/use-students';
 import { Users, BookOpen, Loader2, PlusCircle, TrendingUp, UserCheck, Megaphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { CreateClassDialog } from './create-class-dialog';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
   Dialog,
   DialogContent,
@@ -181,12 +180,13 @@ export default function DashboardPage() {
       icon: TrendingUp,
       description: '30-day attendance trends',
       action: (
-        <button
+        <GlassButton
+          variant="primary"
           onClick={handleGenerateSummary}
-          className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-10 px-4 py-2 inline-flex w-full mt-2"
+          className="w-full mt-2 h-10"
         >
           Get Insights
-        </button>
+        </GlassButton>
       ),
     },
   ];
@@ -201,23 +201,23 @@ export default function DashboardPage() {
             initial="hidden"
             animate="visible"
             variants={cardVariants}
-            whileHover={{ y: -5, scale: 1.05 }}
+            whileHover={{ y: -5 }}
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Card className={cn(
-              "h-full transition-all duration-300 flex flex-col",
-              card.title === 'AI Summary' && 'border-primary/50'
+              "h-full transition-all duration-300 flex flex-col glass border-white/10",
+              card.title === 'AI Summary' && 'border-primary/50 bg-primary/5'
             )}>
               <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-base font-medium">{card.title}</CardTitle>
-                <card.icon className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+                <card.icon className="h-5 w-5 text-primary/70" />
               </CardHeader>
               <CardContent className="space-y-1 flex-grow flex flex-col justify-center">
                 {card.value !== null && (
-                  <div className="text-3xl font-bold">{card.value}</div>
+                  <div className="text-3xl font-bold tracking-tight">{card.value}</div>
                 )}
                 {card.description && (
-                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                  <p className="text-xs text-muted-foreground">{card.description}</p>
                 )}
                 {card.action && <div className="pt-2">{card.action}</div>}
               </CardContent>
@@ -242,37 +242,35 @@ export default function DashboardPage() {
                   <h2 className="text-2xl font-semibold tracking-tight">
                       Your Classes
                   </h2>
-                  <CreateClassDialog onClassCreate={addClass}>
-                    <button
-                        className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-10 px-4 py-2 inline-flex"
-                      >
+                  <PublishNoticeDialog onPublish={addNotice}>
+                    <GlassButton variant="primary" size="sm" className="h-9">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         New Class
-                      </button>
-                  </CreateClassDialog>
+                    </GlassButton>
+                  </PublishNoticeDialog>
                 </div>
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {classes.map((cls, index) => (
                        <motion.div
                         key={cls.id}
-                        whileHover={{ y: -5, scale: 1.02 }}
+                        whileHover={{ y: -5 }}
                         transition={{ type: 'spring', stiffness: 300 }}
                       >
                         <Link 
                           href={`/attendance/${cls.id}`} 
                           className="group"
                         >
-                          <Card className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-md hover:shadow-primary/20 transition-all duration-300 h-full flex flex-col">
+                          <Card className="glass border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col">
                             <CardHeader>
                               <div className="flex justify-between items-start">
                                 <CardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</CardTitle>
-                                <Badge variant="secondary">Sec. {cls.section}</Badge>
+                                <Badge variant="secondary" className="bg-white/5 border-white/10 text-xs">Sec. {cls.section}</Badge>
                               </div>
-                              <CardDescription>Click to start attendance</CardDescription>
+                              <CardDescription className="text-xs">Click to start attendance</CardDescription>
                             </CardHeader>
                             <CardContent className="mt-auto">
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                                 <Users className="h-4 w-4" />
                                 <span>{(studentsByClass[cls.id] || []).length} Students</span>
                               </div>
@@ -283,17 +281,15 @@ export default function DashboardPage() {
                     ))}
                 </div>
                 ) : (
-                <Card className="text-center py-12 bg-white/5 backdrop-blur-sm border border-white/10 shadow-md">
+                <Card className="text-center py-12 glass border-white/10">
                     <CardContent>
                         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
                         <p className="text-muted-foreground mb-4">Create a new class to get started.</p>
-                        <CreateClassDialog onClassCreate={addClass}>
-                            <Button variant="default">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Create Your First Class
-                            </Button>
-                        </CreateClassDialog>
+                        <GlassButton variant="primary">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create Your First Class
+                        </GlassButton>
                     </CardContent>
                 </Card>
                 )}
@@ -301,37 +297,35 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
-             <Card className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-md">
+             <Card className="glass border-white/10 h-full flex flex-col">
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle className="flex items-center gap-2 text-lg"><Megaphone className="h-5 w-5" /> Notice Board</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-lg font-semibold"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</CardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
-                            <button
-                                className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-9 px-3 inline-flex"
-                              >
-                                <PlusCircle className="mr-2 h-4 w-4" />
+                            <GlassButton variant="primary" size="sm" className="h-8 px-3 text-xs">
+                                <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
                                 Publish
-                              </button>
+                            </GlassButton>
                         </PublishNoticeDialog>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex-grow">
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-black/20 border-white/10">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/5 border-white/10 rounded-xl">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
-                           <AlertDescription>{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
+                           <AlertDescription className="text-[10px] text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="absolute top-1/2 right-0 -translate-y-1/2 h-7 w-7">
+                                    <button className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
                                         <MoreVertical className="h-4 w-4" />
-                                    </Button>
+                                    </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => deleteNotice(notice.id)} className="text-destructive">
+                                <DropdownMenuContent className="glass">
+                                    <DropdownMenuItem onClick={() => deleteNotice(notice.id)} className="text-destructive focus:bg-destructive/10">
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -342,7 +336,7 @@ export default function DashboardPage() {
                      )) : (
                         <div className="text-center text-sm text-muted-foreground py-4">No notices yet.</div>
                      )}
-                     {notices.length > 5 && <Button variant="outline" size="sm" className="w-full">View All Notices</Button> }
+                     {notices.length > 5 && <GlassButton variant="outline" size="sm" className="w-full text-xs h-8">View All Notices</GlassButton> }
                    </div>
                 </CardContent>
             </Card>
@@ -350,7 +344,7 @@ export default function DashboardPage() {
       </div>
 
        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
-        <DialogContent className="bg-background/80 backdrop-blur-md border-white/20">
+        <DialogContent className="glass border-white/20">
           <DialogHeader>
             <DialogTitle>AI Attendance Summary (Last 30 Days)</DialogTitle>
             <DialogDescription>
@@ -362,19 +356,15 @@ export default function DashboardPage() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto bg-black/20 p-4 rounded-md">
-              <p>{summary}</p>
+            <div className="prose prose-sm dark:prose-invert max-h-60 overflow-y-auto bg-black/20 p-4 rounded-xl">
+              <p className="text-sm leading-relaxed">{summary}</p>
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setSummaryModalOpen(false)}>Close</Button>
+            <GlassButton onClick={() => setSummaryModalOpen(false)}>Close</GlassButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>
   );
 }
-
-    
-
-    

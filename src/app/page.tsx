@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/ui/glass-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScanFace, Upload, QrCode, UserPlus, FileBarChart, CheckCircle, School, User } from 'lucide-react';
 import Image from 'next/image';
@@ -11,17 +12,17 @@ import { motion } from 'framer-motion';
 
 const features = [
   {
-    icon: <ScanFace className="h-8 w-8 text-yellow-500" />,
+    icon: <ScanFace className="h-8 w-8 text-primary" />,
     title: 'Face Scan Session',
     description: 'Take attendance for the whole class with a continuous, real-time face scan.',
   },
   {
-    icon: <Upload className="h-8 w-8 text-yellow-500" />,
+    icon: <Upload className="h-8 w-8 text-primary" />,
     title: 'Photo Upload',
     description: 'Process a single class photo to instantly mark everyone who is present.',
   },
   {
-    icon: <QrCode className="h-8 w-8 text-yellow-500" />,
+    icon: <QrCode className="h-8 w-8 text-primary" />,
     title: 'QR & RFID Check-in',
     description: 'Allow students to quickly scan their unique ID cards for attendance.',
   },
@@ -57,90 +58,66 @@ const sectionVariants = {
   },
 };
 
-const sentence = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      delay: 0.1,
-      staggerChildren: 0.08,
-    },
-  },
-};
-
-const word = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: 'easeOut',
-    },
-  },
-};
-
 export default function LandingPage() {
   const headlineText = "Automated attendance that actually works.";
 
   return (
     <MarketingLayout>
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-1">
+      <div className="flex flex-col min-h-screen relative overflow-hidden">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-[10%] left-[-5%] w-72 h-72 bg-primary/20 rounded-full blur-[100px] animate-pulse pointer-events-none" />
+        <div className="absolute bottom-[20%] right-[-5%] w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+
+        <main className="flex-1 relative z-10">
           {/* Hero Section */}
-          <section className="relative overflow-hidden bg-background py-24 sm:py-32">
+          <section className="relative overflow-hidden pt-24 pb-12 sm:pt-32 sm:pb-24">
             <div className="container text-center">
               <div className="max-w-4xl mx-auto">
                 <motion.h1
-                  variants={sentence}
-                  initial="hidden"
-                  animate="visible"
-                  className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl md:text-7xl"
                 >
-                  {headlineText.split(" ").map((char, index) => (
-                    <motion.span key={`${char}-${index}`} variants={word} className="inline-block">
-                      {char}&nbsp;
-                    </motion.span>
-                  ))}
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">
+                    {headlineText}
+                  </span>
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8, ease: 'easeOut' }}
-                  className="mt-6 text-xl leading-8 text-muted-foreground"
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-6 text-xl leading-8 text-muted-foreground max-w-2xl mx-auto"
                 >
-                  AI-driven face scans, photo uploads, and QR check-ins — fast, accurate, and easy. Free up teaching time and gain valuable insights.
+                  Experience the future of classroom management with AI face scans, smart photo analysis, and instant QR check-ins.
                 </motion.p>
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1, ease: 'easeOut' }}
-                  className="mt-10 flex items-center justify-center gap-x-6"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                  <Link
-                    href="/login"
-                    className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-11 px-8 py-2 inline-flex"
-                    >
-                    Get Started for Free
+                  <Link href="/login" className="w-full sm:w-auto">
+                    <GlassButton variant="primary" size="lg" className="w-full shadow-2xl">
+                      Get Started for Free
+                    </GlassButton>
                   </Link>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link href="#how-it-works">Watch Demo</Link>
-                  </Button>
+                  <Link href="#how-it-works" className="w-full sm:w-auto">
+                    <GlassButton size="lg" className="w-full">
+                      Watch Demo
+                    </GlassButton>
+                  </Link>
                 </motion.div>
               </div>
+              
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2, ease: 'easeOut' }}
-                className="mt-16 sm:mt-24"
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="mt-16 sm:mt-24 relative"
               >
-                <div className="relative w-full max-w-5xl mx-auto">
-                  <div className="absolute -inset-8 bg-primary/10 rounded-full blur-3xl"></div>
-                  <motion.div
-                    className="relative shadow-2xl rounded-2xl overflow-hidden border"
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
+                <div className="relative w-full max-w-5xl mx-auto group">
+                   <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                  <Card className="relative glass border-white/20 overflow-hidden shadow-2xl rounded-2xl">
                     <Image
                       src="https://i.postimg.cc/gJf7dmf5/Screenshot-2025-09-09-233520.png"
                       alt="AttendEase App Dashboard"
@@ -150,202 +127,90 @@ export default function LandingPage() {
                       data-ai-hint="app dashboard"
                       priority
                     />
-                  </motion.div>
+                  </Card>
                 </div>
               </motion.div>
             </div>
           </section>
 
           {/* Features Section */}
-          <motion.section
-            id="features"
-            className="container"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={{
-              visible: { transition: { staggerChildren: 0.15 } },
-            }}
-          >
+          <section id="features" className="container relative py-20">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {features.map((feature) => (
-                <motion.div key={feature.title} variants={sectionVariants}>
-                  <Card className="text-center p-6 bg-card rounded-2xl shadow-lg transition-transform duration-300 hover:-translate-y-2">
+              {features.map((feature, i) => (
+                <motion.div 
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="text-center p-8 glass border-white/10 hover:border-primary/50 transition-all duration-300 h-full">
                     <CardHeader className="p-0 items-center">
-                      <div className="mb-4 inline-block p-4 bg-yellow-400/10 rounded-xl">{feature.icon}</div>
-                      <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
+                      <div className="mb-6 inline-flex p-4 bg-primary/10 rounded-2xl text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.3)]">
+                        {feature.icon}
+                      </div>
+                      <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 mt-2 text-muted-foreground">
+                    <CardContent className="p-0 mt-4 text-sm text-muted-foreground leading-relaxed">
                       <p>{feature.description}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
               ))}
             </div>
-          </motion.section>
+          </section>
 
           {/* How it Works Section */}
-          <motion.section
-            id="how-it-works"
-            className="bg-secondary"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={sectionVariants}
-          >
-            <div className="container">
-              <div className="text-center max-w-2xl mx-auto">
-                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">A Simple 3-Step Process</h2>
-                <p className="mt-4 text-lg text-muted-foreground">Get up and running with AttendEase in no time.</p>
+          <section id="how-it-works" className="py-24 relative overflow-hidden">
+             <div className="absolute inset-0 bg-primary/5 backdrop-blur-[2px]" />
+            <div className="container relative z-10">
+              <div className="text-center max-w-2xl mx-auto mb-16">
+                <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">A Simple 3-Step Process</h2>
+                <p className="mt-4 text-lg text-muted-foreground">Automating your classroom is as easy as 1-2-3.</p>
               </div>
-              <motion.div
-                className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                variants={{
-                  visible: { transition: { staggerChildren: 0.2 } },
-                }}
-              >
-                {howItWorksSteps.map((step) => (
-                  <motion.div key={step.title} className="flex flex-col items-center" variants={sectionVariants}>
-                    <div className="mb-6 p-4 bg-primary/10 rounded-full">{step.icon}</div>
-                    <h3 className="text-2xl font-semibold mb-2">{step.title}</h3>
-                    <p className="text-muted-foreground max-w-xs">{step.description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                {howItWorksSteps.map((step, i) => (
+                  <motion.div 
+                    key={step.title}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.2 }}
+                    viewport={{ once: true }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="mb-8 p-6 glass rounded-full text-primary shadow-inner">
+                      {step.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                    <p className="text-sm text-muted-foreground max-w-xs">{step.description}</p>
                   </motion.div>
                 ))}
-              </motion.div>
-            </div>
-          </motion.section>
-
-          {/* For Every Role Section */}
-          <motion.section
-            id="roles"
-            className="container"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={sectionVariants}
-          >
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Powerful Tools for Every Role</h2>
-              <p className="mt-4 text-lg text-muted-foreground">Whether you're an administrator or a teacher, AttendEase is designed for you.</p>
-            </div>
-            <motion.div
-              className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={{
-                visible: { transition: { staggerChildren: 0.15 } },
-              }}
-            >
-              <motion.div variants={sectionVariants}>
-                <Card className="p-8 rounded-2xl shadow-lg h-full bg-secondary">
-                  <CardHeader className="p-0 flex-row items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg">
-                      <School className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl font-semibold">For Admins</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 mt-6 space-y-3 text-muted-foreground">
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>Centralized student and teacher registration.</span>
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>View and export detailed attendance reports for compliance.</span>
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>Use AI to detect attendance anomalies across the school.</span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-              <motion.div variants={sectionVariants}>
-                <Card className="p-8 rounded-2xl shadow-lg h-full bg-secondary">
-                  <CardHeader className="p-0 flex-row items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg">
-                      <User className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl font-semibold">For Teachers</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 mt-6 space-y-3 text-muted-foreground">
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>Take attendance in seconds, not minutes.</span>
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>Eliminate manual data entry and paperwork.</span>
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 shrink-0" />
-                      <span>Focus on teaching, not administrative tasks.</span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </motion.div>
-          </motion.section>
-
-          {/* Reports preview Section */}
-          <motion.section
-            className="bg-secondary"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={sectionVariants}
-          >
-            <div className="container grid md:grid-cols-2 gap-12 items-center">
-              <div className="text-left">
-                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Go Beyond Data. Get Insights.</h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Our reports don't just show you who was in class. They help you understand attendance patterns with AI-driven anomaly detection and easy-to-read charts. Export everything to Excel with a single click.
-                </p>
-                <Button size="lg" className="mt-8" asChild>
-                  <Link href="/login">Explore Reports</Link>
-                </Button>
               </div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Image
-                  src="https://images.unsplash.com/photo-1542744173-05336fcc7ad4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxleGNlbCUyMHxlbnwwfHx8fDE3NTc0NDYzMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="App reports page showing charts and data"
-                  width={600}
-                  height={500}
-                  className="rounded-2xl shadow-2xl border"
-                  data-ai-hint="app reports chart"
-                />
-              </motion.div>
             </div>
-          </motion.section>
+          </section>
 
-          {/* Pricing/CTA Section */}
-          <motion.section
-            id="pricing"
-            className="container"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={sectionVariants}
-          >
-            <div className="text-center max-w-3xl mx-auto bg-primary/5 rounded-2xl p-10 md:p-16">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Ready to Revolutionize Your Classroom?</h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Join thousands of educators who are saving time and gaining valuable insights. Get started with AttendEase today for free. No credit card required.
+          {/* CTA Section */}
+          <section id="pricing" className="container py-24">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center max-w-4xl mx-auto glass border-white/20 rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -ml-16 -mb-16" />
+              
+              <h2 className="text-3xl font-bold tracking-tight sm:text-5xl mb-6">Ready to Start?</h2>
+              <p className="mt-4 text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+                Join the modern classroom revolution. Save hours every week and focus on what matters most: teaching.
               </p>
-              <Button size="lg" className="mt-8" asChild>
-                <Link href="/login">Sign Up and Start Saving Time</Link>
-              </Button>
-            </div>
-          </motion.section>
+              <Link href="/login">
+                <GlassButton variant="primary" size="lg" className="h-16 px-12 text-lg rounded-2xl shadow-2xl">
+                  Sign Up and Save Time
+                </GlassButton>
+              </Link>
+            </motion.div>
+          </section>
         </main>
       </div>
     </MarketingLayout>

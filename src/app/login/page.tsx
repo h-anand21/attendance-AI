@@ -2,7 +2,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/ui/glass-button';
 import {
   Card,
   CardContent,
@@ -10,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { LogIn, User, School } from 'lucide-react';
+import { LogIn, User, School, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AppLogo } from '@/components/ui/app-logo';
-import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type Role = 'teacher' | 'admin';
 
@@ -64,25 +64,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
+    <div className="flex min-h-screen items-center justify-center bg-secondary/50 dark:bg-background/50 p-4 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+
       <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
+        className="w-full max-w-md z-10"
       >
-        <Card className="w-full max-w-md shadow-2xl overflow-hidden">
+        <Card className="glass-card overflow-hidden border-white/20">
           <CardHeader className="text-center space-y-4">
             <motion.div variants={itemVariants} className="mx-auto">
-              <AppLogo className="mx-auto h-16 w-16 text-primary" />
+              <AppLogo className="mx-auto h-16 w-16 text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-3xl font-bold">
-                Welcome to AttendEase
+              <CardTitle className="text-3xl font-bold tracking-tight">
+                AttendEase
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-base">
-                The Smart Attendance System. Please select your role to continue.
+              <CardDescription className="text-base text-muted-foreground/80">
+                The Smart Attendance System. Select your role to continue.
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -91,41 +96,43 @@ export default function LoginPage() {
               variants={itemVariants}
               className="grid grid-cols-2 gap-4"
             >
-              <Button
-                variant={selectedRole === 'teacher' ? 'default' : 'outline'}
-                className="h-28 flex-col gap-2 text-lg"
+              <button
+                className={cn(
+                  "flex flex-col items-center justify-center gap-3 rounded-2xl p-4 transition-all duration-300 border backdrop-blur-sm",
+                  selectedRole === 'teacher' 
+                    ? "bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10" 
+                    : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20"
+                )}
                 onClick={() => handleRoleSelect('teacher')}
               >
-                <User className="h-10 w-10 mb-1" />
-                Teacher
-              </Button>
-              <Button
-                variant={selectedRole === 'admin' ? 'default' : 'outline'}
-                className="h-28 flex-col gap-2 text-lg"
+                <User className="h-10 w-10" />
+                <span className="font-semibold">Teacher</span>
+              </button>
+              <button
+                className={cn(
+                  "flex flex-col items-center justify-center gap-3 rounded-2xl p-4 transition-all duration-300 border backdrop-blur-sm",
+                  selectedRole === 'admin' 
+                    ? "bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10" 
+                    : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20"
+                )}
                 onClick={() => handleRoleSelect('admin')}
               >
-                <School className="h-10 w-10 mb-1" />
-                Admin
-              </Button>
+                <School className="h-10 w-10" />
+                <span className="font-semibold">Admin</span>
+              </button>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Button
-                className="w-full text-lg py-6"
+              <GlassButton
+                variant="primary"
+                className="w-full text-lg py-7 rounded-2xl"
                 onClick={handleSignIn}
                 disabled={loading || !selectedRole}
-                size="lg"
               >
                 {loading ? (
                   <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 ) : (
                   <svg
                     className="mr-2 h-6 w-6"
-                    aria-hidden="true"
-                    focusable="false"
-                    data-prefix="fab"
-                    data-icon="google"
-                    role="img"
-                    xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 488 512"
                   >
                     <path
@@ -135,7 +142,7 @@ export default function LoginPage() {
                   </svg>
                 )}
                 Sign in with Google
-              </Button>
+              </GlassButton>
             </motion.div>
           </CardContent>
         </Card>
