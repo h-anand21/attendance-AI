@@ -29,8 +29,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AttendancePieChart } from '@/app/reports/attendance-pie-chart';
 import { AttendanceBarChart } from '@/app/reports/attendance-bar-chart';
 import { subDays, format, eachDayOfInterval, formatDistanceToNow } from 'date-fns';
-import type { AttendanceStatus, Notice } from '@/types';
+import type { AttendanceStatus } from '@/types';
 import { PublishNoticeDialog } from './publish-notice-dialog';
+import { CreateClassDialog } from './create-class-dialog';
 import { useAuth } from '@/hooks/use-auth';
 import { useNotices } from '@/hooks/use-notices';
 import {
@@ -240,12 +241,12 @@ export default function DashboardPage() {
                   <h2 className="text-2xl font-bold tracking-tight">
                       Your Classes
                   </h2>
-                  <PublishNoticeDialog onPublish={addNotice}>
+                  <CreateClassDialog onClassCreate={addClass}>
                     <GlassButton variant="primary" size="sm" className="h-9">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         New Class
                     </GlassButton>
-                  </PublishNoticeDialog>
+                  </CreateClassDialog>
                 </div>
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -284,10 +285,12 @@ export default function DashboardPage() {
                         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
                         <p className="text-muted-foreground mb-4">Create a new class to get started.</p>
-                        <GlassButton variant="primary">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Create Your First Class
-                        </GlassButton>
+                        <CreateClassDialog onClassCreate={addClass}>
+                          <GlassButton variant="primary">
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              Create Your First Class
+                          </GlassButton>
+                        </CreateClassDialog>
                     </GlassCardContent>
                 </GlassCard>
                 )}
@@ -336,7 +339,7 @@ export default function DashboardPage() {
                      )}
                      {notices.length > 5 && <GlassButton variant="outline" size="sm" className="w-full text-xs h-8">View All Notices</GlassButton> }
                    </div>
-                </CardContent>
+                </GlassCardContent>
             </GlassCard>
         </motion.div>
       </div>
