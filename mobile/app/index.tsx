@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,16 @@ import {
   FlatList,
   Animated,
   ViewToken,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, typography, shadows, borders } from '../src/theme';
 import { BrutalButton } from '../src/components/ui/BrutalButton';
 import { DotPattern, GeometricSquare, DiagonalStripes } from '../src/components/ui/BrutalDecorations';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../src/hooks/useAuth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -46,9 +49,39 @@ const slides = [
 ];
 
 export default function OnboardingScreen() {
+  const { user, loading: authLoading } = useAuth();
+  const [checkingInitialState, setCheckingInitialState] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
+
+  // Auto-redirect if already logged in or previously finished onboarding
+  useEffect(() => {
+    async function checkState() {
+      if (authLoading) return;
+
+      if (user) {
+        // User already authenticated -> go straight to Dashboard
+        router.replace('/(tabs)/dashboard');
+        return;
+      }
+
+      // Check if user has already seen onboarding
+      try {
+        const seen = await AsyncStorage.getItem('@attendease_seen_onboarding');
+        if (seen === 'true') {
+          router.replace('/login');
+          return;
+        }
+      } catch {
+        // Continue to onboarding if storage fails
+      }
+
+      setCheckingInitialState(false);
+    }
+
+    checkState();
+  }, [user, authLoading]);
 
   const viewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -60,7 +93,10 @@ export default function OnboardingScreen() {
 
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
+    try {
+      await AsyncStorage.setItem('@attendease_seen_onboarding', 'true');
+    } catch {}
     router.replace('/login');
   };
 
@@ -71,6 +107,19 @@ export default function OnboardingScreen() {
       handleGetStarted();
     }
   };
+
+  if (authLoading || checkingInitialState) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.yellow, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ backgroundColor: colors.white, padding: 24, ...borders.thick, ...shadows.brutal, alignItems: 'center', minWidth: 200 }}>
+          <Text style={{ ...typography.hero, fontSize: 28, color: colors.black, marginBottom: 12 }}>
+            ATTENDEASE
+          </Text>
+          <ActivityIndicator size="large" color={colors.black} />
+        </View>
+      </View>
+    );
+  }
 
   const renderSlide = ({ item, index }: { item: typeof slides[0]; index: number }) => (
     <View style={[styles.slide, { width }]}>

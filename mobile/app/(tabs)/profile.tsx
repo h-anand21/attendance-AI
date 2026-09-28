@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, typography, shadows, borders } from '../../src/theme';
 import { BrutalCard } from '../../src/components/ui/BrutalCard';
 import { BrutalButton } from '../../src/components/ui/BrutalButton';
