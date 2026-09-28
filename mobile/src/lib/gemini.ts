@@ -103,39 +103,51 @@ Respond ONLY with a JSON object in this exact format:
       });
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
+    let lastErrorMsg = '';
+    let data: any = null;
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts,
-          },
-        ],
-        generationConfig: {
-          responseMimeType: 'application/json',
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('Gemini API Error:', response.status, errorBody);
-      let errorMsg = `AI Service returned error ${response.status}`;
+    for (const model of candidateModels) {
       try {
-        const parsedErr = JSON.parse(errorBody);
-        if (parsedErr?.error?.message) {
-          errorMsg = parsedErr.error.message;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts,
+              },
+            ],
+            generationConfig: {
+              responseMimeType: 'application/json',
+            },
+          }),
+        });
+
+        if (response.ok) {
+          data = await response.json();
+          break;
+        } else {
+          const errorBody = await response.text();
+          console.warn(`Gemini API Error with ${model}:`, response.status, errorBody);
+          try {
+            const parsedErr = JSON.parse(errorBody);
+            lastErrorMsg = parsedErr?.error?.message || `AI error ${response.status}`;
+          } catch {
+            lastErrorMsg = `AI error ${response.status}`;
+          }
         }
-      } catch {}
-      throw new Error(errorMsg);
+      } catch (err: any) {
+        lastErrorMsg = err.message || 'Network request failed';
+      }
     }
 
-    const data = await response.json();
+    if (!data) {
+      throw new Error(lastErrorMsg || 'AI Service could not process image.');
+    }
     const candidateText =
       data.candidates?.[0]?.content?.parts?.[0]?.text;
 
