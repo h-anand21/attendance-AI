@@ -103,7 +103,12 @@ Respond ONLY with a JSON object in this exact format:
       });
     }
 
-    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
+    // Priority: gemini-flash-latest (fastest & high RPM), gemini-2.5-flash, gemini-3.8-flash
+    const candidateModels = [
+      'gemini-flash-latest',
+      'gemini-2.5-flash',
+      'gemini-3.8-flash',
+    ];
     let lastErrorMsg = '';
     let data: any = null;
 
@@ -132,10 +137,15 @@ Respond ONLY with a JSON object in this exact format:
           break;
         } else {
           const errorBody = await response.text();
-          console.warn(`Gemini API Error with ${model}:`, response.status, errorBody);
+          console.warn(`Gemini API (${model}) status ${response.status}:`, errorBody);
           try {
             const parsedErr = JSON.parse(errorBody);
-            lastErrorMsg = parsedErr?.error?.message || `AI error ${response.status}`;
+            const rawMsg = parsedErr?.error?.message || '';
+            if (response.status === 429 || rawMsg.toLowerCase().includes('quota')) {
+              lastErrorMsg = 'Rate limit reached (Free tier). Please wait 15-20s before scanning again.';
+            } else {
+              lastErrorMsg = rawMsg || `AI error ${response.status}`;
+            }
           } catch {
             lastErrorMsg = `AI error ${response.status}`;
           }

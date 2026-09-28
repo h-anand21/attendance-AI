@@ -197,12 +197,22 @@ export default function AttendanceDetailScreen() {
         return;
       }
 
-      setLiveScanStatusText('🤖 Gemini AI analyzing faces...');
+      setLiveScanStatusText('🤖 Gemini AI analyzing...');
       const result = await recognizeFacesWithAI(photo.base64, students);
 
       if (result.error) {
-        setLiveScanStatusText(`⚠️ ${result.error}`);
-        setTimeout(() => setLiveScanStatusText(''), 4000);
+        // If live scanning, fail gracefully in background just like Web app does
+        console.warn('Scan frame issue:', result.error);
+        if (!isLiveScanning) {
+          setLiveScanStatusText(
+            result.error.includes('Rate limit')
+              ? '⏳ Rate limit: Please wait a moment'
+              : '⚠️ Scan missed, please try again'
+          );
+          setTimeout(() => setLiveScanStatusText(''), 3000);
+        } else {
+          setLiveScanStatusText('🔴 Scanning for faces...');
+        }
       } else if (result.recognizedStudentIds.length > 0) {
         try {
           Vibration.vibrate(150);
@@ -219,18 +229,21 @@ export default function AttendanceDetailScreen() {
         });
 
         const names = result.recognizedStudentNames.join(', ');
-        setLiveScanStatusText(`🎉 Recognized: ${names}`);
+        setLiveScanStatusText(`🎉 Recognized (${result.recognizedStudentIds.length}): ${names}`);
       } else {
-        setLiveScanStatusText('👀 No matching faces detected');
-        setTimeout(() => {
-          setLiveScanStatusText((prev) =>
-            prev === '👀 No matching faces detected' ? '' : prev
-          );
-        }, 2500);
+        setLiveScanStatusText(isLiveScanning ? '🔴 Scanning for faces...' : '👀 No matching face detected');
+        if (!isLiveScanning) {
+          setTimeout(() => {
+            setLiveScanStatusText('');
+          }, 2500);
+        }
       }
     } catch (error: any) {
-      console.error('Scan error:', error);
-      setLiveScanStatusText('Scan failed, try again');
+      console.warn('Scan error:', error);
+      if (!isLiveScanning) {
+        setLiveScanStatusText('⚠️ Scan failed, try again');
+        setTimeout(() => setLiveScanStatusText(''), 2500);
+      }
     } finally {
       setIsAiScanning(false);
     }
@@ -245,7 +258,7 @@ export default function AttendanceDetailScreen() {
       performAiScan();
       liveScanIntervalRef.current = setInterval(() => {
         performAiScan();
-      }, 3500);
+      }, 8500);
     }
   };
 
@@ -601,10 +614,10 @@ export default function AttendanceDetailScreen() {
 
                 <Text style={styles.cameraTip}>
                   {isAiScanning
-                    ? 'Comparing faces with Gemini 2.5 AI...'
+                    ? 'Comparing faces with Gemini AI...'
                     : isLiveScanning
-                    ? 'Scanning automatically every 3.5s'
-                    : 'Point at students & tap SCAN NOW'}
+                    ? 'Auto-scanning every 8s (Tap SCAN FACE anytime)'
+                    : 'Point at students & tap SCAN FACE'}
                 </Text>
               </View>
             </CameraView>
