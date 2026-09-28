@@ -10,6 +10,7 @@ import {
   Modal,
   Image,
   FlatList,
+  Vibration,
 } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { colors, typography, borders, shadows } from '../../src/theme';
@@ -23,6 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { AttendanceStatus, Student, AttendanceRecord } from '../../src/types';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import { recognizeFacesWithAI } from '../../src/lib/gemini';
 
 const toLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
@@ -43,12 +45,23 @@ export default function AttendanceDetailScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedIds, setScannedIds] = useState<Set<string>>(new Set());
 
-  // Face Scan & Upload states
+  // Camera & Face Scan AI states
   const [showFaceCamera, setShowFaceCamera] = useState(false);
+  const [facing, setFacing] = useState<'back' | 'front'>('back');
+  const [torch, setTorch] = useState<boolean>(false);
+  const [isAiScanning, setIsAiScanning] = useState(false);
+  const [isLiveScanning, setIsLiveScanning] = useState(false);
+  const [liveScanStatusText, setLiveScanStatusText] = useState<string>('');
+  const [sessionRecognizedIds, setSessionRecognizedIds] = useState<Set<string>>(new Set());
+  const liveScanIntervalRef = useRef<any>(null);
+
+  // Upload Photo states
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [showStudentPicker, setShowStudentPicker] = useState(false);
   const [pickerSelectedIds, setPickerSelectedIds] = useState<Set<string>>(new Set());
   const [pickerMode, setPickerMode] = useState<'face' | 'upload'>('face');
+  const [isAiUploading, setIsAiUploading] = useState(false);
+  const [uploadAiStatus, setUploadAiStatus] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const cameraRef = useRef<any>(null);
 
@@ -123,7 +136,24 @@ export default function AttendanceDetailScreen() {
     setShowQrScanner(true);
   };
 
-  // === FACE SCAN: Open camera, take photo, then pick students ===
+  // Stop live scan helper
+  const stopLiveScan = () => {
+    if (liveScanIntervalRef.current) {
+      clearInterval(liveScanIntervalRef.current);
+      liveScanIntervalRef.current = null;
+    }
+    setIsLiveScanning(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (liveScanIntervalRef.current) {
+        clearInterval(liveScanIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // === FACE SCAN: Open camera, live/manual AI scan with front/back toggle ===
   const handleFaceScan = async () => {
     if (!permission?.granted) {
       const result = await requestPermission();
@@ -132,38 +162,129 @@ export default function AttendanceDetailScreen() {
         return;
       }
     }
-    setCapturedPhoto(null);
-    setPickerSelectedIds(new Set());
-    setPickerMode('face');
+    setSessionRecognizedIds(new Set());
+    setLiveScanStatusText('');
+    setIsLiveScanning(false);
     setShowFaceCamera(true);
   };
 
-  const handleTakePhoto = async () => {
-    if (cameraRef.current) {
-      try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 0.5 });
-        setCapturedPhoto(photo.uri);
-        setShowFaceCamera(false);
-        setShowStudentPicker(true);
-      } catch (error) {
-        Alert.alert('ERROR', 'Failed to capture photo. Please try again.');
-      }
+  const handleCloseFaceCamera = () => {
+    stopLiveScan();
+    setShowFaceCamera(false);
+    if (sessionRecognizedIds.size > 0) {
+      Alert.alert(
+        '✅ AI SCAN COMPLETE',
+        `${sessionRecognizedIds.size} student(s) recognized & marked PRESENT! Tap 'CONFIRM ATTENDANCE' to save to database.`
+      );
     }
   };
 
-  // === UPLOAD IMAGE: Pick from gallery, then pick students ===
+  // Perform AI Face Scan using camera snapshot
+  const performAiScan = async () => {
+    if (!cameraRef.current || isAiScanning) return;
+    try {
+      setIsAiScanning(true);
+      setLiveScanStatusText('📸 Capturing frame...');
+
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.4,
+        base64: true,
+      });
+
+      if (!photo?.base64) {
+        setLiveScanStatusText('⚠️ Could not capture image');
+        setIsAiScanning(false);
+        return;
+      }
+
+      setLiveScanStatusText('🤖 Gemini AI analyzing faces...');
+      const result = await recognizeFacesWithAI(photo.base64, students);
+
+      if (result.error) {
+        setLiveScanStatusText(`⚠️ ${result.error}`);
+        setTimeout(() => setLiveScanStatusText(''), 4000);
+      } else if (result.recognizedStudentIds.length > 0) {
+        try {
+          Vibration.vibrate(150);
+        } catch {}
+
+        result.recognizedStudentIds.forEach((id) => {
+          handleStatusChange(id, 'present');
+        });
+
+        setSessionRecognizedIds((prev) => {
+          const updated = new Set(prev);
+          result.recognizedStudentIds.forEach((id) => updated.add(id));
+          return updated;
+        });
+
+        const names = result.recognizedStudentNames.join(', ');
+        setLiveScanStatusText(`🎉 Recognized: ${names}`);
+      } else {
+        setLiveScanStatusText('👀 No matching faces detected');
+        setTimeout(() => {
+          setLiveScanStatusText((prev) =>
+            prev === '👀 No matching faces detected' ? '' : prev
+          );
+        }, 2500);
+      }
+    } catch (error: any) {
+      console.error('Scan error:', error);
+      setLiveScanStatusText('Scan failed, try again');
+    } finally {
+      setIsAiScanning(false);
+    }
+  };
+
+  const handleToggleLiveScan = () => {
+    if (isLiveScanning) {
+      stopLiveScan();
+      setLiveScanStatusText('⏸️ Live scan paused');
+    } else {
+      setIsLiveScanning(true);
+      performAiScan();
+      liveScanIntervalRef.current = setInterval(() => {
+        performAiScan();
+      }, 3500);
+    }
+  };
+
+  // === UPLOAD IMAGE: Pick from gallery, automatic AI scan ===
   const handleUploadImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         quality: 0.5,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setCapturedPhoto(result.assets[0].uri);
+        const asset = result.assets[0];
+        setCapturedPhoto(asset.uri);
         setPickerSelectedIds(new Set());
         setPickerMode('upload');
         setShowStudentPicker(true);
+
+        // Run AI face recognition on uploaded image
+        if (asset.base64) {
+          setIsAiUploading(true);
+          setUploadAiStatus('🤖 Gemini AI analyzing faces in photo...');
+          const aiResult = await recognizeFacesWithAI(asset.base64, students);
+          setIsAiUploading(false);
+
+          if (aiResult.error) {
+            setUploadAiStatus(`⚠️ ${aiResult.error}`);
+          } else if (aiResult.recognizedStudentIds.length > 0) {
+            setPickerSelectedIds(new Set(aiResult.recognizedStudentIds));
+            setUploadAiStatus(
+              `🎉 AI recognized ${aiResult.recognizedStudentIds.length} student(s): ${aiResult.recognizedStudentNames.join(', ')}`
+            );
+          } else {
+            setUploadAiStatus(
+              '👀 No matching faces recognized. You can select students manually below.'
+            );
+          }
+        }
       }
     } catch (error) {
       Alert.alert('ERROR', 'Failed to pick image. Please try again.');
@@ -172,7 +293,7 @@ export default function AttendanceDetailScreen() {
 
   // Toggle student selection in picker
   const toggleStudentPick = (studentId: string) => {
-    setPickerSelectedIds(prev => {
+    setPickerSelectedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(studentId)) {
         newSet.delete(studentId);
@@ -185,7 +306,12 @@ export default function AttendanceDetailScreen() {
 
   // Select all students
   const selectAllStudents = () => {
-    setPickerSelectedIds(new Set(students.map(s => s.id)));
+    setPickerSelectedIds(new Set(students.map((s) => s.id)));
+  };
+
+  // Deselect all students
+  const deselectAllStudents = () => {
+    setPickerSelectedIds(new Set());
   };
 
   // Confirm picked students as present
@@ -195,7 +321,7 @@ export default function AttendanceDetailScreen() {
       return;
     }
 
-    pickerSelectedIds.forEach(id => {
+    pickerSelectedIds.forEach((id) => {
       handleStatusChange(id, 'present');
     });
 
@@ -203,7 +329,7 @@ export default function AttendanceDetailScreen() {
     setCapturedPhoto(null);
     Alert.alert(
       '✅ STUDENTS MARKED',
-      `${pickerSelectedIds.size} student(s) marked as PRESENT via ${pickerMode === 'face' ? 'Face Scan' : 'Image Upload'}. Tap 'CONFIRM ATTENDANCE' below to save!`
+      `${pickerSelectedIds.size} student(s) marked as PRESENT via AI. Tap 'CONFIRM ATTENDANCE' below to save!`
     );
   };
 
@@ -401,23 +527,85 @@ export default function AttendanceDetailScreen() {
 
       {/* Face Scan Camera Modal */}
       <Modal visible={showFaceCamera} animationType="slide">
-        <View style={styles.scannerContainer}>
-          <View style={styles.scannerHeader}>
-            <Text style={styles.scannerTitle}>📸 FACE SCAN</Text>
-            <TouchableOpacity onPress={() => setShowFaceCamera(false)} style={styles.closeBtn}>
-              <Ionicons name="close" size={24} color={colors.black} />
+        <View style={styles.cameraContainer}>
+          {/* Header with Close, Flip Camera, Flash */}
+          <View style={styles.cameraHeader}>
+            <TouchableOpacity onPress={handleCloseFaceCamera} style={styles.cameraHeaderBtn}>
+              <Ionicons name="close" size={24} color={colors.white} />
             </TouchableOpacity>
+
+            <View style={styles.cameraHeaderCenter}>
+              <Text style={styles.cameraHeaderTitle}>🤖 AI FACE SCAN</Text>
+              <Text style={styles.cameraHeaderSub}>
+                {facing === 'front' ? 'FRONT CAMERA' : 'BACK CAMERA'} • {sessionRecognizedIds.size} MARKED
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {/* Flash / Torch */}
+              <TouchableOpacity
+                onPress={() => setTorch((prev) => !prev)}
+                style={[styles.cameraHeaderBtn, torch && { backgroundColor: colors.yellow }]}
+              >
+                <Ionicons
+                  name={torch ? 'flash' : 'flash-off'}
+                  size={20}
+                  color={torch ? colors.black : colors.white}
+                />
+              </TouchableOpacity>
+
+              {/* Front / Back Switch */}
+              <TouchableOpacity
+                onPress={() => setFacing((prev) => (prev === 'back' ? 'front' : 'back'))}
+                style={styles.cameraHeaderBtn}
+              >
+                <Ionicons name="camera-reverse" size={22} color={colors.white} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {permission?.granted ? (
             <CameraView
               ref={cameraRef}
               style={styles.camera}
-              facing="back"
+              facing={facing}
+              enableTorch={torch}
             >
               <View style={styles.scanOverlay}>
-                <View style={[styles.scanFrame, { borderColor: colors.orange, borderRadius: 20 }]} />
-                <Text style={styles.scanText}>CAPTURE STUDENT FACE</Text>
+                {/* Live Banner */}
+                {liveScanStatusText ? (
+                  <View style={styles.statusPill}>
+                    <Text style={styles.statusPillText}>{liveScanStatusText}</Text>
+                  </View>
+                ) : isLiveScanning ? (
+                  <View style={[styles.statusPill, { backgroundColor: '#DC2626' }]}>
+                    <Text style={styles.statusPillText}>🔴 LIVE AI SCAN ACTIVE</Text>
+                  </View>
+                ) : null}
+
+                {/* Viewfinder frame */}
+                <View
+                  style={[
+                    styles.aiScanFrame,
+                    isAiScanning && styles.aiScanFrameScanning,
+                    isLiveScanning && styles.aiScanFrameLive,
+                  ]}
+                >
+                  {isAiScanning && (
+                    <View style={styles.scanningBadge}>
+                      <ActivityIndicator size="large" color={colors.yellow} />
+                      <Text style={styles.scanningBadgeText}>AI ANALYZING...</Text>
+                    </View>
+                  )}
+                </View>
+
+                <Text style={styles.cameraTip}>
+                  {isAiScanning
+                    ? 'Comparing faces with Gemini 2.5 AI...'
+                    : isLiveScanning
+                    ? 'Scanning automatically every 3.5s'
+                    : 'Point at students & tap SCAN NOW'}
+                </Text>
               </View>
             </CameraView>
           ) : (
@@ -427,51 +615,107 @@ export default function AttendanceDetailScreen() {
             </View>
           )}
 
-          <View style={styles.scannerFooter}>
-            <BrutalButton
-              title="📸 CAPTURE PHOTO"
-              onPress={handleTakePhoto}
-              variant="primary"
-              size="lg"
-              fullWidth
-              icon="camera"
-            />
+          {/* Camera Controls Footer */}
+          <View style={styles.cameraFooterBar}>
+            {/* Live Scan Toggle */}
+            <TouchableOpacity
+              onPress={handleToggleLiveScan}
+              style={[
+                styles.cameraBarBtn,
+                isLiveScanning && { backgroundColor: '#DC2626', borderColor: '#DC2626' },
+              ]}
+            >
+              <Ionicons
+                name={isLiveScanning ? 'pause' : 'play'}
+                size={20}
+                color={colors.white}
+              />
+              <Text style={styles.cameraBarBtnText}>
+                {isLiveScanning ? 'STOP' : 'LIVE'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Instant Scan */}
+            <TouchableOpacity
+              onPress={performAiScan}
+              disabled={isAiScanning}
+              style={[styles.cameraScanMainBtn, isAiScanning && { opacity: 0.6 }]}
+            >
+              <Ionicons name="sparkles" size={26} color={colors.black} />
+              <Text style={styles.cameraScanMainBtnText}>
+                {isAiScanning ? 'SCANNING...' : 'SCAN FACE'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Done Button */}
+            <TouchableOpacity
+              onPress={handleCloseFaceCamera}
+              style={[styles.cameraBarBtn, { backgroundColor: colors.success, borderColor: colors.success }]}
+            >
+              <Ionicons name="checkmark-done" size={20} color={colors.white} />
+              <Text style={styles.cameraBarBtnText}>
+                DONE ({sessionRecognizedIds.size})
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Student Picker Modal (after Face Scan or Upload) */}
+      {/* Student Picker Modal (after Upload) */}
       <Modal visible={showStudentPicker} animationType="slide">
         <View style={styles.scannerContainer}>
-          <View style={[styles.scannerHeader, { backgroundColor: pickerMode === 'face' ? colors.orange : colors.black }]}>
+          <View style={[styles.scannerHeader, { backgroundColor: colors.black }]}>
             <Text style={[styles.scannerTitle, { color: colors.white }]}>
-              {pickerMode === 'face' ? '📸 MARK PRESENT' : '🖼️ MARK PRESENT'}
+              🖼️ AI PHOTO ATTENDANCE
             </Text>
-            <TouchableOpacity onPress={() => { setShowStudentPicker(false); setCapturedPhoto(null); }} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowStudentPicker(false);
+                setCapturedPhoto(null);
+                setUploadAiStatus('');
+              }}
+              style={styles.closeBtn}
+            >
               <Ionicons name="close" size={24} color={colors.black} />
             </TouchableOpacity>
           </View>
 
-          {/* Show captured/uploaded photo */}
+          {/* Show photo preview */}
           {capturedPhoto && (
             <View style={styles.photoPreview}>
               <Image source={{ uri: capturedPhoto }} style={styles.previewImage} />
             </View>
           )}
 
-          {/* Instructions */}
-          <View style={styles.pickerInstructions}>
-            <Ionicons name="information-circle" size={18} color={colors.orange} />
-            <Text style={styles.pickerInstructionText}>
-              Select the students visible in the {pickerMode === 'face' ? 'photo' : 'image'} to mark them PRESENT
+          {/* AI Status Banner */}
+          <View style={[
+            styles.aiStatusBanner,
+            isAiUploading ? { backgroundColor: colors.warningBg } : { backgroundColor: colors.successBg },
+          ]}>
+            {isAiUploading ? (
+              <ActivityIndicator size="small" color={colors.orange} />
+            ) : (
+              <Ionicons name="sparkles" size={20} color={colors.success} />
+            )}
+            <Text style={[
+              styles.aiStatusBannerText,
+              isAiUploading ? { color: '#92400E' } : { color: colors.success },
+            ]}>
+              {uploadAiStatus || 'AI analyzed image and pre-selected matching students below.'}
             </Text>
           </View>
 
-          {/* Select All */}
-          <TouchableOpacity style={styles.selectAllBtn} onPress={selectAllStudents}>
-            <Ionicons name="checkmark-done" size={18} color={colors.orange} />
-            <Text style={styles.selectAllText}>SELECT ALL ({students.length})</Text>
-          </TouchableOpacity>
+          {/* Bulk Select / Deselect */}
+          <View style={styles.pickerToolbar}>
+            <TouchableOpacity style={styles.selectAllBtn} onPress={selectAllStudents}>
+              <Ionicons name="checkmark-done" size={16} color={colors.orange} />
+              <Text style={styles.selectAllText}>SELECT ALL</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.selectAllBtn} onPress={deselectAllStudents}>
+              <Ionicons name="close-circle-outline" size={16} color={colors.textMuted} />
+              <Text style={[styles.selectAllText, { color: colors.textMuted }]}>CLEAR</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Student list */}
           <FlatList
@@ -488,25 +732,28 @@ export default function AttendanceDetailScreen() {
                     isSelected && styles.pickerStudentCardSelected,
                   ]}
                 >
-                  <View style={[
-                    styles.pickerCheckbox,
-                    isSelected && styles.pickerCheckboxSelected,
-                  ]}>
+                  <View
+                    style={[
+                      styles.pickerCheckbox,
+                      isSelected && styles.pickerCheckboxSelected,
+                    ]}
+                  >
                     {isSelected && <Ionicons name="checkmark" size={16} color={colors.white} />}
                   </View>
                   <View style={styles.pickerStudentAvatar}>
                     {student.avatar ? (
                       <Image source={{ uri: student.avatar }} style={{ width: 36, height: 36 }} />
                     ) : (
-                      <Text style={{ fontWeight: '900', fontSize: 16, color: colors.black }}>{student.name.charAt(0)}</Text>
+                      <Text style={{ fontWeight: '900', fontSize: 16, color: colors.black }}>
+                        {student.name.charAt(0)}
+                      </Text>
                     )}
                   </View>
                   <View style={{ flex: 1, marginLeft: 10 }}>
                     <Text style={styles.pickerStudentName}>{student.name}</Text>
+                    <Text style={styles.pickerStudentSub}>ID: {student.id}</Text>
                   </View>
-                  {isSelected && (
-                    <BrutalBadge text="PRESENT" variant="success" />
-                  )}
+                  {isSelected && <BrutalBadge text="PRESENT" variant="success" />}
                 </TouchableOpacity>
               );
             }}
@@ -514,7 +761,9 @@ export default function AttendanceDetailScreen() {
 
           {/* Confirm */}
           <View style={styles.scannerFooter}>
-            <Text style={styles.scannedCount}>SELECTED: {pickerSelectedIds.size} / {students.length} STUDENTS</Text>
+            <Text style={styles.scannedCount}>
+              SELECTED: {pickerSelectedIds.size} / {students.length} STUDENTS
+            </Text>
             <BrutalButton
               title={`MARK ${pickerSelectedIds.size} PRESENT`}
               onPress={handleConfirmPicker}
@@ -705,5 +954,123 @@ const styles = StyleSheet.create({
     ...typography.bodyBold,
     fontSize: 14,
     color: colors.black,
+  },
+  pickerStudentSub: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  // Camera Modal Styles
+  cameraContainer: { flex: 1, backgroundColor: colors.black },
+  cameraHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
+    backgroundColor: colors.black,
+  },
+  cameraHeaderCenter: { alignItems: 'center' },
+  cameraHeaderTitle: { fontSize: 16, fontWeight: '900', color: colors.yellow, letterSpacing: 1 },
+  cameraHeaderSub: { fontSize: 10, fontWeight: '800', color: colors.white, opacity: 0.8, marginTop: 2 },
+  cameraHeaderBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusPill: {
+    position: 'absolute',
+    top: 20,
+    backgroundColor: colors.yellow,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    zIndex: 10,
+    elevation: 4,
+  },
+  statusPillText: { fontSize: 12, fontWeight: '900', color: colors.black, textTransform: 'uppercase' },
+  aiScanFrame: {
+    width: 270,
+    height: 310,
+    borderWidth: 3,
+    borderColor: colors.white,
+    borderRadius: 16,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiScanFrameScanning: { borderColor: colors.yellow, borderWidth: 4, borderStyle: 'solid' },
+  aiScanFrameLive: { borderColor: '#DC2626', borderWidth: 4, borderStyle: 'solid' },
+  scanningBadge: {
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    gap: 8,
+  },
+  scanningBadgeText: { fontSize: 12, fontWeight: '900', color: colors.yellow },
+  cameraTip: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 20,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  cameraFooterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    backgroundColor: colors.black,
+  },
+  cameraBarBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    minWidth: 78,
+  },
+  cameraBarBtnText: { fontSize: 11, fontWeight: '900', color: colors.white, marginTop: 4 },
+  cameraScanMainBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.yellow,
+    borderRadius: 36,
+    width: 74,
+    height: 74,
+    ...borders.medium,
+  },
+  cameraScanMainBtnText: { fontSize: 9, fontWeight: '900', color: colors.black, marginTop: 2 },
+  aiStatusBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 6,
+    gap: 10,
+  },
+  aiStatusBannerText: { flex: 1, fontSize: 12, fontWeight: '700' },
+  pickerToolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
 });
