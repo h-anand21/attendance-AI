@@ -80,13 +80,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Check if Google Play Services is available
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-      // Native Google Sign-In — opens Google account picker popup (NO browser!)
+      // Sign out from local Google session first so account chooser opens every time
+      try {
+        await GoogleSignin.signOut();
+      } catch (_) {}
+
+      // Native Google Sign-In — opens Google account picker popup
       const response = await GoogleSignin.signIn();
 
       if (isSuccessResponse(response)) {
         const { idToken } = response.data;
         if (idToken) {
-          // Create Firebase credential from the native Google ID token
           const credential = GoogleAuthProvider.credential(idToken);
           await signInWithCredential(auth, credential);
         }
@@ -100,14 +104,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
-      // Sign out from Google native session too
+      try {
+        await GoogleSignin.revokeAccess();
+      } catch (_) {}
       try {
         await GoogleSignin.signOut();
-      } catch (_) {
-        // Ignore if not signed in via Google
-      }
+      } catch (_) {}
       await firebaseSignout(auth);
       await AsyncStorage.removeItem(ROLE_STORAGE_KEY);
+      setUser(null);
       setUserRole(null);
     } catch (error) {
       console.error('Error signing out:', error);

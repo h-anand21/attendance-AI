@@ -1,10 +1,18 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, borders } from '../../src/theme';
 import { View, StyleSheet } from 'react-native';
+import { useAuth } from '../../src/hooks/useAuth';
 
 export default function TabLayout() {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading]);
   return (
     <Tabs
       screenOptions={{
