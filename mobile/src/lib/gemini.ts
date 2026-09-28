@@ -25,15 +25,69 @@ function parseBase64(
   return { mimeType: defaultMime, data: input };
 }
 
+const AI_SERVICE_URL =
+  process.env.EXPO_PUBLIC_AI_SERVICE_URL || 'http://10.63.17.162:8000';
+
+async function tryUniFace(
+  sceneBase64: string,
+  students: Student[]
+): Promise<RecognizeFacesResult | null> {
+  try {
+    const studentsPayload = students
+      .filter((s) => (s.avatar && s.avatar.length > 50) || (s as any).embedding)
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        avatar: s.avatar,
+        embedding: (s as any).embedding,
+      }));
+
+    if (studentsPayload.length === 0) return null;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch(`${AI_SERVICE_URL}/api/recognize-faces`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenePhoto: sceneBase64,
+        students: studentsPayload,
+        threshold: 0.52,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log('✅ Mobile UniFace biometric matched:', data.recognizedStudentIds);
+      return {
+        recognizedStudentIds: data.recognizedStudentIds || [],
+        recognizedStudentNames: data.recognizedStudentNames || [],
+      };
+    }
+  } catch {
+    // UniFace unreachable; fall back to Gemini
+  }
+  return null;
+}
+
 /**
- * Real AI Face Recognition using Google Gemini 2.5 Flash
- * Compares the scene photo with student profile photos to identify present students
+ * Biometric Face Recognition: UniFace (local ArcFace) with Google Gemini Cloud Fallback
  */
 export async function recognizeFacesWithAI(
   sceneBase64: string,
   students: Student[]
 ): Promise<RecognizeFacesResult> {
   try {
+    // 1. Try UniFace biometric engine first (10ms, unlimited, free)
+    const unifaceResult = await tryUniFace(sceneBase64, students);
+    if (unifaceResult) {
+      return unifaceResult;
+    }
+
+    // 2. Fall back to Gemini Cloud AI
     if (!GEMINI_API_KEY) {
       return {
         recognizedStudentIds: [],
