@@ -16,7 +16,7 @@ app = FastAPI(title="AttendEase UniFace Biometric Engine", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -27,13 +27,31 @@ analyzer = FaceAnalyzer()
 print("UniFace FaceAnalyzer models loaded successfully!")
 
 
-def decode_base64_to_bgr(b64_string: str) -> np.ndarray:
-    """Decodes a base64 data URI or raw base64 string to an OpenCV BGR image."""
+import gc
+
+# In-memory embedding cache for student avatars to avoid re-extracting on every frame
+student_cache = {}
+
+
+def decode_base64_to_bgr(b64_string: str, max_dim: Optional[int] = 640) -> np.ndarray:
+    """
+    Decodes a base64 data URI or raw base64 string to an OpenCV BGR image.
+    Automatically scales down large frames to prevent OOM on 512MB cloud instances.
+    """
     try:
         if "," in b64_string:
             b64_string = b64_string.split(",", 1)[1]
         img_bytes = base64.b64decode(b64_string)
         pil_img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+
+        # Downscale if larger than max_dim (drastically reduces RAM & CPU usage)
+        if max_dim:
+            w, h = pil_img.size
+            if max(w, h) > max_dim:
+                scale = max_dim / max(w, h)
+                new_w, new_h = max(1, int(w * scale)), max(1, int(h * scale))
+                pil_img = pil_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
         # Convert RGB to BGR for OpenCV
         rgb_arr = np.array(pil_img)
         bgr_arr = cv2.cvtColor(rgb_arr, cv2.COLOR_RGB2BGR)
@@ -174,20 +192,27 @@ def recognize_faces(req: RecognizeRequest):
             matches=[]
         )
 
-    # Prepare student candidate embeddings (either precomputed or extract from avatar)
+    # Prepare student candidate embeddings (using cache to avoid re-extracting every frame)
     student_embeddings = []
     for s in req.students:
         emb = None
         if s.embedding and len(s.embedding) > 0:
             emb = np.array(s.embedding, dtype=np.float32)
         elif s.avatar and len(s.avatar) > 50:
-            try:
-                stu_bgr = decode_base64_to_bgr(s.avatar)
-                stu_faces = analyzer.analyze(stu_bgr)
-                if stu_faces and stu_faces[0].embedding is not None:
-                    emb = stu_faces[0].embedding.flatten()
-            except Exception as e:
-                print(f"Warning: could not process avatar for student {s.id}: {e}")
+            # Hash key using student ID and avatar prefix/length
+            cache_key = f"{s.id}_{len(s.avatar)}_{s.avatar[:32]}"
+            if cache_key in student_cache:
+                emb = student_cache[cache_key]
+            else:
+                try:
+                    # Resize avatar to 256px for lightning-fast embedding extraction (<20ms)
+                    stu_bgr = decode_base64_to_bgr(s.avatar, max_dim=256)
+                    stu_faces = analyzer.analyze(stu_bgr)
+                    if stu_faces and stu_faces[0].embedding is not None:
+                        emb = stu_faces[0].embedding.flatten()
+                        student_cache[cache_key] = emb
+                except Exception as e:
+                    print(f"Warning: could not process avatar for student {s.id}: {e}")
 
         if emb is not None:
             student_embeddings.append({
@@ -235,6 +260,9 @@ def recognize_faces(req: RecognizeRequest):
     # Preserve mapping of recognized student names
     id_to_name = {s.id: s.name for s in req.students}
     recognized_names = [id_to_name.get(s_id, s_id) for s_id in recognized_ids]
+
+    # Force memory cleanup after inference so Render 512MB RAM stays free
+    gc.collect()
 
     return RecognizeResponse(
         recognizedStudentIds=list(recognized_ids),
