@@ -8,10 +8,17 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
 
-WebBrowser.maybeCompleteAuthSession();
+// Configure Google Sign-In with Web Client ID from google-services.json
+// This uses native Google Play Services popup — NO browser redirect!
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '271051407293-fppbupib6u5evms1a7oakmnq0l9kcmrd.apps.googleusercontent.com',
+  offlineAccess: true,
+});
 
 export type UserRole = 'admin' | 'teacher' | null;
 
@@ -27,9 +34,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const ROLE_STORAGE_KEY = 'attendease_user_role';
-
-// Google OAuth config - loaded from .env (never hardcode!)
-const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -73,29 +77,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Use expo-auth-session for Google sign in
-      const redirectUri = AuthSession.makeRedirectUri();
-      
-      const discovery = {
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenEndpoint: 'https://oauth2.googleapis.com/token',
-      };
+      // Check if Google Play Services is available
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-      const request = new AuthSession.AuthRequest({
-        clientId: GOOGLE_CLIENT_ID,
-        redirectUri,
-        scopes: ['openid', 'profile', 'email'],
-        responseType: AuthSession.ResponseType.IdToken,
-      });
+      // Native Google Sign-In — opens Google account picker popup (NO browser!)
+      const response = await GoogleSignin.signIn();
 
-      const result = await request.promptAsync(discovery);
-      
-      if (result.type === 'success' && result.params?.id_token) {
-        const credential = GoogleAuthProvider.credential(result.params.id_token);
-        await signInWithCredential(auth, credential);
+      if (isSuccessResponse(response)) {
+        const { idToken } = response.data;
+        if (idToken) {
+          // Create Firebase credential from the native Google ID token
+          const credential = GoogleAuthProvider.credential(idToken);
+          await signInWithCredential(auth, credential);
+        }
       }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error?.message || error);
     } finally {
       setLoading(false);
     }
@@ -103,6 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
+      // Sign out from Google native session too
+      try {
+        await GoogleSignin.signOut();
+      } catch (_) {
+        // Ignore if not signed in via Google
+      }
       await firebaseSignout(auth);
       await AsyncStorage.removeItem(ROLE_STORAGE_KEY);
       setUserRole(null);

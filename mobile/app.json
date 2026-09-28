@@ -46,7 +46,8 @@
         {
           "cameraPermission": "AttendEase needs camera access for face scanning and student registration."
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
