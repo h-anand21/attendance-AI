@@ -49,9 +49,51 @@ const RecognizeFacesOutputSchema = z.object({
 });
 export type RecognizeFacesOutput = z.infer<typeof RecognizeFacesOutputSchema>;
 
+async function tryUniFace(
+  input: RecognizeFacesInput
+): Promise<RecognizeFacesOutput | null> {
+  try {
+    const studentsPayload = input.studentPhotos.map((s) => ({
+      id: s.studentId,
+      name: s.studentId,
+      avatar: s.photoDataUri,
+    }));
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    const res = await fetch('http://127.0.0.1:8000/api/recognize-faces', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenePhoto: input.scenePhotoDataUri,
+        students: studentsPayload,
+        threshold: 0.52,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log('✅ UniFace ArcFace matched:', data.recognizedStudentIds);
+      return {
+        recognizedStudentIds: data.recognizedStudentIds || [],
+      };
+    }
+  } catch {
+    // UniFace server not running or timed out; fall back to cloud AI
+  }
+  return null;
+}
+
 export async function recognizeFaces(
   input: RecognizeFacesInput
 ): Promise<RecognizeFacesOutput> {
+  const unifaceResult = await tryUniFace(input);
+  if (unifaceResult) {
+    return unifaceResult;
+  }
   return recognizeFacesFlow(input);
 }
 
