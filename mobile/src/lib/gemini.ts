@@ -125,7 +125,14 @@ Respond ONLY with a JSON object in this exact format:
     if (!response.ok) {
       const errorBody = await response.text();
       console.error('Gemini API Error:', response.status, errorBody);
-      throw new Error(`AI Service returned error ${response.status}`);
+      let errorMsg = `AI Service returned error ${response.status}`;
+      try {
+        const parsedErr = JSON.parse(errorBody);
+        if (parsedErr?.error?.message) {
+          errorMsg = parsedErr.error.message;
+        }
+      } catch {}
+      throw new Error(errorMsg);
     }
 
     const data = await response.json();
