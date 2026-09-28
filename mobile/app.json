@@ -30,7 +30,9 @@
       "permissions": [
         "CAMERA",
         "INTERNET",
-        "ACCESS_NETWORK_STATE"
+        "ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "googleServicesFile": "./google-services.json"
     },
@@ -54,8 +56,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "attendease-jwukx"
-      }
-    }
+        "projectId": "69df29a6-7c06-41b2-9fe3-7de7abc18ef1"
+      },
+      "router": {}
+    },
+    "owner": "himu21"
   }
 }

@@ -67,7 +67,7 @@ async function tryUniFace(
     for (const baseUrl of uniqueUrls) {
       const cleanUrl = baseUrl.replace(/\/+$/, '');
       const isLocal = cleanUrl.includes('10.63.') || cleanUrl.includes('192.168.') || cleanUrl.includes('127.0.0.1');
-      const timeoutMs = isLocal ? 1800 : 7000; // Fast fail if local laptop is not on this Wi-Fi
+      const timeoutMs = isLocal ? 2000 : 30000; // 30s for cloud (Render cold start can take ~50s)
 
       try {
         const controller = new AbortController();
