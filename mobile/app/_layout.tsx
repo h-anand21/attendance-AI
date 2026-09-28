@@ -7,7 +7,7 @@ import { colors } from '../src/theme';
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="dark" backgroundColor={colors.white} />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -24,7 +24,7 @@ export default function RootLayout() {
             headerShown: true,
             headerStyle: { backgroundColor: colors.yellow },
             headerTintColor: colors.black,
-            headerTitleStyle: { fontWeight: '900', textTransform: 'uppercase' },
+            headerTitleStyle: { fontWeight: '900' },
           }} 
         />
         <Stack.Screen 
@@ -33,7 +33,7 @@ export default function RootLayout() {
             headerShown: true,
             headerStyle: { backgroundColor: colors.yellow },
             headerTintColor: colors.black,
-            headerTitleStyle: { fontWeight: '900', textTransform: 'uppercase' },
+            headerTitleStyle: { fontWeight: '900' },
             title: 'REGISTER STUDENTS',
           }} 
         />
@@ -43,7 +43,7 @@ export default function RootLayout() {
             headerShown: true,
             headerStyle: { backgroundColor: colors.yellow },
             headerTintColor: colors.black,
-            headerTitleStyle: { fontWeight: '900', textTransform: 'uppercase' },
+            headerTitleStyle: { fontWeight: '900' },
             title: 'REGISTER TEACHERS',
           }} 
         />
@@ -53,7 +53,7 @@ export default function RootLayout() {
             headerShown: true,
             headerStyle: { backgroundColor: colors.yellow },
             headerTintColor: colors.black,
-            headerTitleStyle: { fontWeight: '900', textTransform: 'uppercase' },
+            headerTitleStyle: { fontWeight: '900' },
             title: 'MEAL VERIFICATION',
           }} 
         />
