@@ -26,7 +26,7 @@ export default function ProfileScreen() {
   // Settings Modal State
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [aiServerUrl, setAiServerUrl] = useState(
-    process.env.EXPO_PUBLIC_AI_SERVICE_URL || 'http://10.63.17.162:8000'
+    process.env.EXPO_PUBLIC_AI_SERVICE_URL || 'https://attendance-ai-1.onrender.com'
   );
   const [isTestingAi, setIsTestingAi] = useState(false);
   const [aiStatus, setAiStatus] = useState<'idle' | 'connected' | 'error'>('idle');
@@ -34,6 +34,17 @@ export default function ProfileScreen() {
 
   // Info Modal States
   const [activeInfoModal, setActiveInfoModal] = useState<string | null>(null);
+
+  // Load custom saved AI URL from AsyncStorage on mount
+  useEffect(() => {
+    AsyncStorage.getItem('CUSTOM_AI_SERVICE_URL')
+      .then((saved) => {
+        if (saved && saved.trim().length > 0) {
+          setAiServerUrl(saved.trim());
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     Alert.alert('LOG OUT', 'Are you sure you want to sign out?', [
@@ -55,11 +66,15 @@ export default function ProfileScreen() {
       setAiStatus('idle');
       setAiStatusMessage('Connecting to AI Server...');
 
+      const cleanUrl = aiServerUrl.trim().replace(/\/+$/, '');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-      const res = await fetch(`${aiServerUrl}/health`, {
+      const res = await fetch(`${cleanUrl}/health`, {
         method: 'GET',
+        headers: {
+          'bypass-tunnel-reminder': 'true',
+        },
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -67,16 +82,27 @@ export default function ProfileScreen() {
       if (res.ok) {
         const data = await res.json();
         setAiStatus('connected');
-        setAiStatusMessage(`Connected! Engine: ${data.engine || 'UniFace ArcFace'}`);
+        setAiStatusMessage(`Online! Engine: ${data.engine || 'UniFace ArcFace'}`);
       } else {
         setAiStatus('error');
-        setAiStatusMessage(`Server returned error HTTP ${res.status}`);
+        setAiStatusMessage(`Server responded with HTTP ${res.status}`);
       }
     } catch (e: any) {
       setAiStatus('error');
-      setAiStatusMessage('Could not reach UniFace Server. Make sure laptop & phone are on the same Wi-Fi.');
+      setAiStatusMessage('Could not reach server. Verify URL or check internet connection.');
     } finally {
       setIsTestingAi(false);
+    }
+  };
+
+  const handleSaveAiSettings = async () => {
+    try {
+      const cleanUrl = aiServerUrl.trim().replace(/\/+$/, '');
+      await AsyncStorage.setItem('CUSTOM_AI_SERVICE_URL', cleanUrl);
+      setShowSettingsModal(false);
+      Alert.alert('SAVED', `AI Biometric URL saved:\n${cleanUrl}`);
+    } catch {
+      setShowSettingsModal(false);
     }
   };
 
@@ -267,12 +293,41 @@ export default function ProfileScreen() {
               </View>
             )}
 
+            <Text style={styles.fieldLabel}>QUICK SELECT PRESET:</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
+              <TouchableOpacity
+                onPress={() => setAiServerUrl('https://attendance-ai-1.onrender.com')}
+                style={{
+                  flex: 1,
+                  paddingVertical: 8,
+                  paddingHorizontal: 4,
+                  backgroundColor: colors.yellow,
+                  ...borders.medium,
+                  alignItems: 'center',
+                  borderRadius: 4,
+                }}
+              >
+                <Text style={{ fontSize: 10, fontWeight: '900', color: colors.black }}>☁️ RENDER 24/7</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setAiServerUrl('http://10.63.17.162:8000')}
+                style={{
+                  flex: 1,
+                  paddingVertical: 8,
+                  paddingHorizontal: 4,
+                  backgroundColor: colors.surface,
+                  ...borders.medium,
+                  alignItems: 'center',
+                  borderRadius: 4,
+                }}
+              >
+                <Text style={{ fontSize: 10, fontWeight: '900', color: colors.black }}>💻 LOCAL WI-FI</Text>
+              </TouchableOpacity>
+            </View>
+
             <BrutalButton
               title="SAVE SETTINGS"
-              onPress={() => {
-                setShowSettingsModal(false);
-                Alert.alert('SAVED', 'AI Server settings have been applied!');
-              }}
+              onPress={handleSaveAiSettings}
               variant="primary"
               size="md"
               fullWidth

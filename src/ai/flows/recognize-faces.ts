@@ -60,12 +60,14 @@ async function tryUniFace(
 
   // Candidate URLs in priority order:
   // 1. Explicit AI_SERVICE_URL or NEXT_PUBLIC_AI_SERVICE_URL
-  // 2. Local loopback (for local development)
-  // 3. Public persistent tunnel (for Netlify cloud deployment)
+  // 2. Local loopback (for ultra-fast 0ms local development)
+  // 3. Render 24/7 Cloud Service (attendance-ai-1.onrender.com)
+  // 4. Public persistent tunnel (localtunnel fallback)
   const candidateUrls = [
     process.env.AI_SERVICE_URL,
     process.env.NEXT_PUBLIC_AI_SERVICE_URL,
     'http://127.0.0.1:8000',
+    'https://attendance-ai-1.onrender.com',
     'https://attendease-uniface-ai.loca.lt',
   ].filter(Boolean) as string[];
 

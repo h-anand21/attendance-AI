@@ -119,31 +119,40 @@ export function FaceScanModal({
         let handledDirectly = false;
         let newIds: string[] = [];
 
-        // 1. Try direct browser-side fetch to UniFace HTTPS tunnel (fastest, saves Netlify function invocations)
-        try {
-          const directController = new AbortController();
-          const directTimeout = setTimeout(() => directController.abort(), 5000);
-          const directRes = await fetch('https://attendease-uniface-ai.loca.lt/api/recognize-faces', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'bypass-tunnel-reminder': 'true',
-            },
-            body: JSON.stringify({
-              scenePhoto: frame,
-              students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
-              threshold: 0.52,
-            }),
-            signal: directController.signal,
-          });
-          clearTimeout(directTimeout);
-          if (directRes.ok) {
-            const data = await directRes.json();
-            newIds = data.recognizedStudentIds || [];
-            handledDirectly = true;
+        // 1. Try direct browser-side fetch to UniFace (Render 24/7 cloud or tunnel, saves Netlify function invocations)
+        const directEndpoints = [
+          'https://attendance-ai-1.onrender.com',
+          'https://attendease-uniface-ai.loca.lt',
+        ];
+
+        for (const ep of directEndpoints) {
+          if (handledDirectly) break;
+          try {
+            const directController = new AbortController();
+            const directTimeout = setTimeout(() => directController.abort(), 4500);
+            const directRes = await fetch(`${ep}/api/recognize-faces`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'bypass-tunnel-reminder': 'true',
+              },
+              body: JSON.stringify({
+                scenePhoto: frame,
+                students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
+                threshold: 0.52,
+              }),
+              signal: directController.signal,
+            });
+            clearTimeout(directTimeout);
+            if (directRes.ok) {
+              const data = await directRes.json();
+              newIds = data.recognizedStudentIds || [];
+              handledDirectly = true;
+              break;
+            }
+          } catch {
+            // Direct endpoint unreachable or timed out; try next
           }
-        } catch {
-          // Direct fetch skipped or timed out; fall back to Server Action
         }
 
         // 2. Fall back to Next.js Server Action

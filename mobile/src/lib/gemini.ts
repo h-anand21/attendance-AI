@@ -25,8 +25,10 @@ function parseBase64(
   return { mimeType: defaultMime, data: input };
 }
 
-const AI_SERVICE_URL =
-  process.env.EXPO_PUBLIC_AI_SERVICE_URL || 'http://10.63.17.162:8000';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const DEFAULT_CLOUD_URL = 'https://attendance-ai-1.onrender.com';
+const LOCAL_WIFI_URL = 'http://10.63.17.162:8000';
 
 async function tryUniFace(
   sceneBase64: string,
@@ -44,31 +46,62 @@ async function tryUniFace(
 
     if (studentsPayload.length === 0) return null;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    // Check custom saved URL in AsyncStorage
+    let customUrl: string | null = null;
+    try {
+      customUrl = await AsyncStorage.getItem('CUSTOM_AI_SERVICE_URL');
+    } catch {
+      // ignore
+    }
 
-    const res = await fetch(`${AI_SERVICE_URL}/api/recognize-faces`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scenePhoto: sceneBase64,
-        students: studentsPayload,
-        threshold: 0.52,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+    const candidateUrls = [
+      customUrl,
+      process.env.EXPO_PUBLIC_AI_SERVICE_URL,
+      LOCAL_WIFI_URL,
+      DEFAULT_CLOUD_URL,
+      'https://attendease-uniface-ai.loca.lt',
+    ].filter(Boolean) as string[];
 
-    if (res.ok) {
-      const data = await res.json();
-      console.log('✅ Mobile UniFace biometric matched:', data.recognizedStudentIds);
-      return {
-        recognizedStudentIds: data.recognizedStudentIds || [],
-        recognizedStudentNames: data.recognizedStudentNames || [],
-      };
+    const uniqueUrls = Array.from(new Set(candidateUrls));
+
+    for (const baseUrl of uniqueUrls) {
+      const cleanUrl = baseUrl.replace(/\/+$/, '');
+      const isLocal = cleanUrl.includes('10.63.') || cleanUrl.includes('192.168.') || cleanUrl.includes('127.0.0.1');
+      const timeoutMs = isLocal ? 1800 : 7000; // Fast fail if local laptop is not on this Wi-Fi
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        const res = await fetch(`${cleanUrl}/api/recognize-faces`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'bypass-tunnel-reminder': 'true',
+          },
+          body: JSON.stringify({
+            scenePhoto: sceneBase64,
+            students: studentsPayload,
+            threshold: 0.52,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log(`✅ Mobile UniFace matched via ${cleanUrl}:`, data.recognizedStudentIds);
+          return {
+            recognizedStudentIds: data.recognizedStudentIds || [],
+            recognizedStudentNames: data.recognizedStudentNames || [],
+          };
+        }
+      } catch {
+        // Try next endpoint in list
+      }
     }
   } catch {
-    // UniFace unreachable; fall back to Gemini
+    // All UniFace endpoints failed; fall back to Gemini
   }
   return null;
 }
