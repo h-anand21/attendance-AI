@@ -1,0 +1,10 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+uniface[cpu]
+opencv-python-headless
+pillow
+numpy
+scipy
+scikit-image
+onnxruntime
+pydantic
