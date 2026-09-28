@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "AttendEase",
+    "slug": "attendease-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "attendease",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFB800"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.attendease.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "AttendEase needs camera access for face scanning and student registration."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#FFB800"
+      },
+      "package": "com.attendease.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AttendEase needs camera access for face scanning and student registration."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "attendease-jwukx"
+      }
+    }
+  }
+}

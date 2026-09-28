@@ -1,0 +1,98 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# ========================================
+# 🔒 SENSITIVE FILES - NEVER PUSH TO GIT
+# ========================================
+
+# Environment variables (API keys, secrets)
+.env
+.env.*
+.env*.local
+!.env.example
+
+# Firebase config files (contain API keys)
+google-services.json
+GoogleService-Info.plist
+
+# Keystore files (signing keys for APK/AAB)
+*.keystore
+*.jks
+release.keystore
+upload-keystore.jks
+keystore.properties
+
+# Firebase service account keys
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+service-account-key.json
+
+# EAS secrets
+.eas/
+
+# ========================================
+# 📦 BUILD OUTPUTS - APK, AAB, IPA
+# ========================================
+
+# Android build outputs
+*.apk
+*.aab
+build/
+android/app/build/
+android/build/
+
+# iOS build outputs
+*.ipa
+*.xcarchive
+
+# EAS build outputs
+eas-build/
+
+# ========================================
+# 🗑️ OTHER IGNORES
+# ========================================
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

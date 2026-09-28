@@ -38,8 +38,62 @@ yarn-error.log*
 next-env.d.ts
 
 .genkit/*
-.env*
 
-# firebase
+# ========================================
+# 🔒 SENSITIVE FILES - NEVER PUSH TO GIT
+# ========================================
+
+# Environment variables
+.env
+.env.*
+.env*.local
+!.env.example
+
+# Firebase config files (contain API keys)
+google-services.json
+GoogleService-Info.plist
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+service-account-key.json
+
+# Firebase debug logs
 firebase-debug.log
 firestore-debug.log
+
+# Keystore files
+*.keystore
+*.jks
+keystore.properties
+
+# ========================================
+# 📦 BUILD OUTPUTS
+# ========================================
+
+# Android builds
+*.apk
+*.aab
+
+# iOS builds
+*.ipa
+*.xcarchive
+
+# EAS
+.eas/
+eas-build/
+
+# Mobile generated folders
+mobile/ios/
+mobile/android/
+mobile/.expo/
+mobile/dist/
+
+# ========================================
+# 🤖 AI/IDE CONFIG - NOT PROJECT FILES
+# ========================================
+.agents/
+.claude/
+CLAUDE.md
+AGENTS.md
+mobile/.claude/
+mobile/CLAUDE.md
+mobile/AGENTS.md
