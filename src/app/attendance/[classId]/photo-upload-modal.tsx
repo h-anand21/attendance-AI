@@ -123,19 +123,47 @@ export function PhotoUploadModal({
     setIsLoading(true);
 
     try {
-      const studentPhotos = students.map((s) => ({
-        studentId: s.id,
-        photoDataUri: s.avatar,
-      }));
+      let handledDirectly = false;
+      let recognizedIds: string[] = [];
 
-      const result = await recognizeFaces({
-        scenePhotoDataUri: previewUrl,
-        studentPhotos,
-        photoCreationDate: photoCreationDate || undefined,
-      });
+      // 1. Try direct browser-side fetch to UniFace HTTPS tunnel
+      try {
+        const directController = new AbortController();
+        const directTimeout = setTimeout(() => directController.abort(), 8000);
+        const directRes = await fetch('https://attendease-uniface-ai.loca.lt/api/recognize-faces', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'bypass-tunnel-reminder': 'true',
+          },
+          body: JSON.stringify({
+            scenePhoto: previewUrl,
+            students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
+            threshold: 0.52,
+          }),
+          signal: directController.signal,
+        });
+        clearTimeout(directTimeout);
+        if (directRes.ok) {
+          const data = await directRes.json();
+          recognizedIds = data.recognizedStudentIds || [];
+          handledDirectly = true;
+        }
+      } catch {
+        // Direct call failed or timed out; fall back to Server Action
+      }
+
+      // 2. Fall back to Server Action
+      if (!handledDirectly) {
+        const result = await recognizeFaces({
+          scenePhotoDataUri: previewUrl,
+          studentPhotos,
+          photoCreationDate: photoCreationDate || undefined,
+        });
+        recognizedIds = result.recognizedStudentIds || [];
+      }
       
       setScanning(true);
-      const recognizedIds = result.recognizedStudentIds;
       setRecognizedCount(recognizedIds.length);
       setUnrecognizedCount(students.length - recognizedIds.length);
       

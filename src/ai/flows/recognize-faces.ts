@@ -52,49 +52,85 @@ export type RecognizeFacesOutput = z.infer<typeof RecognizeFacesOutputSchema>;
 async function tryUniFace(
   input: RecognizeFacesInput
 ): Promise<RecognizeFacesOutput | null> {
-  try {
-    const studentsPayload = input.studentPhotos.map((s) => ({
-      id: s.studentId,
-      name: s.studentId,
-      avatar: s.photoDataUri,
-    }));
+  const studentsPayload = input.studentPhotos.map((s) => ({
+    id: s.studentId,
+    name: s.studentId,
+    avatar: s.photoDataUri,
+  }));
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+  // Candidate URLs in priority order:
+  // 1. Explicit AI_SERVICE_URL or NEXT_PUBLIC_AI_SERVICE_URL
+  // 2. Local loopback (for local development)
+  // 3. Public persistent tunnel (for Netlify cloud deployment)
+  const candidateUrls = [
+    process.env.AI_SERVICE_URL,
+    process.env.NEXT_PUBLIC_AI_SERVICE_URL,
+    'http://127.0.0.1:8000',
+    'https://attendease-uniface-ai.loca.lt',
+  ].filter(Boolean) as string[];
 
-    const res = await fetch('http://127.0.0.1:8000/api/recognize-faces', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scenePhoto: input.scenePhotoDataUri,
-        students: studentsPayload,
-        threshold: 0.52,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+  const uniqueUrls = Array.from(new Set(candidateUrls));
 
-    if (res.ok) {
-      const data = await res.json();
-      console.log('✅ UniFace ArcFace matched:', data.recognizedStudentIds);
-      return {
-        recognizedStudentIds: data.recognizedStudentIds || [],
-      };
+  for (const baseUrl of uniqueUrls) {
+    const cleanUrl = baseUrl.replace(/\/+$/, '');
+    const targetUrl = `${cleanUrl}/api/recognize-faces`;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const res = await fetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'bypass-tunnel-reminder': 'true',
+        },
+        body: JSON.stringify({
+          scenePhoto: input.scenePhotoDataUri,
+          students: studentsPayload,
+          threshold: 0.52,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(`✅ UniFace ArcFace matched via ${cleanUrl}:`, data.recognizedStudentIds);
+        return {
+          recognizedStudentIds: data.recognizedStudentIds || [],
+        };
+      } else {
+        console.warn(`UniFace endpoint ${cleanUrl} responded with HTTP ${res.status}`);
+      }
+    } catch (err: any) {
+      // Endpoint unreachable or timed out; try next candidate
+      console.log(`UniFace endpoint ${cleanUrl} not reachable (${err?.name || err?.message}), checking next...`);
     }
-  } catch {
-    // UniFace server not running or timed out; fall back to cloud AI
   }
+
   return null;
 }
 
 export async function recognizeFaces(
   input: RecognizeFacesInput
 ): Promise<RecognizeFacesOutput> {
-  const unifaceResult = await tryUniFace(input);
-  if (unifaceResult) {
-    return unifaceResult;
+  try {
+    const unifaceResult = await tryUniFace(input);
+    if (unifaceResult) {
+      return unifaceResult;
+    }
+  } catch (err) {
+    console.warn('UniFace recognition error:', err);
   }
-  return recognizeFacesFlow(input);
+
+  // Fallback to Gemini if UniFace is offline
+  try {
+    return await recognizeFacesFlow(input);
+  } catch (error: any) {
+    console.error('Face recognition fallback failed (Gemini quota or error):', error?.message || error);
+    // Crucial: return empty list rather than throwing unhandled exception to prevent Next.js 500 error!
+    return { recognizedStudentIds: [] };
+  }
 }
 
 const prompt = ai.definePrompt({

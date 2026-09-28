@@ -116,23 +116,56 @@ export function FaceScanModal({
           photoDataUri: s.avatar,
         }));
 
-        const result = await recognizeFaces({
-          scenePhotoDataUri: frame,
-          studentPhotos,
-        });
+        let handledDirectly = false;
+        let newIds: string[] = [];
 
-        const newIds = result.recognizedStudentIds;
-        setLastScanCount(newIds.length);
-        if(newIds.length > 0) {
-            setSessionRecognizedIds(prevIds => {
-                const updatedIds = new Set(prevIds);
-                newIds.forEach(id => updatedIds.add(id));
-                return updatedIds;
-            });
+        // 1. Try direct browser-side fetch to UniFace HTTPS tunnel (fastest, saves Netlify function invocations)
+        try {
+          const directController = new AbortController();
+          const directTimeout = setTimeout(() => directController.abort(), 5000);
+          const directRes = await fetch('https://attendease-uniface-ai.loca.lt/api/recognize-faces', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'bypass-tunnel-reminder': 'true',
+            },
+            body: JSON.stringify({
+              scenePhoto: frame,
+              students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
+              threshold: 0.52,
+            }),
+            signal: directController.signal,
+          });
+          clearTimeout(directTimeout);
+          if (directRes.ok) {
+            const data = await directRes.json();
+            newIds = data.recognizedStudentIds || [];
+            handledDirectly = true;
+          }
+        } catch {
+          // Direct fetch skipped or timed out; fall back to Server Action
         }
-      } catch(error) {
-          console.error("Single scan failed:", error);
-          // Don't stop the session for a single failed scan
+
+        // 2. Fall back to Next.js Server Action
+        if (!handledDirectly) {
+          const result = await recognizeFaces({
+            scenePhotoDataUri: frame,
+            studentPhotos,
+          });
+          newIds = result.recognizedStudentIds || [];
+        }
+
+        setLastScanCount(newIds.length);
+        if (newIds.length > 0) {
+          setSessionRecognizedIds((prevIds) => {
+            const updatedIds = new Set(prevIds);
+            newIds.forEach((id) => updatedIds.add(id));
+            return updatedIds;
+          });
+        }
+      } catch (error) {
+        console.error("Single scan failed:", error);
+        // Don't stop the session for a single failed scan
       }
   }
 
