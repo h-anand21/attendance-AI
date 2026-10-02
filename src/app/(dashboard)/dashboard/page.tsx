@@ -68,11 +68,16 @@ export default function DashboardPage() {
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
   
   const totalStudents = useMemo(() => {
-    return Object.values(studentsByClass).reduce(
-      (acc, classStudents) => acc + classStudents.length,
-      0
-    );
-  }, [studentsByClass]);
+    const existingClassIds = new Set(classes.map(c => c.id));
+    return Object.entries(studentsByClass)
+      .filter(([classId]) => existingClassIds.has(classId))
+      .reduce((acc, [, classStudents]) => acc + classStudents.length, 0);
+  }, [studentsByClass, classes]);
+
+  const validAttendanceRecords = useMemo(() => {
+    const existingClassIds = new Set(classes.map(c => c.id));
+    return attendanceRecords.filter(r => r.classId && existingClassIds.has(r.classId));
+  }, [attendanceRecords, classes]);
 
   const loading = classesLoading || studentsLoading || attendanceLoading || noticesLoading;
 
@@ -109,7 +114,7 @@ export default function DashboardPage() {
     const fromDateStr = format(thirtyDaysAgo, 'yyyy-MM-dd');
     const toDateStr = format(today, 'yyyy-MM-dd');
 
-    const relevantRecords = attendanceRecords.filter(r => r.date >= fromDateStr && r.date <= toDateStr);
+    const relevantRecords = validAttendanceRecords.filter(r => r.date >= fromDateStr && r.date <= toDateStr);
 
     const pieData = relevantRecords.reduce((acc, record) => {
       acc[record.status] = (acc[record.status] || 0) + 1;
@@ -139,7 +144,7 @@ export default function DashboardPage() {
 
     return { pieChartData, barChartData };
 
-  }, [attendanceRecords]);
+  }, [validAttendanceRecords]);
 
   if (loading) {
     return (
@@ -168,7 +173,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Attendance Events',
-      value: attendanceRecords.length,
+      value: validAttendanceRecords.length,
       icon: UserCheck,
       description: 'Total records logged',
       action: null,

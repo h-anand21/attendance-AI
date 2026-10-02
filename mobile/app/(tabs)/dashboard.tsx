@@ -37,11 +37,16 @@ export default function DashboardScreen() {
   const [classSection, setClassSection] = useState('');
 
   const totalStudents = useMemo(() => {
-    return Object.values(studentsByClass).reduce(
-      (acc, classStudents) => acc + classStudents.length,
-      0
-    );
-  }, [studentsByClass]);
+    const existingClassIds = new Set(classes.map(c => c.id));
+    return Object.entries(studentsByClass)
+      .filter(([classId]) => existingClassIds.has(classId))
+      .reduce((acc, [, classStudents]) => acc + classStudents.length, 0);
+  }, [studentsByClass, classes]);
+
+  const validAttendanceRecords = useMemo(() => {
+    const existingClassIds = new Set(classes.map(c => c.id));
+    return attendanceRecords.filter(r => r.classId && existingClassIds.has(r.classId));
+  }, [attendanceRecords, classes]);
 
   const loading = classesLoading || studentsLoading || attendanceLoading || noticesLoading;
 
@@ -74,7 +79,7 @@ export default function DashboardScreen() {
   const statCards = [
     { title: 'TOTAL CLASSES', value: classes.length, icon: 'book-outline' as const, color: colors.yellow },
     { title: 'TOTAL STUDENTS', value: totalStudents, icon: 'people-outline' as const, color: colors.orange },
-    { title: 'ATTENDANCE', value: attendanceRecords.length, icon: 'checkmark-circle-outline' as const, color: colors.success },
+    { title: 'ATTENDANCE', value: validAttendanceRecords.length, icon: 'checkmark-circle-outline' as const, color: colors.success },
   ];
 
   return (
