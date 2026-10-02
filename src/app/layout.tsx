@@ -13,10 +13,15 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'AttendEase',
-  description: 'Smart Attendance System',
+  title: 'AttendEase - Smart AI Attendance',
+  description: 'Smart Attendance System powered by AI Biometrics',
   icons: {
-    icon: 'https://i.postimg.cc/NfztPvvS/green-check-box-icon-3d-render-illustration.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    apple: '/logo.png',
   },
 };
 
