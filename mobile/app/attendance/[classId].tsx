@@ -197,7 +197,7 @@ export default function AttendanceDetailScreen() {
         return;
       }
 
-      setLiveScanStatusText('🤖 Gemini AI analyzing...');
+      setLiveScanStatusText('🤖 AI Analyzing...');
       const result = await recognizeFacesWithAI(photo.base64, students);
 
       if (result.error) {

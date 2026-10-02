@@ -198,7 +198,7 @@ def recognize_faces(req: RecognizeRequest):
     scene_faces = None
     try:
         try:
-            scene_bgr = decode_base64_to_bgr(req.scenePhoto)
+            scene_bgr = decode_base64_to_bgr(req.scenePhoto, max_dim=1080)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid scene photo: {str(e)}")
 
