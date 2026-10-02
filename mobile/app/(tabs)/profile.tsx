@@ -20,8 +20,6 @@ import { BrutalButton } from '../../src/components/ui/BrutalButton';
 import { DotPattern, GeometricSquare } from '../../src/components/ui/BrutalDecorations';
 import { useAuth } from '../../src/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
-import { collection, getDocs, writeBatch } from 'firebase/firestore';
-import { db } from '../../src/lib/firebase';
 
 export default function ProfileScreen() {
   const { user, userRole, signOut } = useAuth();
@@ -109,89 +107,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const [isCleaningDemo, setIsCleaningDemo] = useState(false);
-
-  const handleCleanDemoData = () => {
-    if (!user) return;
-
-    Alert.alert(
-      'CLEAN DEMO DATA',
-      'This will delete all auto-generated placeholder demo classes (Mathematics 101, etc.) and fake placeholder students.\n\n🛡️ Any real students you registered with photos will be kept completely safe.',
-      [
-        { text: 'CANCEL', style: 'cancel' },
-        {
-          text: 'DELETE DEMO ONLY',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setIsCleaningDemo(true);
-              const DEMO_CLASS_NAMES = [
-                'Mathematics 101',
-                'Physics 202',
-                'English Literature 301',
-                'Computer Science 404',
-              ];
-
-              // 1. Fetch user classes
-              const classesSnapshot = await getDocs(
-                collection(db, 'users', user.uid, 'classes')
-              );
-              const demoClassIds = new Set<string>();
-
-              const batch = writeBatch(db);
-              let deletedClassCount = 0;
-              let deletedStudentCount = 0;
-
-              classesSnapshot.docs.forEach((docSnap) => {
-                const data = docSnap.data();
-                if (DEMO_CLASS_NAMES.includes(data.name)) {
-                  demoClassIds.add(docSnap.id);
-                  batch.delete(docSnap.ref);
-                  deletedClassCount++;
-                }
-              });
-
-              // 2. Fetch user students
-              const studentsSnapshot = await getDocs(
-                collection(db, 'users', user.uid, 'students')
-              );
-
-              studentsSnapshot.docs.forEach((docSnap) => {
-                const data = docSnap.data();
-                const isRealRegistered =
-                  (data.avatar && data.avatar.startsWith('data:image/')) ||
-                  (Array.isArray(data.embedding) && data.embedding.length > 0);
-
-                // Safe check: Only delete if NOT a real registered student
-                const isDemo =
-                  !isRealRegistered &&
-                  (demoClassIds.has(data.classId) ||
-                    (data.avatar && data.avatar.includes('picsum.photos')) ||
-                    (data.name && /^Student \d{4}/.test(data.name)));
-
-                if (isDemo) {
-                  batch.delete(docSnap.ref);
-                  deletedStudentCount++;
-                }
-              });
-
-              await batch.commit();
-              Alert.alert(
-                'CLEANED SUCCESSFULLY',
-                `Removed ${deletedClassCount} demo classes and ${deletedStudentCount} demo students.\n\nYour real registered students and custom classes are 100% safe.`
-              );
-            } catch (err: any) {
-              console.error('Error cleaning demo data:', err);
-              Alert.alert('ERROR', err?.message || 'Could not clean demo data');
-            } finally {
-              setIsCleaningDemo(false);
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const menuItems = [
     {
       icon: 'person-outline' as const,
@@ -203,12 +118,6 @@ export default function ProfileScreen() {
       label: 'AI BIOMETRICS SETTINGS',
       detail: 'UniFace',
       onPress: () => setShowSettingsModal(true),
-    },
-    {
-      icon: 'trash-outline' as const,
-      label: isCleaningDemo ? 'CLEANING DEMO...' : 'CLEAN DEMO DATA',
-      detail: 'Safe',
-      onPress: handleCleanDemoData,
     },
     {
       icon: 'shield-checkmark-outline' as const,
