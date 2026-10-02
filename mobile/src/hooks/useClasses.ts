@@ -3,7 +3,6 @@ import {
   collection,
   query,
   onSnapshot,
-  writeBatch,
   doc,
   orderBy,
   setDoc,
@@ -11,8 +10,6 @@ import {
 import { db } from '../lib/firebase';
 import type { Class } from '../types';
 import { useAuth } from './useAuth';
-import { classes as initialClassesData, students as initialStudentsData } from '../lib/data';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useClasses() {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -29,58 +26,13 @@ export function useClasses() {
     const classesCollectionRef = collection(db, 'users', user.uid, 'classes');
     const q = query(classesCollectionRef, orderBy('createdAt', 'desc'));
 
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const seedingFlag = `seeding_for_${user.uid}`;
-      const alreadySeeded = await AsyncStorage.getItem(seedingFlag);
-      
-      if (querySnapshot.empty && !alreadySeeded) {
-        await AsyncStorage.setItem(seedingFlag, 'true');
-        setLoading(true);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedClasses = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+      } as Class));
 
-        console.log('No classes found, seeding initial data...');
-        try {
-          const batch = writeBatch(db);
-          const studentsCollectionRef = collection(db, 'users', user.uid, 'students');
-          
-          for (const classData of initialClassesData) {
-            const newClassRef = doc(classesCollectionRef);
-
-            const studentsForClass = initialStudentsData[classData.id] || [];
-            const studentCount = studentsForClass.length;
-
-            const newClassPayload: Class = {
-              id: newClassRef.id,
-              name: classData.name,
-              section: classData.section,
-              studentCount: studentCount,
-              createdAt: new Date().toISOString(),
-            };
-            batch.set(newClassRef, newClassPayload);
-
-            for (const studentData of studentsForClass) {
-              const newStudentRef = doc(studentsCollectionRef);
-              batch.set(newStudentRef, {
-                ...studentData,
-                id: newStudentRef.id,
-                classId: newClassRef.id,
-              });
-            }
-          }
-          await batch.commit();
-          console.log('Initial data seeded.');
-        } catch (error) {
-          console.error('Error seeding data:', error);
-          await AsyncStorage.removeItem(seedingFlag);
-          setLoading(false);
-        }
-      } else {
-        const fetchedClasses = querySnapshot.docs.map(doc => ({
-          ...doc.data(),
-        } as Class));
-
-        setClasses(fetchedClasses);
-        setLoading(false);
-      }
+      setClasses(fetchedClasses);
+      setLoading(false);
     }, (error) => {
       console.error('Error fetching classes: ', error);
       setLoading(false);
