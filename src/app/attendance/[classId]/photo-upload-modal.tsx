@@ -126,10 +126,11 @@ export function PhotoUploadModal({
       let handledDirectly = false;
       let recognizedIds: string[] = [];
 
-      // 1. Try direct browser-side fetch to UniFace (Render 24/7 cloud or tunnel)
+      // 1. Try direct browser-side fetch to UniFace (Local 8000 or Render 24/7 cloud)
       const directEndpoints = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
         'https://attendance-ai-1.onrender.com',
-        'https://attendease-uniface-ai.loca.lt',
       ];
 
       for (const ep of directEndpoints) {

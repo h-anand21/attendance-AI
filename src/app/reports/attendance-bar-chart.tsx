@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Legend, Tooltip } from 'recharts';
 import {
   Card,
   CardContent,
@@ -45,8 +45,7 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
       <CardContent>
         {data.length > 0 ? (
           <ChartContainer config={chartConfig} className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <AreaChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                  <defs>
                     <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="var(--color-present)" stopOpacity={0.8}/>
@@ -91,7 +90,6 @@ export function AttendanceBarChart({ data }: AttendanceBarChartProps) {
                 <Area type="monotone" dataKey="absent" stroke="var(--color-absent)" strokeWidth={2} fillOpacity={1} fill="url(#colorAbsent)" />
                 <Area type="monotone" dataKey="late" stroke="var(--color-late)" strokeWidth={2} fillOpacity={1} fill="url(#colorLate)" />
               </AreaChart>
-            </ResponsiveContainer>
           </ChartContainer>
         ) : (
           <div className="flex h-[350px] items-center justify-center">

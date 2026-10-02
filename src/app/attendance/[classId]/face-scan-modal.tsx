@@ -119,10 +119,11 @@ export function FaceScanModal({
         let handledDirectly = false;
         let newIds: string[] = [];
 
-        // 1. Try direct browser-side fetch to UniFace (Render 24/7 cloud or tunnel, saves Netlify function invocations)
+        // 1. Try direct browser-side fetch to UniFace (Local laptop loopback or 24/7 Render Cloud)
         const directEndpoints = [
+          'http://localhost:8000',
+          'http://127.0.0.1:8000',
           'https://attendance-ai-1.onrender.com',
-          'https://attendease-uniface-ai.loca.lt',
         ];
 
         for (const ep of directEndpoints) {

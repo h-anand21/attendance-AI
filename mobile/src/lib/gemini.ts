@@ -59,7 +59,6 @@ async function tryUniFace(
       process.env.EXPO_PUBLIC_AI_SERVICE_URL,
       DEFAULT_CLOUD_URL,
       LOCAL_WIFI_URL,
-      'https://attendease-uniface-ai.loca.lt',
     ].filter(Boolean) as string[];
 
     const uniqueUrls = Array.from(new Set(candidateUrls));
