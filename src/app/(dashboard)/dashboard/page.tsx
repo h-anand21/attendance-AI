@@ -42,6 +42,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { collection, getDocs, writeBatch } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -60,12 +62,94 @@ export default function DashboardPage() {
   const { classes, loading: classesLoading, addClass } = useClasses();
   const { studentsByClass, loading: studentsLoading } = useStudents();
   const { attendanceRecords, loading: attendanceLoading } = useAttendance();
-  const { userRole } = useAuth();
+  const { user, userRole } = useAuth();
   const { notices, addNotice, deleteNotice, loading: noticesLoading } = useNotices();
 
   const [isSummaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [isSummaryModalOpen, setSummaryModalOpen] = useState(false);
+
+  const [isCleaningDemo, setIsCleaningDemo] = useState(false);
+  const [cleanDialogOpen, setCleanDialogOpen] = useState(false);
+  const [cleanResult, setCleanResult] = useState<string | null>(null);
+
+  const handleCleanDemoData = async () => {
+    if (!user) return;
+    setIsCleaningDemo(true);
+    try {
+      const DEMO_CLASS_NAMES = [
+        'Mathematics 101',
+        'Physics 202',
+        'English Literature 301',
+        'Computer Science 404',
+      ];
+
+      // 1. Fetch user classes
+      const classesSnapshot = await getDocs(
+        collection(db, 'users', user.uid, 'classes')
+      );
+      const demoClassIds = new Set<string>();
+
+      let batch = writeBatch(db);
+      let batchCount = 0;
+      let deletedClassCount = 0;
+      let deletedStudentCount = 0;
+
+      classesSnapshot.docs.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (DEMO_CLASS_NAMES.includes(data.name)) {
+          demoClassIds.add(docSnap.id);
+          batch.delete(docSnap.ref);
+          deletedClassCount++;
+          batchCount++;
+        }
+      });
+
+      // 2. Fetch user students
+      const studentsSnapshot = await getDocs(
+        collection(db, 'users', user.uid, 'students')
+      );
+
+      for (const docSnap of studentsSnapshot.docs) {
+        const data = docSnap.data();
+        const isRealRegistered =
+          (data.avatar && data.avatar.startsWith('data:image/')) ||
+          (Array.isArray(data.embedding) && data.embedding.length > 0);
+
+        // Safe check: Only delete if NOT a real registered student
+        const isDemo =
+          !isRealRegistered &&
+          (demoClassIds.has(data.classId) ||
+            (data.avatar && data.avatar.includes('picsum.photos')) ||
+            (data.name && /^Student \d{4}/.test(data.name)));
+
+        if (isDemo) {
+          batch.delete(docSnap.ref);
+          deletedStudentCount++;
+          batchCount++;
+
+          if (batchCount >= 400) {
+            await batch.commit();
+            batch = writeBatch(db);
+            batchCount = 0;
+          }
+        }
+      }
+
+      if (batchCount > 0) {
+        await batch.commit();
+      }
+
+      setCleanResult(
+        `Successfully removed ${deletedClassCount} demo classes and ${deletedStudentCount} fake demo students. All your real registered students are intact!`
+      );
+    } catch (err: any) {
+      console.error('Error cleaning demo data:', err);
+      setCleanResult(`Error: ${err?.message || 'Failed to clean demo data'}`);
+    } finally {
+      setIsCleaningDemo(false);
+    }
+  };
   
   const totalStudents = useMemo(() => {
     return Object.values(studentsByClass).reduce(
@@ -163,7 +247,17 @@ export default function DashboardPage() {
       title: 'Total Students',
       value: totalStudents,
       icon: Users,
-      description: null,
+      description: (
+        <button
+          onClick={() => {
+            setCleanResult(null);
+            setCleanDialogOpen(true);
+          }}
+          className="text-xs text-amber-400/90 hover:text-amber-300 flex items-center gap-1.5 transition-colors font-medium mt-1 cursor-pointer"
+        >
+          <Trash2 className="h-3 w-3" /> Clean Old Demo Data
+        </button>
+      ),
       action: null,
     },
     {
@@ -241,12 +335,26 @@ export default function DashboardPage() {
                   <h2 className="text-2xl font-bold tracking-tight">
                       Your Classes
                   </h2>
-                  <CreateClassDialog onClassCreate={addClass}>
-                    <GlassButton variant="primary" size="sm" className="h-9">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        New Class
+                  <div className="flex items-center gap-2">
+                    <GlassButton
+                      variant="secondary"
+                      size="sm"
+                      className="h-9 text-xs text-amber-300 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
+                      onClick={() => {
+                        setCleanResult(null);
+                        setCleanDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                      Clean Demo Data
                     </GlassButton>
-                  </CreateClassDialog>
+                    <CreateClassDialog onClassCreate={addClass}>
+                      <GlassButton variant="primary" size="sm" className="h-9">
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          New Class
+                      </GlassButton>
+                    </CreateClassDialog>
+                  </div>
                 </div>
                 {classes.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -344,7 +452,7 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-       <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
+        <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
         <DialogContent className="glass border-white/20 p-8">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">AI Attendance Summary</DialogTitle>
@@ -363,6 +471,53 @@ export default function DashboardPage() {
           )}
           <DialogFooter className="pt-4">
             <GlassButton onClick={() => setSummaryModalOpen(false)} className="w-full sm:w-auto">Close Insights</GlassButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cleanDialogOpen} onOpenChange={setCleanDialogOpen}>
+        <DialogContent className="glass border-white/20 p-6 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-amber-400">
+              <Trash2 className="h-5 w-5" /> Clean Old Demo Data
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-300 pt-2 leading-relaxed">
+              This will remove old placeholder demo classes (like Mathematics 101) and fake demo students (Student 1001...).
+              <br /><br />
+              <span className="text-emerald-400 font-medium">🛡️ 100% Safe:</span> Any real students you registered with photos or face embeddings will NEVER be deleted.
+            </DialogDescription>
+          </DialogHeader>
+
+          {cleanResult && (
+            <div className="p-3 bg-emerald-950/60 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs mt-2">
+              {cleanResult}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-4">
+            <GlassButton
+              variant="secondary"
+              onClick={() => setCleanDialogOpen(false)}
+            >
+              Close
+            </GlassButton>
+            {!cleanResult && (
+              <GlassButton
+                variant="primary"
+                className="bg-red-600/80 hover:bg-red-600 text-white border-red-500/40"
+                onClick={handleCleanDemoData}
+                disabled={isCleaningDemo}
+              >
+                {isCleaningDemo ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Cleaning Demo Data...
+                  </>
+                ) : (
+                  'Remove Demo Only'
+                )}
+              </GlassButton>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
