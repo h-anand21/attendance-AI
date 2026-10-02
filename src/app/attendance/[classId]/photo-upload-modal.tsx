@@ -123,6 +123,35 @@ export function PhotoUploadModal({
     setIsLoading(true);
 
     try {
+      // Compress image client-side to max 1080px to guarantee fast upload and keep server memory low
+      const compressImage = (dataUrl: string, maxDim = 1080): Promise<string> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (Math.max(w, h) > maxDim) {
+              const scale = maxDim / Math.max(w, h);
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL('image/jpeg', 0.82));
+            } else {
+              resolve(dataUrl);
+            }
+          };
+          img.onerror = () => resolve(dataUrl);
+          img.src = dataUrl;
+        });
+      };
+
+      const photoToSend = await compressImage(previewUrl, 1080);
       let handledDirectly = false;
       let recognizedIds: string[] = [];
 
@@ -145,7 +174,7 @@ export function PhotoUploadModal({
               'bypass-tunnel-reminder': 'true',
             },
             body: JSON.stringify({
-              scenePhoto: previewUrl,
+              scenePhoto: photoToSend,
               students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
               threshold: 0.52,
             }),
@@ -166,7 +195,7 @@ export function PhotoUploadModal({
       // 2. Fall back to Server Action
       if (!handledDirectly) {
         const result = await recognizeFaces({
-          scenePhotoDataUri: previewUrl,
+          scenePhotoDataUri: photoToSend,
           studentPhotos,
           photoCreationDate: photoCreationDate || undefined,
         });

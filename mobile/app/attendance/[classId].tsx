@@ -187,7 +187,7 @@ export default function AttendanceDetailScreen() {
       setLiveScanStatusText('📸 Capturing frame...');
 
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.4,
+        quality: 0.85,
         base64: true,
       });
 
@@ -258,7 +258,7 @@ export default function AttendanceDetailScreen() {
       performAiScan();
       liveScanIntervalRef.current = setInterval(() => {
         performAiScan();
-      }, 8500);
+      }, 2500);
     }
   };
 
@@ -267,7 +267,7 @@ export default function AttendanceDetailScreen() {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        quality: 0.5,
+        quality: 0.85,
         base64: true,
       });
 

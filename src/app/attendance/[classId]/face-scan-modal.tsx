@@ -35,6 +35,7 @@ export function FaceScanModal({
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isProcessingRef = useRef<boolean>(false);
   const [isScanningSession, setIsScanningSession] = useState(false);
   const [sessionRecognizedIds, setSessionRecognizedIds] = useState<Set<string>>(new Set());
   const [lastScanCount, setLastScanCount] = useState(0);
@@ -45,6 +46,7 @@ export function FaceScanModal({
         clearInterval(scanIntervalRef.current);
         scanIntervalRef.current = null;
     }
+    isProcessingRef.current = false;
     setIsScanningSession(false);
     setSessionRecognizedIds(new Set());
     setLastScanCount(0);
@@ -90,94 +92,108 @@ export function FaceScanModal({
   }, [isOpen, toast, resetState]);
 
   const captureFrame = (): string | null => {
-    if (videoRef.current) {
+    if (videoRef.current && videoRef.current.videoWidth > 0) {
+      const vWidth = videoRef.current.videoWidth;
+      const vHeight = videoRef.current.videoHeight;
+      // Full HD 1080p native resolution for crystal-clear face detection with zero blur
+      const maxDim = 1920;
+      let targetW = vWidth;
+      let targetH = vHeight;
+      if (Math.max(vWidth, vHeight) > maxDim) {
+        const scale = maxDim / Math.max(vWidth, vHeight);
+        targetW = Math.round(vWidth * scale);
+        targetH = Math.round(vHeight * scale);
+      }
+
       const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      canvas.width = targetW;
+      canvas.height = targetH;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        return canvas.toDataURL('image/jpeg');
+        ctx.drawImage(videoRef.current, 0, 0, targetW, targetH);
+        return canvas.toDataURL('image/jpeg', 0.90);
       }
     }
     return null;
   };
   
   const performScan = async () => {
-     const frame = captureFrame();
-      if (!frame) {
-        // Silently fail if frame can't be captured, loop will try again
-        return;
-      }
+    // Avoid concurrent scan flooding (wait until previous request completes)
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
 
-      try {
-        const studentPhotos = students.map((s) => ({
-          studentId: s.id,
-          photoDataUri: s.avatar,
-        }));
+    try {
+      const frame = captureFrame();
+      if (!frame) return;
 
-        let handledDirectly = false;
-        let newIds: string[] = [];
+      const studentPhotos = students.map((s) => ({
+        studentId: s.id,
+        photoDataUri: s.avatar,
+      }));
 
-        // 1. Try direct browser-side fetch to UniFace (Local laptop loopback or 24/7 Render Cloud)
-        const directEndpoints = [
-          'http://localhost:8000',
-          'http://127.0.0.1:8000',
-          'https://attendance-ai-1.onrender.com',
-        ];
+      let handledDirectly = false;
+      let newIds: string[] = [];
 
-        for (const ep of directEndpoints) {
-          if (handledDirectly) break;
-          try {
-            const directController = new AbortController();
-            const directTimeout = setTimeout(() => directController.abort(), 4500);
-            const directRes = await fetch(`${ep}/api/recognize-faces`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'bypass-tunnel-reminder': 'true',
-              },
-              body: JSON.stringify({
-                scenePhoto: frame,
-                students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
-                threshold: 0.52,
-              }),
-              signal: directController.signal,
-            });
-            clearTimeout(directTimeout);
-            if (directRes.ok) {
-              const data = await directRes.json();
-              newIds = data.recognizedStudentIds || [];
-              handledDirectly = true;
-              break;
-            }
-          } catch {
-            // Direct endpoint unreachable or timed out; try next
+      // 1. Try direct browser-side fetch to UniFace (Local laptop loopback or 24/7 Render Cloud)
+      const directEndpoints = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'https://attendance-ai-1.onrender.com',
+      ];
+
+      for (const ep of directEndpoints) {
+        if (handledDirectly) break;
+        try {
+          const directController = new AbortController();
+          const directTimeout = setTimeout(() => directController.abort(), 4500);
+          const directRes = await fetch(`${ep}/api/recognize-faces`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'bypass-tunnel-reminder': 'true',
+            },
+            body: JSON.stringify({
+              scenePhoto: frame,
+              students: students.map((s) => ({ id: s.id, name: s.id, avatar: s.avatar })),
+              threshold: 0.52,
+            }),
+            signal: directController.signal,
+          });
+          clearTimeout(directTimeout);
+          if (directRes.ok) {
+            const data = await directRes.json();
+            newIds = data.recognizedStudentIds || [];
+            handledDirectly = true;
+            break;
           }
+        } catch {
+          // Direct endpoint unreachable or timed out; try next
         }
-
-        // 2. Fall back to Next.js Server Action
-        if (!handledDirectly) {
-          const result = await recognizeFaces({
-            scenePhotoDataUri: frame,
-            studentPhotos,
-          });
-          newIds = result.recognizedStudentIds || [];
-        }
-
-        setLastScanCount(newIds.length);
-        if (newIds.length > 0) {
-          setSessionRecognizedIds((prevIds) => {
-            const updatedIds = new Set(prevIds);
-            newIds.forEach((id) => updatedIds.add(id));
-            return updatedIds;
-          });
-        }
-      } catch (error) {
-        console.error("Single scan failed:", error);
-        // Don't stop the session for a single failed scan
       }
-  }
+
+      // 2. Fall back to Next.js Server Action
+      if (!handledDirectly) {
+        const result = await recognizeFaces({
+          scenePhotoDataUri: frame,
+          studentPhotos,
+        });
+        newIds = result.recognizedStudentIds || [];
+      }
+
+      setLastScanCount(newIds.length);
+      if (newIds.length > 0) {
+        setSessionRecognizedIds((prevIds) => {
+          const updatedIds = new Set(prevIds);
+          newIds.forEach((id) => updatedIds.add(id));
+          return updatedIds;
+        });
+      }
+    } catch (error) {
+      console.error("Single scan failed:", error);
+    } finally {
+      isProcessingRef.current = false;
+    }
+  };
 
   const handleStartStopScan = () => {
     if(isScanningSession) {
@@ -186,18 +202,20 @@ export function FaceScanModal({
             clearInterval(scanIntervalRef.current);
             scanIntervalRef.current = null;
         }
+        isProcessingRef.current = false;
         setIsScanningSession(false);
     } else {
         // Start scanning
         setSessionRecognizedIds(new Set());
         setLastScanCount(0);
         setIsScanningSession(true);
+        isProcessingRef.current = false;
         
         // Perform initial scan immediately
         performScan();
         
-        // Then set interval for subsequent scans
-        scanIntervalRef.current = setInterval(performScan, 2000); // Scan every 2 seconds
+        // Then set safe interval for subsequent scans (2.5 seconds)
+        scanIntervalRef.current = setInterval(performScan, 2500);
     }
   };
 
