@@ -91,6 +91,49 @@
   }
 }
 
+@keyframes liquid-sheen {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  45%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes liquid-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes liquid-blob {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: rotate(180deg) scale(1.06);
+  }
+}
+
+.animate-liquid-sheen {
+  animation: liquid-sheen 4s ease-in-out infinite;
+}
+
+.animate-liquid-pulse {
+  animation: liquid-pulse 3s ease-in-out infinite;
+}
+
+.animate-liquid-blob {
+  animation: liquid-blob 9s ease-in-out infinite;
+}
+
 @layer base {
   section {
     @apply py-16 sm:py-24;

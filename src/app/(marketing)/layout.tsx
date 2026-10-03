@@ -21,8 +21,8 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-[#0B0F19] text-[#F1F5F9] selection:bg-amber-400 selection:text-black">
-      {/* Sticky Refined Dark Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-[#0B0F19]/90 backdrop-blur-xl">
+      {/* Sticky Refined Glass Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0B0F19]/70 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center shadow-sm group-hover:border-amber-400 transition-colors">
@@ -42,7 +42,7 @@ export default function MarketingLayout({
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-slate-300 transition-colors hover:text-amber-400"
+                className="text-slate-300 transition-colors hover:text-white"
               >
                 {link.label}
               </Link>
@@ -51,14 +51,20 @@ export default function MarketingLayout({
 
           {/* Right Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="/AttendEase-Release.apk"
-              download="AttendEase-v1.0.1.apk"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition-all shadow-sm active:translate-y-0.5"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
-              <span>Download APK</span>
-            </a>
+            <div className="relative group inline-block">
+              <a
+                href="/AttendEase-Release.apk"
+                download="AttendEase-v1.0.1.apk"
+                className="relative overflow-hidden inline-flex items-center gap-2 pl-3.5 pr-1.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 border-2 border-white shadow-[2.5px_2.5px_0px_#FFFFFF] hover:shadow-[1px_1px_0px_#FFFFFF] hover:translate-x-[1.5px] hover:translate-y-[1.5px] active:translate-x-[2.5px] active:translate-y-[2.5px] active:shadow-none transition-all duration-200"
+              >
+                <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/50 to-transparent rounded-t-full pointer-events-none" />
+                <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-liquid-sheen" />
+                <span className="relative z-10 text-slate-950 font-black text-xs">Download APK</span>
+                <div className="relative z-10 w-6 h-6 rounded-full bg-white/30 border border-white flex items-center justify-center">
+                  <Download className="w-3 h-3 text-slate-950 stroke-[3]" />
+                </div>
+              </a>
+            </div>
             <Button
               variant="ghost"
               asChild
@@ -68,7 +74,7 @@ export default function MarketingLayout({
             </Button>
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-all shadow-sm"
+              className="inline-flex items-center justify-center px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-semibold border border-white/15 transition-all shadow-sm backdrop-blur-md"
             >
               Dashboard
             </Link>
@@ -109,9 +115,9 @@ export default function MarketingLayout({
                   <a
                     href="/AttendEase-Release.apk"
                     download="AttendEase-v1.0.1.apk"
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FFB800] text-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000000]"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-xs font-bold uppercase tracking-wider shadow-md"
                   >
-                    <Download className="w-4 h-4 text-black stroke-[3]" />
+                    <Download className="w-4 h-4 text-slate-950 stroke-[2.5]" />
                     <span>Download APK (136 MB)</span>
                   </a>
                   <Button variant="outline" asChild className="w-full border-slate-700 bg-slate-900 text-white">

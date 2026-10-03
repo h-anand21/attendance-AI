@@ -212,11 +212,11 @@ export default function LandingPage() {
                   transition={{ duration: 0.4 }}
                   className="mb-4 inline-block"
                 >
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs font-medium tracking-wide text-slate-200 shadow-sm backdrop-blur-md">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/15 text-xs font-medium tracking-wide text-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.25)] backdrop-blur-xl">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
                     <span className="font-bold text-white">On-Device AI</span>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400">Zero Hardware Required</span>
+                    <span className="text-slate-500">|</span>
+                    <span className="text-slate-300">Zero Hardware Required</span>
                   </div>
                 </motion.div>
 
@@ -238,22 +238,20 @@ export default function LandingPage() {
                     className="text-xl sm:text-2xl lg:text-[1.75rem] font-semibold tracking-[-0.02em] leading-snug"
                   >
                     <span className="text-slate-200">Built for speed. </span>
-                    <span className="text-amber-400">Ready in seconds. </span>
+                    <span className="text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.45)]">Ready in seconds. </span>
                     <span className="text-slate-400">Zero internet needed.</span>
                   </motion.p>
                 </div>
 
-                {/* Subtitle - Editorial Callout with Left Accent */}
-                <motion.div
+                {/* Description Paragraph - Clean, Open & Unboxed */}
+                <motion.p
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.12 }}
-                  className="mt-6 max-w-xl border-l-2 border-amber-400/60 pl-4 py-1"
+                  className="mt-5 max-w-xl text-base sm:text-lg text-slate-300 leading-relaxed font-normal"
                 >
-                  <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-                    Replace slow roll calls and expensive biometric machines with a high-speed Android app. Detect and verify multiple faces simultaneously in <strong className="text-white font-semibold">under 2.5 seconds</strong> with <strong className="text-white font-semibold">99.8% precision</strong>, backed by seamless cloud analytics.
-                  </p>
-                </motion.div>
+                  Replace slow roll calls and expensive biometric machines with a high-speed Android app. Detect and verify multiple faces simultaneously in <strong className="text-white font-semibold">under 2.5 seconds</strong> with <strong className="text-amber-400 font-semibold">99.8% precision</strong>, backed by seamless cloud analytics.
+                </motion.p>
 
                 {/* CTA Buttons - Large & Tactile */}
                 <motion.div
@@ -262,40 +260,65 @@ export default function LandingPage() {
                   transition={{ duration: 0.5, delay: 0.16 }}
                   className="mt-7 flex flex-wrap items-center gap-4"
                 >
-                  {/* Direct APK Download Button */}
+                  {/* Direct APK Download Button - Pill + 3D White Shadow + Circular Icon (matches user reference image) */}
                   <Magnetic strength={0.35} radius={100} className="inline-block">
-                    <a
-                      href="/AttendEase-Release.apk"
-                      download="AttendEase-v1.0.1.apk"
-                      className="group relative inline-flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm uppercase tracking-wide shadow-[0_4px_20px_rgba(245,158,11,0.22)] border border-amber-300/60 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
-                    >
-                      <Download className="w-4 h-4 text-slate-950 stroke-[2.5] group-hover:translate-y-0.5 transition-transform duration-200" />
-                      <div className="text-left">
-                        <div className="leading-tight font-black text-sm">Download Android APK</div>
-                        <div className="text-[10px] text-slate-900/80 font-bold lowercase">direct install • 136 mb • v1.0.1</div>
-                      </div>
-                    </a>
+                    <div className="relative group inline-block">
+                      {/* Ambient Liquid Glow */}
+                      <div className="absolute -inset-1 rounded-full bg-amber-400/40 blur-xl opacity-60 group-hover:opacity-100 transition-opacity animate-liquid-pulse pointer-events-none" />
+
+                      <a
+                        href="/AttendEase-Release.apk"
+                        download="AttendEase-v1.0.1.apk"
+                        className="relative overflow-hidden inline-flex items-center gap-3.5 pl-6 pr-2.5 py-2.5 sm:pl-7 sm:pr-3 sm:py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 border-[2.5px] border-white shadow-[4px_4px_0px_#FFFFFF] hover:shadow-[2px_2px_0px_#FFFFFF] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-200"
+                      >
+                        {/* Top Curved Glass Meniscus Reflection */}
+                        <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/50 to-transparent rounded-t-full pointer-events-none" />
+
+                        {/* Moving Liquid Sheen */}
+                        <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-liquid-sheen" />
+
+                        {/* Button Text */}
+                        <div className="text-left relative z-10">
+                          <div className="leading-tight font-black text-sm sm:text-base text-slate-950 tracking-tight">
+                            Download Android APK
+                          </div>
+                          <div className="text-[10px] sm:text-[11px] text-slate-900/85 font-extrabold lowercase tracking-wide">
+                            direct install • 136 mb • v1.0.1
+                          </div>
+                        </div>
+
+                        {/* Circular Icon Capsule on Right (Matches Reference Image) */}
+                        <div className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/25 hover:bg-white/35 border-2 border-white flex items-center justify-center backdrop-blur-md shadow-sm transition-transform duration-200 group-hover:scale-105">
+                          <Download className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 stroke-[2.8] group-hover:translate-y-0.5 transition-transform" />
+                        </div>
+                      </a>
+                    </div>
                   </Magnetic>
 
-                  {/* Open Web Dashboard Button */}
+                  {/* Open Web Dashboard Button - Matching Capsule Pill */}
                   <Magnetic strength={0.25} radius={90} className="inline-block">
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white font-bold text-sm border border-slate-700/80 transition-all duration-200 backdrop-blur-md shadow-sm hover:-translate-y-0.5"
+                      className="group relative overflow-hidden inline-flex items-center gap-3.5 pl-6 pr-2.5 py-2.5 sm:pl-7 sm:pr-3 sm:py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white font-bold text-sm sm:text-base border-[2.5px] border-white/40 hover:border-white shadow-[4px_4px_0px_rgba(255,255,255,0.25)] hover:shadow-[2px_2px_0px_#FFFFFF] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none backdrop-blur-2xl transition-all duration-200"
                     >
-                      <Laptop className="w-4 h-4 text-slate-300" />
-                      <span>Open Web Dashboard</span>
-                      <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                      <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/30 to-transparent rounded-t-full pointer-events-none" />
+                      <div className="flex items-center gap-2 relative z-10">
+                        <Laptop className="w-4 h-4 text-slate-300" />
+                        <span>Open Web Dashboard</span>
+                      </div>
+                      <div className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 border-2 border-white/60 group-hover:border-white flex items-center justify-center backdrop-blur-md transition-transform duration-200 group-hover:scale-105">
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </Link>
                   </Magnetic>
                 </motion.div>
 
-                {/* Editorial Micro-Proof Row */}
+                {/* Editorial Micro-Proof Row - Glass Strip */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-3 gap-4 w-full max-w-xl"
+                  className="mt-7 p-4 sm:p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.25)] grid grid-cols-3 gap-4 w-full max-w-xl"
                 >
                   <div>
                     <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Face Scan Speed</div>
@@ -303,7 +326,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">AI Accuracy</div>
-                    <div className="text-base font-extrabold text-amber-400 tracking-tight mt-0.5">99.8% Match</div>
+                    <div className="text-base font-extrabold text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.4)] tracking-tight mt-0.5">99.8% Match</div>
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Classroom Mode</div>
@@ -315,13 +338,13 @@ export default function LandingPage() {
               {/* Right Column: Live Mobile & Web Attendance Animation Switcher */}
               <div className="lg:col-span-5 flex flex-col items-center justify-center">
                 {/* Switcher Bar: Mobile vs Web */}
-                <div className="mb-2.5 p-1 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-1 shadow-lg backdrop-blur-md">
+                <div className="mb-2.5 p-1 rounded-xl bg-slate-950/70 border border-white/15 flex items-center gap-1 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-2xl">
                   <button
                     type="button"
                     onClick={() => setDeviceMode('mobile')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       deviceMode === 'mobile'
-                        ? 'bg-amber-400 text-slate-950 shadow-sm'
+                        ? 'bg-white text-slate-950 shadow-md'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
@@ -332,9 +355,9 @@ export default function LandingPage() {
                   <button
                     type="button"
                     onClick={() => setDeviceMode('web')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       deviceMode === 'web'
-                        ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
+                        ? 'bg-white text-slate-950 shadow-md'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
@@ -526,7 +549,7 @@ export default function LandingPage() {
                     }}
                     className={`relative p-3.5 sm:p-4 rounded-2xl text-left transition-all duration-300 border-2 overflow-hidden ${
                       isActive
-                        ? 'bg-[#151821] border-[#FFB800] shadow-[0_0_25px_rgba(255,184,0,0.3)] -translate-y-1'
+                        ? 'bg-[#151821] border-white/80 shadow-[0_0_25px_rgba(255,255,255,0.12)] -translate-y-1'
                         : 'bg-[#0E1016] border-slate-800 hover:border-slate-700 text-slate-400'
                     }`}
                   >
@@ -537,7 +560,7 @@ export default function LandingPage() {
                         initial={{ width: '0%' }}
                         animate={{ width: '100%' }}
                         transition={{ duration: 5, ease: 'linear' }}
-                        className="absolute bottom-0 left-0 h-1 bg-[#FFB800]"
+                        className="absolute bottom-0 left-0 h-1 bg-white"
                       />
                     )}
 
@@ -545,14 +568,14 @@ export default function LandingPage() {
                       <span
                         className={`text-xs font-mono font-black px-2 py-0.5 rounded-md ${
                           isActive
-                            ? 'bg-[#FFB800] text-black'
+                            ? 'bg-white text-slate-950'
                             : 'bg-slate-800 text-slate-400'
                         }`}
                       >
                         STEP {s.step}
                       </span>
                       {isActive && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#FFB800] animate-pulse" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                       )}
                     </div>
                     <div className={`text-xs sm:text-sm font-bold truncate ${isActive ? 'text-white' : 'text-slate-300'}`}>
@@ -695,14 +718,20 @@ export default function LandingPage() {
                           <ChevronRight className="w-4 h-4" />
                         </button>
 
-                        <a
-                          href="/AttendEase-Release.apk"
-                          download="AttendEase-v1.0.1.apk"
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black text-sm font-black uppercase tracking-wider transition-all border-2 border-black shadow-[3px_3px_0px_#000000] hover:shadow-[4px_4px_0px_#FF6B35]"
-                        >
-                          <Download className="w-4 h-4 text-black" />
-                          <span>Download APK to Test</span>
-                        </a>
+                        <div className="relative group inline-block">
+                          <a
+                            href="/AttendEase-Release.apk"
+                            download="AttendEase-v1.0.1.apk"
+                            className="relative overflow-hidden inline-flex items-center gap-3 pl-5 pr-2 py-2 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 border-2 border-white shadow-[3px_3px_0px_#FFFFFF] hover:shadow-[1.5px_1.5px_0px_#FFFFFF] hover:translate-x-[1.5px] hover:translate-y-[1.5px] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all duration-200"
+                          >
+                            <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/50 to-transparent rounded-t-full pointer-events-none" />
+                            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-liquid-sheen" />
+                            <span className="relative z-10 text-slate-950 font-black text-xs uppercase tracking-wider">Download APK to Test</span>
+                            <div className="relative z-10 w-7 h-7 rounded-full bg-white/25 border-2 border-white flex items-center justify-center">
+                              <Download className="w-3.5 h-3.5 text-slate-950 stroke-[2.8]" />
+                            </div>
+                          </a>
+                        </div>
 
                         <button
                           type="button"
@@ -780,9 +809,9 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center rounded-3xl bg-gradient-to-b from-[#13161F] to-[#0A0C11] border-2 border-[#FFB800]/50 p-10 sm:p-16 relative overflow-hidden shadow-2xl backdrop-blur-xl"
+              className="text-center rounded-3xl bg-gradient-to-b from-white/[0.08] via-slate-900/50 to-black/80 border border-white/20 p-10 sm:p-16 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-2xl"
             >
-              <div className="absolute top-0 right-1/2 translate-x-1/2 w-96 h-96 bg-[#FFB800]/15 rounded-full blur-[130px] pointer-events-none" />
+              <div className="absolute top-0 right-1/2 translate-x-1/2 w-96 h-96 bg-amber-400/10 rounded-full blur-[130px] pointer-events-none" />
 
               <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-6">
                 Ready to Upgrade Your Campus Attendance?
@@ -794,20 +823,29 @@ export default function LandingPage() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6">
                 <Magnetic strength={0.35} radius={100} className="w-full sm:w-auto inline-block">
-                  <a
-                    href="/AttendEase-Release.apk"
-                    download="AttendEase-v1.0.1.apk"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-base uppercase tracking-wider shadow-[0_6px_25px_rgba(245,158,11,0.25)] border border-amber-300/40 transition-all hover:-translate-y-0.5 active:translate-y-1"
-                  >
-                    <Download className="w-5 h-5 text-slate-950 stroke-[2.5]" />
-                    <span>Download Free Android APK</span>
-                  </a>
+                  <div className="relative group w-full sm:w-auto">
+                    <div className="absolute -inset-1 rounded-full bg-amber-400/40 blur-xl opacity-60 group-hover:opacity-100 transition-opacity animate-liquid-pulse pointer-events-none" />
+
+                    <a
+                      href="/AttendEase-Release.apk"
+                      download="AttendEase-v1.0.1.apk"
+                      className="relative overflow-hidden w-full sm:w-auto inline-flex items-center justify-between gap-4 pl-7 pr-3 py-3 sm:pl-8 sm:pr-3.5 sm:py-3.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 border-[2.5px] border-white shadow-[5px_5px_0px_#FFFFFF] hover:shadow-[2px_2px_0px_#FFFFFF] hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-[5px] active:translate-y-[5px] active:shadow-none transition-all duration-200"
+                    >
+                      <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/50 to-transparent rounded-t-full pointer-events-none" />
+                      <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-liquid-sheen" />
+
+                      <span className="relative z-10 font-black text-slate-950 text-base sm:text-lg">Download Free Android APK</span>
+                      <div className="relative z-10 w-10 h-10 rounded-full bg-white/25 border-2 border-white flex items-center justify-center shadow-sm">
+                        <Download className="w-5 h-5 text-slate-950 stroke-[2.8]" />
+                      </div>
+                    </a>
+                  </div>
                 </Magnetic>
 
                 <Magnetic strength={0.25} radius={90} className="w-full sm:w-auto inline-block">
                   <Link
                     href="/login"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-white font-bold text-base transition-all hover:-translate-y-0.5 shadow-sm"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/20 text-white font-bold text-base transition-all hover:-translate-y-0.5 shadow-sm backdrop-blur-xl"
                   >
                     <span>Access Web Dashboard</span>
                     <ArrowRight className="w-4 h-4 text-amber-400" />
@@ -826,7 +864,7 @@ export default function LandingPage() {
               </div>
 
               {/* 4 Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-3xl mx-auto pt-6 border-t border-slate-800/80">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-3xl mx-auto pt-6 border-t border-white/10">
                 {[
                   { value: '< 2.5s', label: 'Face Scan Speed', icon: <Zap className="w-4 h-4 text-amber-400" /> },
                   { value: '99.8%', label: 'AI Accuracy', icon: <Sparkles className="w-4 h-4 text-blue-400" /> },
@@ -835,7 +873,7 @@ export default function LandingPage() {
                 ].map((stat, i) => (
                   <div
                     key={i}
-                    className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md shadow-sm"
+                    className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]"
                   >
                     <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 mb-1">
                       {stat.icon}
