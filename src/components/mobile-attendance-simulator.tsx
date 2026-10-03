@@ -91,7 +91,7 @@ export function MobileAttendanceSimulator({
 
       {/* Screen Content */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false}>
           {/* ========================================================== */}
           {/* SCREEN 1: mobile/app/(tabs)/attendance.tsx */}
           {/* ========================================================== */}
@@ -102,7 +102,7 @@ export function MobileAttendanceSimulator({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.25 }}
-              className="p-3.5 flex-1 flex flex-col justify-between overflow-y-auto"
+              className="absolute inset-0 p-3.5 flex flex-col justify-between overflow-y-auto bg-white"
             >
               <div>
                 {/* Header matching mobile attendance.tsx */}
@@ -201,7 +201,7 @@ export function MobileAttendanceSimulator({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.25 }}
-              className="p-3.5 flex-1 flex flex-col justify-between overflow-y-auto"
+              className="absolute inset-0 p-3.5 flex flex-col justify-between overflow-y-auto bg-white"
             >
               <div>
                 {/* Header */}
@@ -300,7 +300,7 @@ export function MobileAttendanceSimulator({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.04 }}
               transition={{ duration: 0.25 }}
-              className="p-3.5 flex-1 flex flex-col justify-between bg-black text-white relative overflow-hidden"
+              className="absolute inset-0 p-3.5 flex flex-col justify-between bg-black text-white relative overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between text-[10px] relative z-10">
@@ -378,7 +378,7 @@ export function MobileAttendanceSimulator({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.25 }}
-              className="p-3.5 flex-1 flex flex-col justify-between overflow-y-auto"
+              className="absolute inset-0 p-3.5 flex flex-col justify-between overflow-y-auto bg-white"
             >
               <div>
                 {/* Success Banner */}
