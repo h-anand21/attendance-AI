@@ -212,37 +212,39 @@ export default function LandingPage() {
                   transition={{ duration: 0.4 }}
                   className="mb-4 inline-block"
                 >
-                  <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-300 text-xs sm:text-sm font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
-                    <Flame className="w-4 h-4 text-amber-400" />
-                    <span>AttendEase v1.0.1 Ready</span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-slate-300 font-semibold">Android APK & Web Cloud</span>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-300 text-xs sm:text-sm font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    <span>On-Device AI</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-slate-300 font-semibold">Zero Hardware Required</span>
                   </div>
                 </motion.div>
 
-                {/* Main Headline - Zoomed & Bold */}
+                {/* Main Headline - Zoomed, Bold & High-Impact */}
                 <motion.h1
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.05 }}
                   className="text-4xl sm:text-6xl lg:text-[4.2rem] font-black tracking-tight leading-[1.04] text-white"
                 >
-                  Next-Gen{' '}
+                  Instant{' '}
                   <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-amber-400 bg-clip-text text-transparent font-black drop-shadow-sm">
-                    AI Biometric Attendance
+                    Multi-Face Attendance.
                   </span>
                   <br />
-                  <span className="text-white">For Modern Institutions.</span>
+                  <span className="text-2xl sm:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-slate-200 block mt-2.5">
+                    Built for speed. Ready in seconds. Zero internet needed.
+                  </span>
                 </motion.h1>
 
-                {/* Subtitle - Zoomed, Clear & Readable */}
+                {/* Subtitle - Polished High-Converting Copy */}
                 <motion.p
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="mt-6 text-base sm:text-xl text-slate-300 max-w-xl leading-relaxed font-normal"
+                  className="mt-6 text-base sm:text-lg lg:text-xl text-slate-300 max-w-xl leading-relaxed font-normal"
                 >
-                  Mark 1080p multi-face attendance in seconds with on-device AI. Zero manual registers, offline-ready Android APK, and automated cloud Excel reports.
+                  Replace slow roll calls and expensive biometric machines with a high-speed Android app. Detect and verify multiple faces simultaneously in under 2.5 seconds with 99.8% precision, backed by seamless cloud analytics.
                 </motion.p>
 
                 {/* CTA Buttons - Large & Prominent */}
