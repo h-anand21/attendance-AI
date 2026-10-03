@@ -205,66 +205,74 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
               {/* Left Column: Headline, Descriptions, CTAs, and Stats */}
               <div className="lg:col-span-7 flex flex-col items-start text-left">
-                {/* Release Badge */}
+                {/* Architectural Product Badge */}
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                   className="mb-4 inline-block"
                 >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-300 text-xs sm:text-sm font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    <span>On-Device AI</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-slate-300 font-semibold">Zero Hardware Required</span>
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs font-medium tracking-wide text-slate-200 shadow-sm backdrop-blur-md">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="font-bold text-white">On-Device AI</span>
+                    <span className="text-slate-600">|</span>
+                    <span className="text-slate-400">Zero Hardware Required</span>
                   </div>
                 </motion.div>
 
-                {/* Main Headline - Zoomed, Bold & High-Impact */}
-                <motion.h1
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.05 }}
-                  className="text-4xl sm:text-6xl lg:text-[4.2rem] font-black tracking-tight leading-[1.04] text-white"
-                >
-                  Instant{' '}
-                  <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-amber-400 bg-clip-text text-transparent font-black drop-shadow-sm">
-                    Multi-Face Attendance.
-                  </span>
-                  <br />
-                  <span className="text-2xl sm:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-slate-200 block mt-2.5">
-                    Built for speed. Ready in seconds. Zero internet needed.
-                  </span>
-                </motion.h1>
+                {/* Main Headline - Crafted Typography */}
+                <div className="space-y-3">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.05 }}
+                    className="text-4xl sm:text-5xl lg:text-[3.85rem] font-extrabold tracking-[-0.035em] text-white leading-[1.08]"
+                  >
+                    Instant Multi-Face Attendance.
+                  </motion.h1>
 
-                {/* Subtitle - Polished High-Converting Copy */}
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="mt-6 text-base sm:text-lg lg:text-xl text-slate-300 max-w-xl leading-relaxed font-normal"
-                >
-                  Replace slow roll calls and expensive biometric machines with a high-speed Android app. Detect and verify multiple faces simultaneously in under 2.5 seconds with 99.8% precision, backed by seamless cloud analytics.
-                </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.08 }}
+                    className="text-xl sm:text-2xl lg:text-[1.75rem] font-semibold tracking-[-0.02em] leading-snug"
+                  >
+                    <span className="text-slate-200">Built for speed. </span>
+                    <span className="text-amber-400">Ready in seconds. </span>
+                    <span className="text-slate-400">Zero internet needed.</span>
+                  </motion.p>
+                </div>
 
-                {/* CTA Buttons - Large & Prominent */}
+                {/* Subtitle - Editorial Callout with Left Accent */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15 }}
-                  className="mt-8 flex flex-wrap items-center gap-4"
+                  transition={{ duration: 0.5, delay: 0.12 }}
+                  className="mt-6 max-w-xl border-l-2 border-amber-400/60 pl-4 py-1"
+                >
+                  <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+                    Replace slow roll calls and expensive biometric machines with a high-speed Android app. Detect and verify multiple faces simultaneously in <strong className="text-white font-semibold">under 2.5 seconds</strong> with <strong className="text-white font-semibold">99.8% precision</strong>, backed by seamless cloud analytics.
+                  </p>
+                </motion.div>
+
+                {/* CTA Buttons - Large & Tactile */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.16 }}
+                  className="mt-7 flex flex-wrap items-center gap-4"
                 >
                   {/* Direct APK Download Button */}
                   <Magnetic strength={0.35} radius={100} className="inline-block">
                     <a
                       href="/AttendEase-Release.apk"
                       download="AttendEase-v1.0.1.apk"
-                      className="group relative inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-base uppercase tracking-wide shadow-[0_6px_25px_rgba(245,158,11,0.25)] border border-amber-300/40 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
+                      className="group relative inline-flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm uppercase tracking-wide shadow-[0_4px_20px_rgba(245,158,11,0.22)] border border-amber-300/60 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
                     >
-                      <Download className="w-5 h-5 text-slate-950 stroke-[2.5] group-hover:translate-y-0.5 transition-transform duration-200" />
+                      <Download className="w-4 h-4 text-slate-950 stroke-[2.5] group-hover:translate-y-0.5 transition-transform duration-200" />
                       <div className="text-left">
-                        <div className="leading-tight font-black text-base">Download Android APK</div>
-                        <div className="text-[11px] text-slate-900/80 font-bold lowercase">direct install • 136 mb • v1.0.1</div>
+                        <div className="leading-tight font-black text-sm">Download Android APK</div>
+                        <div className="text-[10px] text-slate-900/80 font-bold lowercase">direct install • 136 mb • v1.0.1</div>
                       </div>
                     </a>
                   </Magnetic>
@@ -273,13 +281,34 @@ export default function LandingPage() {
                   <Magnetic strength={0.25} radius={90} className="inline-block">
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-white font-bold text-base border border-slate-700/80 transition-all duration-200 backdrop-blur-md shadow-sm hover:-translate-y-0.5"
+                      className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white font-bold text-sm border border-slate-700/80 transition-all duration-200 backdrop-blur-md shadow-sm hover:-translate-y-0.5"
                     >
-                      <Laptop className="w-5 h-5 text-slate-300" />
+                      <Laptop className="w-4 h-4 text-slate-300" />
                       <span>Open Web Dashboard</span>
                       <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </Magnetic>
+                </motion.div>
+
+                {/* Editorial Micro-Proof Row */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-3 gap-4 w-full max-w-xl"
+                >
+                  <div>
+                    <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Face Scan Speed</div>
+                    <div className="text-base font-extrabold text-white tracking-tight mt-0.5">&lt; 2.5s Total</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">AI Accuracy</div>
+                    <div className="text-base font-extrabold text-amber-400 tracking-tight mt-0.5">99.8% Match</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Classroom Mode</div>
+                    <div className="text-base font-extrabold text-emerald-400 tracking-tight mt-0.5">100% Offline</div>
+                  </div>
                 </motion.div>
               </div>
 

@@ -3,12 +3,12 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth.tsx';
-import { PT_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme-provider";
 
-const ptSans = PT_Sans({
+const fontSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-sans',
 });
 
@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={ptSans.className} suppressHydrationWarning>
+      <body className={fontSans.className} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
