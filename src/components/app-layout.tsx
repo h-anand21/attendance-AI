@@ -21,7 +21,7 @@ import { GlassSidebar } from "./ui/glass-sidebar";
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-300/80 dark:border-white/10 bg-slate-200/60 dark:bg-background/50 px-4 backdrop-blur-md sm:px-6 transition-colors duration-200">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-400/60 dark:border-white/10 bg-slate-300/70 dark:bg-background/50 px-4 backdrop-blur-md sm:px-6 transition-colors duration-200">
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
@@ -39,7 +39,7 @@ function Header({ pageTitle }: { pageTitle: string }) {
           </SheetContent>
         </Sheet>
       </div>
-      <h1 className="flex-1 text-2xl font-semibold">{pageTitle}</h1>
+      <h1 className="flex-1 text-2xl font-black text-black dark:text-white tracking-tight">{pageTitle}</h1>
        <ThemeToggle />
       <Button variant="ghost" size="icon" className="rounded-full">
         <Bell className="h-5 w-5" />

@@ -4,30 +4,30 @@
 
 @layer base {
   :root {
-    --background: 218 14% 90%; /* Muted titanium slate - zero harsh white */
-    --foreground: 222 47% 11%; /* Deep slate text */
-    --card: 218 16% 93%; /* Soft subdued slate card surface */
-    --card-foreground: 222 47% 11%;
-    --popover: 218 16% 93%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 38 92% 50%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 216 16% 84%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 216 16% 85%;
-    --muted-foreground: 218 16% 38%;
-    --accent: 216 16% 84%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 218 14% 78%; /* Substantially dimmed matte slate */
+    --foreground: 0 0% 0%; /* Pure deep dark black */
+    --card: 218 16% 83%; /* Dimmed muted slate card surface */
+    --card-foreground: 0 0% 0%; /* Pure deep dark black */
+    --popover: 218 16% 83%;
+    --popover-foreground: 0 0% 0%; /* Pure deep dark black */
+    --primary: 38 92% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 16% 73%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 216 16% 74%;
+    --muted-foreground: 220 40% 10%; /* Solid deep black-slate for subtext */
+    --accent: 216 16% 73%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.2% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 218 16% 80%; /* Defined, comfortable slate borders */
-    --input: 218 16% 80%;
-    --ring: 38 92% 50%;
-    --chart-1: 221 83% 53%;
-    --chart-2: 173 58% 39%;
+    --border: 218 14% 68%;
+    --input: 218 14% 68%;
+    --ring: 38 92% 45%;
+    --chart-1: 221 83% 45%;
+    --chart-2: 173 58% 35%;
     --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 0 72% 51%;
+    --chart-4: 43 74% 50%;
+    --chart-5: 0 72% 48%;
     --radius: 1rem;
   }
 
@@ -60,7 +60,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, #DCE2EC 0%, #D0D8E4 50%, #E2E7F0 100%);
+    background: linear-gradient(135deg, #B8C4D2 0%, #A6B5C6 50%, #BDCAD8 100%);
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -71,8 +71,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 10% 15%, rgba(245, 158, 11, 0.05) 0%, transparent 35%),
-                radial-gradient(circle at 90% 85%, rgba(99, 102, 241, 0.04) 0%, transparent 35%);
+    background: radial-gradient(circle at 10% 15%, rgba(245, 158, 11, 0.04) 0%, transparent 35%),
+                radial-gradient(circle at 90% 85%, rgba(99, 102, 241, 0.03) 0%, transparent 35%);
     pointer-events: none;
     z-index: -1;
   }
@@ -96,13 +96,13 @@
 
 @layer utilities {
   .glass {
-    @apply bg-slate-200/50 backdrop-blur-md border border-slate-300/80 shadow-md text-slate-900 dark:bg-black/20 dark:border-white/10 dark:text-slate-100;
+    @apply bg-slate-300/50 backdrop-blur-md border border-slate-400/60 shadow-md text-black dark:bg-black/20 dark:border-white/10 dark:text-slate-100;
   }
   .glass-card {
-    @apply bg-slate-100/65 backdrop-blur-lg border border-slate-300/85 shadow-[0_4px_20px_rgba(15,23,42,0.06)] rounded-2xl text-slate-900 dark:bg-black/40 dark:border-white/5 dark:text-slate-100;
+    @apply bg-slate-200/60 backdrop-blur-lg border border-slate-400/50 shadow-[0_4px_20px_rgba(15,23,42,0.08)] rounded-2xl text-black dark:bg-black/40 dark:border-white/5 dark:text-slate-100;
   }
   .glass-morphism {
-    @apply bg-slate-200/40 backdrop-filter backdrop-blur-lg border border-slate-300/80 shadow-md dark:bg-opacity-10 dark:border-white/20;
+    @apply bg-slate-300/40 backdrop-filter backdrop-blur-lg border border-slate-400/50 shadow-md text-black dark:bg-opacity-10 dark:border-white/20 dark:text-white;
   }
 }
 

@@ -209,19 +209,19 @@ export default function DashboardPage() {
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <GlassCard className={cn(
-              "h-full transition-all duration-300 flex flex-col border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-none",
+              "h-full transition-all duration-300 flex flex-col border-slate-400/60 dark:border-white/10 shadow-sm dark:shadow-none",
               card.title === 'AI Summary' && 'border-primary/50 bg-primary/5'
             )}>
               <GlassCardHeader className="flex flex-row items-center justify-between pb-4">
-                <GlassCardTitle className="text-sm font-medium text-muted-foreground">{card.title}</GlassCardTitle>
+                <GlassCardTitle className="text-sm font-bold text-black dark:text-muted-foreground">{card.title}</GlassCardTitle>
                 <card.icon className="h-5 w-5 text-primary/70" />
               </GlassCardHeader>
               <GlassCardContent className="space-y-1 flex-grow flex flex-col justify-center">
                 {card.value !== null && (
-                  <div className="text-3xl font-bold tracking-tight">{card.value}</div>
+                  <div className="text-3xl font-black tracking-tight text-black dark:text-white">{card.value}</div>
                 )}
                 {card.description && (
-                  <p className="text-xs text-muted-foreground">{card.description}</p>
+                  <p className="text-xs font-bold text-black/80 dark:text-muted-foreground">{card.description}</p>
                 )}
                 {card.action && <div className="pt-2">{card.action}</div>}
               </GlassCardContent>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
         <motion.div className="lg:col-span-5 space-y-4" custom={4} initial="hidden" animate="visible" variants={cardVariants}>
             <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold tracking-tight">
+                  <h2 className="text-2xl font-black text-black dark:text-white tracking-tight">
                       Your Classes
                   </h2>
                   <CreateClassDialog onClassCreate={addClass}>
@@ -265,17 +265,17 @@ export default function DashboardPage() {
                           href={`/attendance/${cls.id}`} 
                           className="group"
                         >
-                          <GlassCard className="border-slate-200/80 dark:border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col p-2 shadow-sm dark:shadow-none">
+                          <GlassCard className="border-slate-400/60 dark:border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col p-2 shadow-sm dark:shadow-none">
                             <GlassCardHeader>
                               <div className="flex justify-between items-start">
-                                <GlassCardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</GlassCardTitle>
+                                <GlassCardTitle className="text-lg font-bold text-black dark:text-white group-hover:text-primary transition-colors">{cls.name}</GlassCardTitle>
                                 <GlassBadge variant="secondary" className="text-xs">Sec. {cls.section}</GlassBadge>
                               </div>
                               <GlassCardDescription className="text-xs">Click to start attendance</GlassCardDescription>
                             </GlassCardHeader>
                             <GlassCardContent className="mt-auto">
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Users className="h-4 w-4" />
+                              <div className="flex items-center space-x-2 text-xs font-bold text-black dark:text-muted-foreground">
+                                <Users className="h-4 w-4 text-black dark:text-muted-foreground" />
                                 <span>{(studentsByClass[cls.id] || []).length} Students</span>
                               </div>
                             </GlassCardContent>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                     ))}
                 </div>
                 ) : (
-                <GlassCard className="text-center py-12 border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-none">
+                <GlassCard className="text-center py-12 border-slate-400/60 dark:border-white/10 shadow-sm dark:shadow-none">
                     <GlassCardContent>
                         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
@@ -303,10 +303,10 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
-             <GlassCard className="border-slate-200/80 dark:border-white/10 h-full flex flex-col shadow-sm dark:shadow-none">
+             <GlassCard className="border-slate-400/60 dark:border-white/10 h-full flex flex-col shadow-sm dark:shadow-none">
                 <GlassCardHeader>
                   <div className="flex justify-between items-center">
-                    <GlassCardTitle className="flex items-center gap-2 text-lg font-bold"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</GlassCardTitle>
+                    <GlassCardTitle className="flex items-center gap-2 text-lg font-black text-black dark:text-white"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</GlassCardTitle>
                     {userRole === 'admin' && (
                         <PublishNoticeDialog onPublish={addNotice}>
                             <GlassButton variant="primary" size="sm" className="h-8 px-3 text-xs">
@@ -320,9 +320,9 @@ export default function DashboardPage() {
                 <GlassCardContent className="flex-grow">
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/70 dark:bg-white/5 border-slate-200/80 dark:border-white/10 rounded-xl backdrop-blur-md shadow-xs">
-                           <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
-                           <AlertDescription className="text-[10px] text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-slate-100/70 dark:bg-white/5 border-slate-400/60 dark:border-white/10 rounded-xl backdrop-blur-md shadow-xs">
+                           <AlertTitle className="text-xs font-bold text-black dark:text-white mb-1">{notice.title}</AlertTitle>
+                           <AlertDescription className="text-[10px] font-semibold text-black/80 dark:text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -362,7 +362,7 @@ export default function DashboardPage() {
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-h-80 overflow-y-auto bg-slate-100/70 dark:bg-black/20 p-6 rounded-2xl border border-slate-200/80 dark:border-white/10">
+            <div className="prose prose-sm dark:prose-invert max-h-80 overflow-y-auto bg-slate-100/70 dark:bg-black/20 p-6 rounded-2xl border border-slate-400/60 dark:border-white/10">
               <p className="text-base leading-relaxed">{summary}</p>
             </div>
           )}

@@ -208,7 +208,7 @@ export function ReportsClient() {
         </GlassCardHeader>
         <GlassCardContent className="flex flex-wrap items-center gap-4">
           <Select value={selectedClassId} onValueChange={setSelectedClassId} disabled={classes.length === 0}>
-            <SelectTrigger className="flex-1 min-w-[200px] glass h-12 rounded-xl border-slate-200/80 dark:border-white/10">
+            <SelectTrigger className="flex-1 min-w-[200px] glass h-12 rounded-xl border-slate-400/60 dark:border-white/10">
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent className="glass">

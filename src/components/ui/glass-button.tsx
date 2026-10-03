@@ -10,10 +10,10 @@ const glassButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-slate-200/80 dark:bg-white/10 backdrop-blur-md border border-slate-300 dark:border-white/20 text-slate-800 dark:text-foreground hover:bg-slate-300/80 dark:hover:bg-white/20 shadow-xs",
-        primary: "bg-amber-500/20 dark:bg-primary/20 backdrop-blur-md border border-amber-500/40 dark:border-primary/30 text-amber-900 dark:text-primary hover:bg-amber-500/30 dark:hover:bg-primary/30 font-semibold shadow-xs",
-        outline: "bg-slate-100/60 dark:bg-transparent border border-slate-300 dark:border-white/10 hover:bg-slate-200/70 dark:hover:bg-white/5 text-slate-800 dark:text-foreground shadow-xs",
-        ghost: "hover:bg-slate-200/60 dark:hover:bg-white/10 text-slate-800 dark:text-foreground",
+        default: "bg-slate-300/80 dark:bg-white/10 backdrop-blur-md border border-slate-400 dark:border-white/20 text-slate-900 dark:text-foreground hover:bg-slate-400/60 dark:hover:bg-white/20 shadow-xs",
+        primary: "bg-amber-500/25 dark:bg-primary/20 backdrop-blur-md border border-amber-500/50 dark:border-primary/30 text-amber-950 dark:text-primary hover:bg-amber-500/35 dark:hover:bg-primary/30 font-semibold shadow-xs",
+        outline: "bg-slate-200/60 dark:bg-transparent border border-slate-400 dark:border-white/10 hover:bg-slate-300/70 dark:hover:bg-white/5 text-slate-900 dark:text-foreground shadow-xs",
+        ghost: "hover:bg-slate-300/60 dark:hover:bg-white/10 text-slate-900 dark:text-foreground",
       },
       size: {
         default: "h-11 px-6 py-2",

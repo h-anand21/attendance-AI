@@ -45,14 +45,14 @@ function SidebarLink({ href, label, icon, isMobile = false }: SidebarLinkProps) 
       className={cn(
         'group relative flex w-full items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all duration-150 select-none cursor-pointer',
         isActive
-          ? 'bg-amber-500/20 text-amber-800 dark:text-amber-400 font-bold border border-amber-500/40 dark:border-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.12)]'
-          : 'text-slate-700 hover:bg-slate-300/60 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
+          ? 'bg-amber-500/25 text-black dark:text-amber-400 font-black border border-amber-500/50 dark:border-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+          : 'text-black font-bold hover:bg-slate-400/40 hover:text-black dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
       )}
     >
       {isActive && (
         <span className="absolute -left-3 top-1/2 h-6 w-1.5 -translate-y-1/2 rounded-r-full bg-amber-500 dark:bg-amber-400 shadow-[0_0_10px_#F59E0B]" />
       )}
-      <span className={cn('transition-colors shrink-0', isActive ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-white')}>
+      <span className={cn('transition-colors shrink-0', isActive ? 'text-black dark:text-amber-400' : 'text-black dark:text-slate-400 dark:group-hover:text-white')}>
         {icon}
       </span>
       <span className="truncate">{label}</span>
@@ -110,10 +110,10 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-full w-56 flex-col border-r border-slate-300/80 dark:border-white/10 bg-slate-200/75 dark:bg-[#0B0F19]/90 p-4 backdrop-blur-xl transition-colors duration-200">
+    <aside className="fixed left-0 top-0 z-40 flex h-full w-56 flex-col border-r border-slate-400/60 dark:border-white/10 bg-slate-300/80 dark:bg-[#0B0F19]/90 p-4 backdrop-blur-xl transition-colors duration-200">
       <Link href="/dashboard" className="mb-8 flex items-center gap-2.5 px-2">
         <AppLogo className="h-8 w-8 text-amber-500 dark:text-amber-400" />
-        <span className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">AttendEase</span>
+        <span className="text-xl font-black text-black dark:text-white tracking-tight">AttendEase</span>
       </Link>
 
       <nav className="flex-1 space-y-2">
@@ -127,15 +127,15 @@ export function GlassSidebar({ isMobile = false }: { isMobile?: boolean }) {
         <div className="w-full mt-4">
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="mt-2 w-full cursor-pointer rounded-lg px-2 py-3 text-slate-700 dark:text-foreground/80 transition-colors hover:bg-slate-300/60 dark:hover:bg-white/10 hover:text-slate-950 dark:hover:text-foreground">
+                <div className="mt-2 w-full cursor-pointer rounded-lg px-2 py-3 text-black dark:text-foreground/80 transition-colors hover:bg-slate-400/40 dark:hover:bg-white/10 hover:text-black dark:hover:text-foreground">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-8 w-8 ring-1 ring-slate-200 dark:ring-white/10">
+                    <Avatar className="h-8 w-8 ring-1 ring-slate-400 dark:ring-white/10">
                     <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
-                    <AvatarFallback className="bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">{user?.displayName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-amber-500/20 text-black dark:text-amber-300 font-black">{user?.displayName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col overflow-hidden">
-                    <span className="font-semibold text-slate-900 dark:text-white truncate">{user?.displayName || 'Himanshu'}</span>
-                    <span className="text-xs text-slate-500 dark:text-muted-foreground truncate">{user?.email}</span>
+                    <span className="font-black text-black dark:text-white truncate">{user?.displayName || 'Himanshu'}</span>
+                    <span className="text-xs font-bold text-black/80 dark:text-muted-foreground truncate">{user?.email}</span>
                     </div>
                 </div>
                 </div>
