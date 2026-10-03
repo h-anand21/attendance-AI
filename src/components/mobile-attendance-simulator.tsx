@@ -300,7 +300,7 @@ export function MobileAttendanceSimulator({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.04 }}
               transition={{ duration: 0.25 }}
-              className="absolute inset-0 p-3.5 flex flex-col justify-between bg-black text-white relative overflow-hidden"
+              className="absolute inset-0 p-3.5 flex flex-col justify-between bg-black text-white overflow-hidden z-10"
             >
               {/* Header */}
               <div className="flex items-center justify-between text-[10px] relative z-10">
