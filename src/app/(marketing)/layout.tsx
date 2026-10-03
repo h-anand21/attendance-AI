@@ -1,14 +1,17 @@
+'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, Download, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { AppLogo } from '@/components/ui/app-logo';
 
 const navLinks = [
   { label: 'Features', href: '#features' },
-  { label: 'How it Works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Mobile App', href: '#mobile-app' },
+  { label: 'Web Analytics', href: '#web-analytics' },
+  { label: 'Download APK', href: '#download-apk' },
 ];
 
 export default function MarketingLayout({
@@ -17,111 +20,194 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <AppLogo className="h-6 w-6 text-primary" />
-            <span className="font-bold">AttendEase</span>
+    <div className="flex min-h-screen flex-col bg-[#08090C] text-[#F5F5F0] selection:bg-[#FFB800] selection:text-black">
+      {/* Sticky Pitch Black Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#08090C]/95 backdrop-blur-xl">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-black border border-slate-700 flex items-center justify-center shadow-[0_0_15px_rgba(255,184,0,0.2)] group-hover:border-[#FFB800] transition-colors">
+              <AppLogo className="h-5 w-5 text-[#FFB800]" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-white text-base tracking-tight leading-none group-hover:text-[#FFB800] transition-colors">
+                AttendEase
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">AI Biometrics</span>
+            </div>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="text-slate-300 transition-colors hover:text-[#FFB800] hover:scale-105"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" asChild>
+
+          {/* Right Action Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <a
+              href="/AttendEase-Release.apk"
+              download="AttendEase-v1.0.1.apk"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black text-xs font-black uppercase tracking-wider border border-black shadow-[3px_3px_0px_#000000] hover:shadow-[4px_4px_0px_#FF6B35] transition-all hover:-translate-y-0.5 active:translate-y-0.5"
+            >
+              <Download className="w-3.5 h-3.5 text-black stroke-[3]" />
+              <span>Download APK</span>
+            </a>
+            <Button
+              variant="ghost"
+              asChild
+              className="text-xs font-bold text-slate-300 hover:text-[#FFB800] hover:bg-slate-900/60"
+            >
               <Link href="/login">Sign In</Link>
             </Button>
-            <button
-              className="items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-10 px-4 py-2 inline-flex"
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#FF6B35] hover:bg-[#E55A2B] text-white text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,107,53,0.35)] hover:-translate-y-0.5"
             >
-              <Link href="/login">Get Started</Link>
-            </button>
+              Dashboard
+            </Link>
           </div>
+
+          {/* Mobile Navigation Drawer */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
+              <Button
+                variant="outline"
+                size="icon"
+                className="md:hidden bg-slate-900 border-slate-700 text-white hover:bg-slate-800"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left">
+            <SheetContent side="left" className="bg-[#0A0C11] border-r border-slate-800 text-white p-6">
               <div className="flex flex-col h-full">
-                <div className="flex items-center p-4 border-b">
-                   <Link href="/" className="flex items-center gap-2">
-                     <AppLogo className="h-6 w-6 text-primary" />
-                     <span className="font-bold">AttendEase</span>
-                   </Link>
+                <div className="flex items-center gap-2.5 pb-6 border-b border-slate-800">
+                  <div className="w-8 h-8 rounded-lg bg-black border border-slate-700 flex items-center justify-center">
+                    <AppLogo className="h-5 w-5 text-[#FFB800]" />
+                  </div>
+                  <span className="font-black text-white text-lg">AttendEase</span>
                 </div>
-                <nav className="flex-grow grid gap-4 p-4 text-lg font-medium">
+                <nav className="flex flex-col gap-4 py-6 font-semibold">
                   {navLinks.map((link) => (
                     <Link
                       key={link.label}
                       href={link.href}
-                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      className="text-slate-300 text-base py-2 hover:text-[#FFB800] transition-colors"
                     >
                       {link.label}
                     </Link>
                   ))}
                 </nav>
-                 <div className="p-4 border-t">
-                    <Button variant="ghost" asChild className='w-full justify-start mb-2'>
-                      <Link href="/login">Sign In</Link>
-                    </Button>
-                    <button
-                      className="items-center w-full justify-center whitespace-nowrap rounded-md text-sm font-medium transition-transform duration-200 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group relative animate-rainbow cursor-pointer border-0 bg-[linear-gradient(hsl(var(--card)),hsl(var(--card))),linear-gradient(hsl(var(--card))_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] bg-[length:200%] text-foreground [background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.08*1rem)_solid_transparent] before:absolute before:bottom-[-20%] before:left-1/2 before:z-[0] before:h-[20%] before:w-[60%] before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] before:[filter:blur(calc(0.8*1rem))] dark:bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(0,100%,63%),hsl(90,100%,63%),hsl(210,100%,63%),hsl(195,100%,63%),hsl(270,100%,63%))] hover:scale-105 active:scale-95 h-10 px-4 py-2 inline-flex"
-                    >
-                      <Link href="/login">Get Started</Link>
-                    </button>
-                  </div>
+                <div className="mt-auto pt-6 border-t border-slate-800 flex flex-col gap-3">
+                  <a
+                    href="/AttendEase-Release.apk"
+                    download="AttendEase-v1.0.1.apk"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FFB800] text-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000000]"
+                  >
+                    <Download className="w-4 h-4 text-black stroke-[3]" />
+                    <span>Download APK (136 MB)</span>
+                  </a>
+                  <Button variant="outline" asChild className="w-full border-slate-700 bg-slate-900 text-white">
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
         </div>
       </header>
-      <main className="flex-1">{children}</main>
-      <footer className="border-t">
-        <div className="container grid grid-cols-2 md:grid-cols-4 gap-8 py-12">
-          <div className="col-span-2 md:col-span-1">
-             <Link href="/" className="flex items-center gap-2 mb-4">
-                <AppLogo className="h-6 w-6 text-primary" />
-                <span className="font-bold">AttendEase</span>
+
+      {/* Main Content Body */}
+      <main className="flex-1 bg-[#08090C]">{children}</main>
+
+      {/* Pure Black Dark Footer */}
+      <footer className="border-t border-slate-800/80 bg-[#050608] text-slate-400">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-14">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+            {/* Brand column */}
+            <div className="md:col-span-1">
+              <Link href="/" className="flex items-center gap-2.5 mb-4 group">
+                <div className="w-8 h-8 rounded-lg bg-black border border-slate-700 flex items-center justify-center shadow-[0_0_15px_rgba(255,184,0,0.2)]">
+                  <AppLogo className="h-5 w-5 text-[#FFB800]" />
+                </div>
+                <span className="font-black text-white text-lg tracking-tight">AttendEase</span>
               </Link>
-            <p className="text-sm text-muted-foreground">Automated attendance that actually works.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Product</h4>
-            <div className="grid gap-2 text-sm">
-              <Link href="#features" className="text-muted-foreground hover:text-foreground">Features</Link>
-              <Link href="#how-it-works" className="text-muted-foreground hover:text-foreground">How it Works</Link>
-              <Link href="#pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
+              <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                Next-Gen AI Biometric Attendance ecosystem for modern schools, colleges, and enterprise classrooms.
+              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#FFB800]/10 border border-[#FFB800]/30 text-[#FFB800] text-[11px] font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#22C55E]" />
+                <span>v1.0.1 Production Released</span>
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div>
+              <h4 className="font-black text-white text-sm uppercase tracking-wider mb-4">Platform</h4>
+              <div className="grid gap-2.5 text-xs">
+                <Link href="#mobile-app" className="hover:text-[#FFB800] transition-colors">
+                  Mobile App (4-Step Flow)
+                </Link>
+                <Link href="#web-analytics" className="hover:text-[#FFB800] transition-colors">
+                  Web Analytics & Reports
+                </Link>
+                <Link href="#features" className="hover:text-[#FFB800] transition-colors">
+                  AI Face Recognition 1080p
+                </Link>
+                <a href="/AttendEase-Release.apk" download="AttendEase-v1.0.1.apk" className="text-[#FFB800] hover:underline font-bold flex items-center gap-1">
+                  <Download className="w-3 h-3" />
+                  <span>Direct Download APK</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Solutions Column */}
+            <div>
+              <h4 className="font-black text-white text-sm uppercase tracking-wider mb-4">Features</h4>
+              <div className="grid gap-2.5 text-xs">
+                <span className="text-slate-400">Multi-Face Continuous Scan</span>
+                <span className="text-slate-400">Classroom Photo Batch Scan</span>
+                <span className="text-slate-400">Student QR Code Badges</span>
+                <span className="text-slate-400">Automated Excel/PDF Export</span>
+                <span className="text-slate-400">Real-Time Cloud DB Sync</span>
+              </div>
+            </div>
+
+            {/* Quick Access Column */}
+            <div>
+              <h4 className="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Access</h4>
+              <div className="grid gap-2.5 text-xs">
+                <Link href="/login" className="hover:text-[#FFB800] transition-colors">
+                  Teacher Login
+                </Link>
+                <Link href="/dashboard" className="hover:text-[#FFB800] transition-colors">
+                  Web Admin Dashboard
+                </Link>
+                <Link href="/reports" className="hover:text-[#FFB800] transition-colors">
+                  Attendance Reports
+                </Link>
+                <a href="/api/download-apk" className="hover:text-[#FFB800] transition-colors">
+                  APK Server Mirror
+                </a>
+              </div>
             </div>
           </div>
-          <div>
-            <h4 className="font-semibold mb-3">Company</h4>
-             <div className="grid gap-2 text-sm">
-              <Link href="/about" className="text-muted-foreground hover:text-foreground">About Us</Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">Terms of Service</Link>
-            </div>
+
+          {/* Copyright Sub-bar */}
+          <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <p>© {new Date().getFullYear()} AttendEase AI Biometrics. All rights reserved.</p>
+            <p className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+              <span className="text-slate-400 font-mono">System Status: All Services Operational</span>
+            </p>
           </div>
-          <div>
-            <h4 className="font-semibold mb-3">Follow Us</h4>
-            <div className="grid gap-2 text-sm">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">Twitter</Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">LinkedIn</Link>
-            </div>
-          </div>
-        </div>
-        <div className="border-t py-6">
-           <p className="text-center text-sm text-muted-foreground">© {new Date().getFullYear()} AttendEase. All rights reserved.</p>
         </div>
       </footer>
     </div>

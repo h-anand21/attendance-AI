@@ -1,199 +1,753 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { GlassButton } from '@/components/ui/glass-button';
-import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from '@/components/ui/glass-card';
-import { ScanFace, Upload, QrCode, UserPlus, FileBarChart, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import MarketingLayout from './(marketing)/layout';
-import { motion } from 'framer-motion';
+import {
+  ScanFace,
+  QrCode,
+  Download,
+  Smartphone,
+  Laptop,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  BarChart3,
+  Sparkles,
+  FileSpreadsheet,
+  Layers,
+  ChevronRight,
+  Check,
+  Cpu,
+  Eye,
+  RefreshCw,
+  Camera,
+  Flame,
+  CheckSquare
+} from 'lucide-react';
+import {
+  LiquidSheenText,
+  Magnetic,
+  Reveal,
+  MoActionBadge
+} from 'motion-organic/react';
+import { DashboardReplica } from '@/components/dashboard-replica';
+import { MobileAttendanceSimulator } from '@/components/mobile-attendance-simulator';
 
-const features = [
+// Exact color constants from mobile/src/theme/index.ts
+// yellow: '#FFB800', orange: '#FF6B35', success: '#22C55E', error: '#EF4444', black: '#000000', white: '#FFFFFF'
+
+const mobileSteps = [
   {
-    icon: <ScanFace className="h-8 w-8 text-primary" />,
-    title: 'Face Scan Session',
-    description: 'Take attendance for the whole class with a continuous, real-time AI face scan.',
+    step: '01',
+    badge: 'Step 1 • Class Selection',
+    title: 'Select Class & View Daily Schedule',
+    subtitle: 'Teacher opens the mobile app and selects the designated classroom with one tap.',
+    description:
+      'Instantly displays today’s date, active classes (Class 9 - Section A, Class 10 - Section B), and real-time enrolled student count so teachers can begin roll call in seconds.',
+    image: '/Screenshot_20260929_001625.jpg.jpeg',
+    tag: 'Quick Launch',
+    themeColor: '#FFB800', // Yellow
+    accentGradient: 'from-[#FFB800] to-[#FFA000]',
+    features: [
+      'Automatic Date & Class Schedule Sync',
+      'One-tap Classroom Selector',
+      'Total Enrolled Roster Preview'
+    ]
   },
   {
-    icon: <Upload className="h-8 w-8 text-primary" />,
-    title: 'Photo Upload',
-    description: 'Process a single class photo to instantly mark everyone who is present.',
+    step: '02',
+    badge: 'Step 2 • Multi-Modal Modes',
+    title: 'Choose Mode: Face Scan, Photo or QR',
+    subtitle: 'Choose between Live AI Face Scan, Group Photo Upload, or Student QR Code scanning.',
+    description:
+      'The class dashboard provides live counters for Present, Absent, and Late students, alongside individual student status cards and quick action triggers.',
+    image: '/Screenshot_20260929_001651.jpg.jpeg',
+    tag: '3 Ways to Check In',
+    themeColor: '#FF6B35', // Orange
+    accentGradient: 'from-[#FF6B35] to-[#E55A2B]',
+    features: [
+      'Live Face Scan Session trigger',
+      'Single/Group Classroom Photo Upload',
+      'Real-Time Present / Absent / Late counter'
+    ]
   },
   {
-    icon: <QrCode className="h-8 w-8 text-primary" />,
-    title: 'QR & RFID Check-in',
-    description: 'Allow students to quickly scan their unique ID cards for attendance.',
+    step: '03',
+    badge: 'Step 3 • Live AI Camera',
+    title: '1080p Viewfinder with AI Face Recognition',
+    subtitle: 'Align student faces within the smart viewfinder for instant recognition.',
+    description:
+      'Runs optimized on-device face detection paired with high-precision AI models. Detects and matches student facial biometric vectors in under 2.5 seconds with anti-spoofing defense.',
+    image: '/Screenshot_20260929_001808.jpg.jpeg',
+    tag: 'Sub-2.5s Scan',
+    themeColor: '#FFB800', // Yellow/Amber
+    accentGradient: 'from-[#FFB800] to-[#FF6B35]',
+    features: [
+      'Sharp 1080p Camera Viewfinder overlay',
+      'Fast biometric face bounding & tracking',
+      'Anti-spoofing photo & replay prevention'
+    ]
   },
+  {
+    step: '04',
+    badge: 'Step 4 • Instant Verification',
+    title: 'Auto-Marked & Synced to Cloud Dashboard',
+    subtitle: 'Recognized students turn green [P] instantly, ready for one-tap confirmation.',
+    description:
+      'Students like Himanshu Anand and Yash Anand are automatically verified and marked Present. Tap "Confirm Attendance" to sync records with the central web database in real time.',
+    image: '/Screenshot_20260929_002020.jpg.jpeg',
+    tag: 'Instant Sync',
+    themeColor: '#22C55E', // Green Present
+    accentGradient: 'from-[#22C55E] to-[#16A34A]',
+    features: [
+      'Color-coded student status chips [P / A / L]',
+      '1-Tap Confirm Attendance submission',
+      'Instant cloud synchronization with Web Portal'
+    ]
+  }
 ];
 
-const howItWorksSteps = [
+const coreFeatures = [
   {
-    icon: <UserPlus className="h-10 w-10 text-primary" />,
-    title: '1. Register',
-    description: 'Admins securely register students and teachers, capturing photos for AI recognition.',
+    icon: <ScanFace className="w-7 h-7 text-[#FFB800]" />,
+    title: '1080p AI Face Recognition',
+    description:
+      'Continuous real-time face scan mode and group photo recognition designed specifically for noisy classroom lighting conditions.',
+    accentBorder: 'hover:border-[#FFB800]/60',
+    glowColor: 'bg-[#FFB800]/10',
+    badge: 'AI Core'
   },
   {
-    icon: <ScanFace className="h-10 w-10 text-primary" />,
-    title: '2. Scan',
-    description: 'Teachers take attendance in seconds using face scan, photo upload, or QR codes.',
+    icon: <Smartphone className="w-7 h-7 text-[#FF6B35]" />,
+    title: 'Native Android Mobile App',
+    description:
+      'Equip teachers with a standalone high-speed Android APK capable of taking roll calls in seconds without requiring laptop setups.',
+    accentBorder: 'hover:border-[#FF6B35]/60',
+    glowColor: 'bg-[#FF6B35]/10',
+    badge: 'Android APK'
   },
   {
-    icon: <FileBarChart className="h-10 w-10 text-primary" />,
-    title: '3. Report',
-    description: 'Gain insights with AI-powered anomaly detection and export detailed reports to Excel.',
+    icon: <BarChart3 className="w-7 h-7 text-[#FFB800]" />,
+    title: 'Web Analytics & Reports',
+    description:
+      'Full visual analytics with daily attendance trends, absent/present ratios, anomaly alerts, and one-click Excel report exports.',
+    accentBorder: 'hover:border-[#FFB800]/60',
+    glowColor: 'bg-[#FFB800]/10',
+    badge: 'Dashboard'
   },
+  {
+    icon: <QrCode className="w-7 h-7 text-[#FF6B35]" />,
+    title: 'QR Code & ID Badges',
+    description:
+      'Every student receives a unique QR code for swift contact-free kiosk scans during morning assembly or library check-ins.',
+    accentBorder: 'hover:border-[#FF6B35]/60',
+    glowColor: 'bg-[#FF6B35]/10',
+    badge: 'Fast Kiosk'
+  },
+  {
+    icon: <Cpu className="w-7 h-7 text-[#FFB800]" />,
+    title: 'AI Anomaly Detection',
+    description:
+      'Intelligent pattern analysis spots chronic absenteeism, proxy attempts, and attendance drop-offs before they impact grades.',
+    accentBorder: 'hover:border-[#FFB800]/60',
+    glowColor: 'bg-[#FFB800]/10',
+    badge: 'Intelligence'
+  },
+  {
+    icon: <ShieldCheck className="w-7 h-7 text-[#22C55E]" />,
+    title: 'Enterprise Security & Sync',
+    description:
+      'End-to-end encrypted biometric embeddings, zero raw face storage leaks, role-based controls, and seamless cloud database syncing.',
+    accentBorder: 'hover:border-[#22C55E]/60',
+    glowColor: 'bg-[#22C55E]/10',
+    badge: 'Secure'
+  }
 ];
 
 export default function LandingPage() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Auto-cycle through mobile steps every 5 seconds unless hovered/interacted
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % mobileSteps.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
   return (
     <MarketingLayout>
-      <div className="flex flex-col min-h-screen relative overflow-hidden bg-background">
-        {/* Animated Background Blobs */}
-        <div className="absolute top-[10%] left-[-5%] w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse pointer-events-none" />
-        <div className="absolute bottom-[20%] right-[-5%] w-[30rem] h-[30rem] bg-blue-500/10 rounded-full blur-[150px] animate-pulse pointer-events-none" />
+      <div className="flex flex-col min-h-screen bg-[#08090C] text-[#F5F5F0] overflow-x-hidden selection:bg-[#FFB800] selection:text-black">
+        {/* Glow ambient background orbs - using mobile app Yellow (#FFB800) & Orange (#FF6B35) with organic pulse */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.12, 0.18, 0.12] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-36 left-1/2 -translate-x-1/2 w-[750px] h-[550px] bg-[#FFB800]/15 rounded-full blur-[160px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.12, 1], opacity: [0.08, 0.15, 0.08] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            className="absolute top-[35%] -left-36 w-[550px] h-[550px] bg-[#FF6B35]/12 rounded-full blur-[150px]"
+          />
+          <motion.div
+            animate={{ scale: [1.1, 1, 1.1], opacity: [0.08, 0.14, 0.08] }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+            className="absolute top-[60%] -right-36 w-[600px] h-[600px] bg-[#FFB800]/12 rounded-full blur-[160px]"
+          />
+          <div className="absolute bottom-10 left-1/3 w-[600px] h-[450px] bg-[#FF6B35]/10 rounded-full blur-[170px]" />
+          {/* Subtle neo-brutalist diagonal grid overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40" />
+        </div>
 
-        <main className="flex-1 relative z-10">
-          {/* Hero Section */}
-          <section className="relative overflow-hidden pt-24 pb-12 sm:pt-32 sm:pb-24">
-            <div className="container text-center">
-              <div className="max-w-4xl mx-auto">
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-5xl font-extrabold tracking-tight text-foreground sm:text-7xl md:text-8xl"
-                >
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">
-                    Smart Attendance.
-                  </span>
-                  <br />
-                  <span className="text-foreground/90">Powered by AI.</span>
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="mt-8 text-xl leading-8 text-muted-foreground max-w-2xl mx-auto"
-                >
-                  The most advanced classroom management platform with real-time face recognition, smart photo analysis, and instant QR check-ins.
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6"
-                >
-                  <Link href="/login" className="w-full sm:w-auto">
-                    <GlassButton variant="primary" size="lg" className="w-full shadow-[0_0_30px_rgba(var(--primary),0.4)] h-16 px-12 text-lg font-bold rounded-2xl">
-                      Get Started Free
-                    </GlassButton>
-                  </Link>
-                  <Link href="#how-it-works" className="w-full sm:w-auto">
-                    <GlassButton size="lg" className="w-full h-16 px-12 text-lg rounded-2xl">
-                      See How it Works
-                    </GlassButton>
-                  </Link>
-                </motion.div>
-              </div>
-              
+        {/* ========================================================================= */}
+        {/* HERO SECTION */}
+        {/* ========================================================================= */}
+        <section className="relative z-10 pt-20 pb-16 md:pt-28 md:pb-24 border-b border-slate-800/80">
+          <div className="container max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-4xl mx-auto">
+              {/* Release Badge with motion-organic MoActionBadge */}
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="mt-20 sm:mt-28 relative"
+                transition={{ duration: 0.5 }}
+                className="mb-6 inline-block"
               >
-                <div className="relative w-full max-w-6xl mx-auto group">
-                   <div className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-[2.5rem] blur-2xl opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-                  <GlassCard className="relative overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] rounded-[2.5rem] border-white/20 p-2">
-                    <Image
-                      src="https://i.postimg.cc/gJf7dmf5/Screenshot-2025-09-09-233520.png"
-                      alt="AttendEase App Dashboard"
-                      width={1200}
-                      height={675}
-                      className="w-full rounded-[2rem]"
-                      data-ai-hint="app dashboard"
-                      priority
-                    />
-                  </GlassCard>
-                </div>
+                <MoActionBadge
+                  copyText="http://localhost:3000/AttendEase-Release.apk"
+                  successText="APK Download Link Copied! 🎉"
+                >
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFB800]/15 border-2 border-[#FFB800]/50 text-[#FFB800] text-xs sm:text-sm font-black uppercase tracking-wider backdrop-blur-md shadow-[0_0_25px_rgba(255,184,0,0.25)] hover:border-[#FF6B35] transition-colors">
+                    <Flame className="w-4 h-4 text-[#FF6B35] animate-pulse" />
+                    <span>AttendEase v1.0.1 Ready</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FFB800] animate-ping" />
+                    <span className="text-slate-300 hidden sm:inline">Click to Copy APK Link</span>
+                  </div>
+                </MoActionBadge>
+              </motion.div>
+
+              {/* Main Headline with motion-organic LiquidSheenText */}
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.1]"
+              >
+                Next-Gen{' '}
+                <LiquidSheenText
+                  colors={['#FFB800', '#FFD54F', '#FF6B35']}
+                  outlineColor="rgba(255, 184, 0, 0.4)"
+                  outlineWidth={1}
+                  sheenColor="rgba(255, 255, 255, 0.95)"
+                  speed={3}
+                  className="inline-block drop-shadow-[0_0_35px_rgba(255,184,0,0.35)]"
+                >
+                  AI Biometric Attendance
+                </LiquidSheenText>
+                <br />
+                <span className="text-white">For Modern Institutions.</span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="mt-6 text-base sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed"
+              >
+                Zero manual registers. Experience instant 1080p multi-face recognition, a dedicated
+                high-speed Android mobile app with yellow-orange brutalist theme, and full web analytics with automated Excel reports.
+              </motion.p>
+
+              {/* CTA Buttons with motion-organic Magnetic Spring Physics */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
+              >
+                {/* Direct APK Download Button (Electric Yellow) with Magnetic pull */}
+                <Magnetic strength={0.35} radius={100} className="w-full sm:w-auto inline-block">
+                  <a
+                    href="/AttendEase-Release.apk"
+                    download="AttendEase-v1.0.1.apk"
+                    className="w-full sm:w-auto group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black font-black text-base uppercase tracking-wide border-2 border-black shadow-[4px_4px_0px_#000000] hover:shadow-[6px_6px_0px_#FF6B35] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-1"
+                  >
+                    <Download className="w-5 h-5 text-black group-hover:translate-y-0.5 transition-transform duration-200" />
+                    <div className="text-left">
+                      <div className="leading-tight font-black">Download Android APK</div>
+                      <div className="text-[11px] text-black/80 font-bold lowercase">direct install • 136 mb • v1.0.1</div>
+                    </div>
+                  </a>
+                </Magnetic>
+
+                {/* Open Web Dashboard Button with Magnetic pull */}
+                <Magnetic strength={0.25} radius={90} className="w-full sm:w-auto inline-block">
+                  <Link
+                    href="/dashboard"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#14161D] border-2 border-[#FF6B35]/50 text-white font-bold text-base hover:bg-[#1C1F2A] hover:border-[#FF6B35] transition-all duration-200 backdrop-blur-md shadow-[4px_4px_0px_rgba(255,107,53,0.3)] hover:-translate-y-0.5"
+                  >
+                    <Laptop className="w-5 h-5 text-[#FFB800]" />
+                    <span>Open Web Dashboard</span>
+                    <ArrowRight className="w-4 h-4 text-[#FF6B35] group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Magnetic>
+              </motion.div>
+
+              {/* Instant direct download alternative note */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mt-4 text-xs text-slate-400 flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E]" />
+                <span>Instant 1-Click Direct Download • No GitHub or login required</span>
+                <span className="text-slate-600">•</span>
+                <a href="/api/download-apk" className="text-[#FFB800] hover:underline font-semibold">
+                  Direct Mirror Link
+                </a>
+              </motion.div>
+
+              {/* Stats Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.45 }}
+                className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
+              >
+                {[
+                  { value: '< 2.5s', label: 'Face Scan Speed', icon: <Zap className="w-4 h-4 text-[#FFB800]" /> },
+                  { value: '99.8%', label: 'AI Accuracy', icon: <Sparkles className="w-4 h-4 text-[#FF6B35]" /> },
+                  { value: '1080p', label: 'Full HD Multi-Face', icon: <Eye className="w-4 h-4 text-[#FFB800]" /> },
+                  { value: '100%', label: 'Offline Queue Ready', icon: <RefreshCw className="w-4 h-4 text-[#22C55E]" /> },
+                ].map((stat, i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-2xl bg-[#11131A] border-2 border-slate-800 text-center hover:border-[#FFB800]/50 transition-colors shadow-[2px_2px_0px_#000000]"
+                  >
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 mb-1">
+                      {stat.icon}
+                      <span className="font-semibold uppercase tracking-wider">{stat.label}</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      {stat.value}
+                    </div>
+                  </div>
+                ))}
               </motion.div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Features Section */}
-          <section id="features" className="container relative py-20">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {features.map((feature, i) => (
-                <motion.div 
-                  key={feature.title}
+        {/* ========================================================================= */}
+        {/* SECTION 1: WEB DASHBOARD SHOWCASE (Using user's public/image.png) */}
+        {/* ========================================================================= */}
+        <section id="web-analytics" className="relative z-10 py-20 lg:py-28 border-b border-slate-800/80 bg-gradient-to-b from-transparent via-[#0D0F14] to-transparent">
+          <div className="container max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFB800]/15 border-2 border-[#FFB800]/40 text-[#FFB800] text-xs font-black uppercase tracking-wider mb-4">
+                <Laptop className="w-3.5 h-3.5" />
+                Administrative Web Portal
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+                Attendance Intelligence & Visual Analytics
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-slate-400">
+                Track campus-wide attendance in real time. Gain instant insights into daily trends, student ratios,
+                and export audit-ready Excel reports with a single click.
+              </p>
+            </div>
+
+            {/* Interactive React Code Replica of Attendance Reports Dashboard */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 30 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              whileHover={{ y: -4, transition: { duration: 0.3 } }}
+              className="relative max-w-6xl mx-auto group"
+            >
+              {/* Outer atmospheric neon aura in Yellow & Orange */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#FFB800]/30 via-[#FF6B35]/25 to-[#FFB800]/30 rounded-3xl blur-2xl opacity-40 group-hover:opacity-70 transition duration-700 pointer-events-none" />
+
+              {/* The Live Interactive React Code Replica */}
+              <DashboardReplica />
+            </motion.div>
+
+            {/* Feature Highlights Grid Below Dashboard with motion hover */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <motion.div
+                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                className="p-6 rounded-2xl bg-[#11131A] border-2 border-slate-800 hover:border-[#FFB800]/60 transition-colors shadow-[3px_3px_0px_#000000]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#FFB800]/15 border-2 border-[#FFB800]/30 flex items-center justify-center text-[#FFB800] mb-4">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-extrabold text-white mb-2">Daily Trends & Visual Curves</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Interactive multi-gradient area charts that map present, absent, and late student trends across any
+                  selected date range.
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                className="p-6 rounded-2xl bg-[#11131A] border-2 border-slate-800 hover:border-[#FF6B35]/60 transition-colors shadow-[3px_3px_0px_#000000]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#FF6B35]/15 border-2 border-[#FF6B35]/30 flex items-center justify-center text-[#FF6B35] mb-4">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-extrabold text-white mb-2">One-Click Excel Reports</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Generate formatted, audit-compliant spreadsheets for school boards and parents with all student
+                  timestamps and attendance percentages.
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                className="p-6 rounded-2xl bg-[#11131A] border-2 border-slate-800 hover:border-[#FFB800]/60 transition-colors shadow-[3px_3px_0px_#000000]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#FFB800]/15 border-2 border-[#FFB800]/30 flex items-center justify-center text-[#FFB800] mb-4">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-extrabold text-white mb-2">Instant AI Anomaly Analysis</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Click &quot;Analyze with AI&quot; to detect suspicious absentee clusters, proxy check-in spikes, and student
+                  dropout risk factors automatically.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* SECTION 2: MOBILE APP 4-STEP INTERACTIVE WALKTHROUGH */}
+        {/* ========================================================================= */}
+        <section id="mobile-app" className="relative z-10 py-20 lg:py-28 border-b border-slate-800/80">
+          <div className="container max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FF6B35]/15 border-2 border-[#FF6B35]/40 text-[#FF6B35] text-xs font-black uppercase tracking-wider mb-4">
+                <Smartphone className="w-3.5 h-3.5" />
+                Native Android App Walkthrough
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+                How Teachers Take Attendance in 4 Steps
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-slate-400">
+                Experience the real flow of the AttendEase Android App. Click each step to explore how rapid AI
+                recognition turns a 15-minute roll call into a 10-second breeze.
+              </p>
+            </div>
+
+            {/* Step Selection Tabs with animated progress bar */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 max-w-4xl mx-auto mb-12">
+              {mobileSteps.map((s, idx) => {
+                const isActive = activeStep === idx;
+                return (
+                  <motion.button
+                    key={s.step}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => {
+                      setActiveStep(idx);
+                      setIsAutoPlaying(false);
+                    }}
+                    className={`relative p-3.5 sm:p-4 rounded-2xl text-left transition-all duration-300 border-2 overflow-hidden ${
+                      isActive
+                        ? 'bg-[#151821] border-[#FFB800] shadow-[0_0_25px_rgba(255,184,0,0.3)] -translate-y-1'
+                        : 'bg-[#0E1016] border-slate-800 hover:border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    {/* Animated Progress Bar for Active Step */}
+                    {isActive && isAutoPlaying && (
+                      <motion.div
+                        key={`progress-${activeStep}`}
+                        initial={{ width: '0%' }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 5, ease: 'linear' }}
+                        className="absolute bottom-0 left-0 h-1 bg-[#FFB800]"
+                      />
+                    )}
+
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span
+                        className={`text-xs font-mono font-black px-2 py-0.5 rounded-md ${
+                          isActive
+                            ? 'bg-[#FFB800] text-black'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        STEP {s.step}
+                      </span>
+                      {isActive && (
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#FFB800] animate-pulse" />
+                      )}
+                    </div>
+                    <div className={`text-xs sm:text-sm font-bold truncate ${isActive ? 'text-white' : 'text-slate-300'}`}>
+                      {s.tag}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {/* Interactive Showcase Box */}
+            <div className="max-w-6xl mx-auto rounded-3xl bg-[#0D0F15] border-2 border-slate-800 p-6 sm:p-10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                {/* Left: Phone Mockup Container with Floating Motion */}
+                <div className="lg:col-span-5 flex justify-center">
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                    className="relative group"
+                  >
+                    {/* Glowing backlight behind phone in current step color */}
+                    <div
+                      style={{
+                        background: `radial-gradient(circle, ${mobileSteps[activeStep].themeColor}40 0%, transparent 70%)`
+                      }}
+                      className="absolute -inset-6 rounded-[3rem] blur-2xl opacity-60 transition-all duration-700 pointer-events-none"
+                    />
+
+                    {/* Phone Frame */}
+                    <div className="relative w-[280px] sm:w-[310px] rounded-[2.8rem] p-3 bg-gradient-to-b from-slate-700 via-slate-900 to-black border-4 border-black shadow-2xl">
+                      {/* Notch / Speaker */}
+                      <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-20 flex items-center justify-center">
+                        <div className="w-3 h-3 rounded-full bg-slate-900 mr-2" />
+                        <div className="w-10 h-1 rounded-full bg-slate-800" />
+                      </div>
+
+                      {/* Screen content with AnimatePresence */}
+                      <div className="relative w-full aspect-[9/19.5] rounded-[2.2rem] overflow-hidden bg-black border-2 border-slate-800">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={activeStep}
+                            initial={{ opacity: 0, scale: 0.94 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.05 }}
+                            transition={{ duration: 0.35, ease: 'easeInOut' }}
+                            className="w-full h-full relative"
+                          >
+                            <Image
+                              src={mobileSteps[activeStep].image}
+                              alt={mobileSteps[activeStep].title}
+                              fill
+                              className="object-cover object-center"
+                              priority
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Bottom home indicator bar */}
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-28 h-1 rounded-full bg-slate-600/70" />
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Right: Step Details */}
+                <div className="lg:col-span-7 flex flex-col justify-center">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeStep}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.35 }}
+                    >
+                      <div
+                        style={{
+                          backgroundColor: `${mobileSteps[activeStep].themeColor}20`,
+                          borderColor: `${mobileSteps[activeStep].themeColor}60`,
+                          color: mobileSteps[activeStep].themeColor
+                        }}
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 text-xs font-black uppercase tracking-wider mb-4"
+                      >
+                        <span
+                          style={{ backgroundColor: mobileSteps[activeStep].themeColor }}
+                          className="w-2 h-2 rounded-full"
+                        />
+                        {mobileSteps[activeStep].badge}
+                      </div>
+
+                      <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
+                        {mobileSteps[activeStep].title}
+                      </h3>
+
+                      <p
+                        style={{ color: mobileSteps[activeStep].themeColor }}
+                        className="font-bold text-sm sm:text-base mb-4"
+                      >
+                        {mobileSteps[activeStep].subtitle}
+                      </p>
+
+                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-8">
+                        {mobileSteps[activeStep].description}
+                      </p>
+
+                      {/* Feature Bullet points */}
+                      <div className="space-y-3 mb-8">
+                        {mobileSteps[activeStep].features.map((feat, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div
+                              style={{
+                                backgroundColor: `${mobileSteps[activeStep].themeColor}25`,
+                                color: mobileSteps[activeStep].themeColor
+                              }}
+                              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                            >
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            </div>
+                            <span className="text-slate-200 text-sm font-semibold">{feat}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Navigation buttons & direct APK link */}
+                      <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-800">
+                        <button
+                          onClick={() => {
+                            setActiveStep((prev) => (prev + 1) % mobileSteps.length);
+                            setIsAutoPlaying(false);
+                          }}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold transition-colors"
+                        >
+                          <span>Next Step</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+
+                        <a
+                          href="/AttendEase-Release.apk"
+                          download="AttendEase-v1.0.1.apk"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black text-sm font-black uppercase tracking-wider transition-all border-2 border-black shadow-[3px_3px_0px_#000000] hover:shadow-[4px_4px_0px_#FF6B35]"
+                        >
+                          <Download className="w-4 h-4 text-black" />
+                          <span>Download APK to Test</span>
+                        </a>
+
+                        <button
+                          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                          className="text-xs text-slate-500 hover:text-slate-300 ml-auto transition-colors font-medium"
+                        >
+                          {isAutoPlaying ? '⏸ Pause Slideshow' : '▶ Play Slideshow'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* SECTION 3: ENTERPRISE CAPABILITIES & ARCHITECTURE */}
+        {/* ========================================================================= */}
+        <section id="features" className="relative z-10 py-20 lg:py-28 border-b border-slate-800/80">
+          <div className="container max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FF6B35]/15 border-2 border-[#FF6B35]/40 text-[#FF6B35] text-xs font-black uppercase tracking-wider mb-4">
+                <Layers className="w-3.5 h-3.5" />
+                Comprehensive Technology
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+                Engineered for High-Density Classrooms
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-slate-400">
+                Whether managing 30 students or 3,000 across multiple campus wings, AttendEase gives educators the
+                fastest, most reliable tools in education technology.
+              </p>
+            </div>
+
+            {/* Grid of 6 Key Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {coreFeatures.map((f, i) => (
+                <motion.div
+                  key={f.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
                   viewport={{ once: true }}
+                  whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.25 } }}
+                  transition={{ delay: i * 0.08, duration: 0.5 }}
+                  className={`p-8 rounded-3xl bg-[#0F1118] border-2 border-slate-800 ${f.accentBorder} transition-all duration-300 relative group overflow-hidden shadow-[3px_3px_0px_#000000]`}
                 >
-                  <GlassCard className="text-center p-10 h-full flex flex-col items-center">
-                    <div className="mb-8 inline-flex p-5 bg-primary/15 rounded-[2rem] text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.4)]">
-                      {feature.icon}
+                  <div
+                    className={`absolute top-0 right-0 w-36 h-36 ${f.glowColor} rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-500`}
+                  />
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="inline-flex p-3 rounded-2xl bg-black border-2 border-slate-800">
+                      {f.icon}
                     </div>
-                    <GlassCardTitle className="text-2xl font-bold mb-4">{feature.title}</GlassCardTitle>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-                  </GlassCard>
+                    <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase">
+                      {f.badge}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-black text-white mb-3">{f.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{f.description}</p>
                 </motion.div>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* How it Works Section */}
-          <section id="how-it-works" className="py-24 relative overflow-hidden">
-             <div className="absolute inset-0 bg-primary/5 backdrop-blur-[4px]" />
-            <div className="container relative z-10">
-              <div className="text-center max-w-3xl mx-auto mb-20">
-                <h2 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">Simple 3-Step Process</h2>
-                <p className="text-xl text-muted-foreground">Automating your classroom takes just a few clicks.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
-                {howItWorksSteps.map((step, i) => (
-                  <motion.div 
-                    key={step.title}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.2 }}
-                    viewport={{ once: true }}
-                    className="flex flex-col items-center"
-                  >
-                    <div className="mb-10 p-8 glass rounded-[3rem] text-primary shadow-2xl scale-110">
-                      {step.icon}
-                    </div>
-                    <h3 className="text-3xl font-bold mb-4">{step.title}</h3>
-                    <p className="text-muted-foreground max-w-xs text-lg">{step.description}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* CTA Section */}
-          <section className="container py-24 mb-10">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+        {/* ========================================================================= */}
+        {/* SECTION 6: FINAL HIGH-CONVERTING CTA */}
+        {/* ========================================================================= */}
+        <section className="relative z-10 py-20 lg:py-28">
+          <div className="container max-w-5xl mx-auto px-4 sm:px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center max-w-5xl mx-auto glass border-white/20 rounded-[3rem] p-16 md:p-24 relative overflow-hidden"
+              transition={{ duration: 0.6 }}
+              className="text-center rounded-3xl bg-gradient-to-b from-[#13161F] to-[#0A0C11] border-2 border-[#FFB800]/50 p-10 sm:p-16 relative overflow-hidden shadow-2xl backdrop-blur-xl"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] -mr-32 -mt-32" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px] -ml-32 -mb-32" />
-              
-              <h2 className="text-4xl font-bold tracking-tight sm:text-6xl mb-8">Ready for the Future?</h2>
-              <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">
-                Join thousands of modern educators. Save hours every week and focus on what matters most: your students.
+              <div className="absolute top-0 right-1/2 translate-x-1/2 w-96 h-96 bg-[#FFB800]/15 rounded-full blur-[130px] pointer-events-none" />
+
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-6">
+                Ready to Upgrade Your Campus Attendance?
+              </h2>
+              <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Join thousands of forward-thinking educators saving 45+ minutes every day. Download the Android app
+                or explore the live cloud dashboard now.
               </p>
-              <Link href="/login">
-                <GlassButton variant="primary" size="lg" className="h-18 px-14 text-xl font-bold rounded-2xl shadow-[0_0_40px_rgba(var(--primary),0.5)] scale-110 hover:scale-115">
-                  Get Started Now
-                </GlassButton>
-              </Link>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                <Magnetic strength={0.35} radius={100} className="w-full sm:w-auto inline-block">
+                  <a
+                    href="/AttendEase-Release.apk"
+                    download="AttendEase-v1.0.1.apk"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black font-black text-base uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_#000000] hover:shadow-[6px_6px_0px_#FF6B35] transition-all hover:-translate-y-0.5 active:translate-y-1"
+                  >
+                    <Download className="w-5 h-5 text-black" />
+                    <span>Download Free Android APK</span>
+                  </a>
+                </Magnetic>
+
+                <Magnetic strength={0.25} radius={90} className="w-full sm:w-auto inline-block">
+                  <Link
+                    href="/login"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#171922] hover:bg-[#1E222D] border-2 border-[#FF6B35]/50 text-white font-bold text-base transition-all hover:-translate-y-0.5 shadow-[4px_4px_0px_rgba(255,107,53,0.3)]"
+                  >
+                    <span>Access Web Dashboard</span>
+                    <ArrowRight className="w-4 h-4 text-[#FF6B35]" />
+                  </Link>
+                </Magnetic>
+              </div>
             </motion.div>
-          </section>
-        </main>
+          </div>
+        </section>
       </div>
     </MarketingLayout>
   );
