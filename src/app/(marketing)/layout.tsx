@@ -20,16 +20,16 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#08090C] text-[#F5F5F0] selection:bg-[#FFB800] selection:text-black">
-      {/* Sticky Pitch Black Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#08090C]/95 backdrop-blur-xl">
+    <div className="flex min-h-screen flex-col bg-[#0B0F19] text-[#F1F5F9] selection:bg-amber-400 selection:text-black">
+      {/* Sticky Refined Dark Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-[#0B0F19]/90 backdrop-blur-xl">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-black border border-slate-700 flex items-center justify-center shadow-[0_0_15px_rgba(255,184,0,0.2)] group-hover:border-[#FFB800] transition-colors">
-              <AppLogo className="h-5 w-5 text-[#FFB800]" />
+            <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center shadow-sm group-hover:border-amber-400 transition-colors">
+              <AppLogo className="h-5 w-5 text-amber-400" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-white text-base tracking-tight leading-none group-hover:text-[#FFB800] transition-colors">
+              <span className="font-extrabold text-white text-base tracking-tight leading-none group-hover:text-amber-400 transition-colors">
                 AttendEase
               </span>
               <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">AI Biometrics</span>
@@ -42,7 +42,7 @@ export default function MarketingLayout({
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-slate-300 transition-colors hover:text-[#FFB800] hover:scale-105"
+                className="text-slate-300 transition-colors hover:text-amber-400"
               >
                 {link.label}
               </Link>
@@ -54,21 +54,21 @@ export default function MarketingLayout({
             <a
               href="/AttendEase-Release.apk"
               download="AttendEase-v1.0.1.apk"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFB800] hover:bg-[#FFC700] text-black text-xs font-black uppercase tracking-wider border border-black shadow-[3px_3px_0px_#000000] hover:shadow-[4px_4px_0px_#FF6B35] transition-all hover:-translate-y-0.5 active:translate-y-0.5"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition-all shadow-sm active:translate-y-0.5"
             >
-              <Download className="w-3.5 h-3.5 text-black stroke-[3]" />
+              <Download className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
               <span>Download APK</span>
             </a>
             <Button
               variant="ghost"
               asChild
-              className="text-xs font-bold text-slate-300 hover:text-[#FFB800] hover:bg-slate-900/60"
+              className="text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60"
             >
               <Link href="/login">Sign In</Link>
             </Button>
             <Link
-              href="/login"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#FF6B35] hover:bg-[#E55A2B] text-white text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,107,53,0.35)] hover:-translate-y-0.5"
+              href="/dashboard"
+              className="inline-flex items-center justify-center px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-all shadow-sm"
             >
               Dashboard
             </Link>
