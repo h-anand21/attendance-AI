@@ -209,7 +209,7 @@ export default function DashboardPage() {
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <GlassCard className={cn(
-              "h-full transition-all duration-300 flex flex-col border-white/10",
+              "h-full transition-all duration-300 flex flex-col border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-none",
               card.title === 'AI Summary' && 'border-primary/50 bg-primary/5'
             )}>
               <GlassCardHeader className="flex flex-row items-center justify-between pb-4">
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                           href={`/attendance/${cls.id}`} 
                           className="group"
                         >
-                          <GlassCard className="border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col p-2">
+                          <GlassCard className="border-slate-200/80 dark:border-white/10 hover:border-primary/50 transition-all duration-300 h-full flex flex-col p-2 shadow-sm dark:shadow-none">
                             <GlassCardHeader>
                               <div className="flex justify-between items-start">
                                 <GlassCardTitle className="text-lg group-hover:text-primary transition-colors">{cls.name}</GlassCardTitle>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                     ))}
                 </div>
                 ) : (
-                <GlassCard className="text-center py-12 border-white/10">
+                <GlassCard className="text-center py-12 border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-none">
                     <GlassCardContent>
                         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-20" />
                         <h3 className="text-xl font-semibold mb-2">No Classes Found</h3>
@@ -303,7 +303,7 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div className="lg:col-span-2 space-y-4" custom={5} initial="hidden" animate="visible" variants={cardVariants}>
-             <GlassCard className="border-white/10 h-full flex flex-col">
+             <GlassCard className="border-slate-200/80 dark:border-white/10 h-full flex flex-col shadow-sm dark:shadow-none">
                 <GlassCardHeader>
                   <div className="flex justify-between items-center">
                     <GlassCardTitle className="flex items-center gap-2 text-lg font-bold"><Megaphone className="h-5 w-5 text-primary" /> Notice Board</GlassCardTitle>
@@ -320,13 +320,13 @@ export default function DashboardPage() {
                 <GlassCardContent className="flex-grow">
                    <div className="space-y-3">
                      {notices.length > 0 ? notices.slice(0, 5).map((notice) => (
-                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/5 border-white/10 rounded-xl backdrop-blur-md">
+                        <Alert key={notice.id} className="relative pr-10 text-xs bg-white/70 dark:bg-white/5 border-slate-200/80 dark:border-white/10 rounded-xl backdrop-blur-md shadow-xs">
                            <AlertTitle className="text-xs font-semibold mb-1">{notice.title}</AlertTitle>
                            <AlertDescription className="text-[10px] text-muted-foreground">{getFormattedNoticeTime(notice.createdAt)}</AlertDescription>
                            {userRole === 'admin' && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                                    <button className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
                                         <MoreVertical className="h-4 w-4" />
                                     </button>
                                 </DropdownMenuTrigger>
@@ -350,7 +350,7 @@ export default function DashboardPage() {
       </div>
 
         <Dialog open={isSummaryModalOpen} onOpenChange={setSummaryModalOpen}>
-        <DialogContent className="glass border-white/20 p-8">
+        <DialogContent className="glass border-slate-200/80 dark:border-white/20 p-8 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">AI Attendance Summary</DialogTitle>
             <DialogDescription className="text-base">
@@ -362,7 +362,7 @@ export default function DashboardPage() {
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-h-80 overflow-y-auto bg-black/20 p-6 rounded-2xl border border-white/10">
+            <div className="prose prose-sm dark:prose-invert max-h-80 overflow-y-auto bg-slate-100/70 dark:bg-black/20 p-6 rounded-2xl border border-slate-200/80 dark:border-white/10">
               <p className="text-base leading-relaxed">{summary}</p>
             </div>
           )}

@@ -21,11 +21,11 @@ import { GlassSidebar } from "./ui/glass-sidebar";
 
 function Header({ pageTitle }: { pageTitle: string }) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-white/10 bg-background/50 px-4 backdrop-blur-sm sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-300/80 dark:border-white/10 bg-slate-200/60 dark:bg-background/50 px-4 backdrop-blur-md sm:px-6 transition-colors duration-200">
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="bg-transparent hover:bg-white/10">
+            <Button size="icon" variant="outline" className="bg-transparent hover:bg-slate-100 dark:hover:bg-white/10">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
@@ -75,7 +75,7 @@ export function AppLayout({
   }
 
   return (
-      <div className="flex min-h-screen w-full flex-col bg-background/95">
+      <div className="flex min-h-screen w-full flex-col bg-background/70 transition-colors duration-200">
           <div className="hidden md:block">
             <GlassSidebar />
           </div>

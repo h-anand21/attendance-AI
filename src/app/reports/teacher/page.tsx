@@ -23,7 +23,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { FileDown, Loader2 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +41,7 @@ export default function TeacherReportsPage() {
     return classInfo ? `${classInfo.name} - Sec. ${classInfo.section}` : classId;
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (teachers.length === 0) {
       toast({
         variant: 'destructive',
@@ -53,6 +52,7 @@ export default function TeacherReportsPage() {
     }
     setIsExporting(true);
     try {
+      const XLSX = await import('xlsx');
       const dataForSheet = teachers.map(teacher => ({
         'Teacher ID': teacher.id,
         'Name': teacher.name,

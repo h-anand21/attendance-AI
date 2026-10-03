@@ -36,7 +36,6 @@ import { format, subDays, eachDayOfInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { analyzeAttendanceAnomalies } from '@/ai/flows/analyze-attendance-anomalies';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import * as XLSX from 'xlsx';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 
@@ -107,7 +106,7 @@ export function ReportsClient() {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (filteredRecords.length === 0) {
       toast({
         variant: 'destructive',
@@ -119,6 +118,7 @@ export function ReportsClient() {
     setIsExporting(true);
 
     try {
+        const XLSX = await import('xlsx');
         const studentsInClass = studentsByClass[selectedClassId] || [];
         const studentSummary: any[] = [];
         if (dateRange?.from && dateRange?.to) {
@@ -193,7 +193,10 @@ export function ReportsClient() {
         acc[name] = (acc[name] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
-    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
+
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count: Number(count) }))
+      .sort((a, b) => b.count - a.count);
   }, [anomalies, selectedClassId]);
 
   return (
@@ -205,7 +208,7 @@ export function ReportsClient() {
         </GlassCardHeader>
         <GlassCardContent className="flex flex-wrap items-center gap-4">
           <Select value={selectedClassId} onValueChange={setSelectedClassId} disabled={classes.length === 0}>
-            <SelectTrigger className="flex-1 min-w-[200px] glass h-12 rounded-xl border-white/10">
+            <SelectTrigger className="flex-1 min-w-[200px] glass h-12 rounded-xl border-slate-200/80 dark:border-white/10">
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent className="glass">

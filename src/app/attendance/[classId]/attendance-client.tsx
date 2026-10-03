@@ -24,7 +24,6 @@ import { QrScanModal } from './qr-scan-modal';
 import { useStudents } from '@/hooks/use-students';
 import { useAttendance } from '@/hooks/use-attendance';
 import { PhotoUploadModal } from './photo-upload-modal';
-import * as XLSX from 'xlsx';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 const toLocalDateString = (date: Date): string => {
@@ -139,7 +138,7 @@ export function AttendanceClient({
     });
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setIsExporting(true);
     try {
         const recordsToExport = attendanceRecords.filter(record => record.classId === currentClass.id);
@@ -154,6 +153,7 @@ export function AttendanceClient({
             return;
         }
 
+        const XLSX = await import('xlsx');
         const dataForSheet = recordsToExport.map(record => {
             const student = students.find(s => s.id === record.studentId);
             return {

@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.EXT_PUBLIC_FIREBASE_API_KEY,
   },
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/googleai',
+    '@genkit-ai/core',
+    'handlebars',
+    'dotprompt',
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },

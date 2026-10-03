@@ -8,14 +8,14 @@ const glassBadgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-white/20 bg-white/10 text-foreground hover:bg-white/20",
+          "border-slate-300/80 dark:border-white/20 bg-slate-100/90 dark:bg-white/10 text-slate-800 dark:text-foreground hover:bg-slate-200/90 dark:hover:bg-white/20",
         primary:
-          "border-primary/30 bg-primary/20 text-primary hover:bg-primary/30",
+          "border-amber-500/40 dark:border-primary/30 bg-amber-500/15 dark:bg-primary/20 text-amber-800 dark:text-primary hover:bg-amber-500/25 dark:hover:bg-primary/30 font-semibold",
         secondary:
-          "border-secondary/30 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30",
+          "border-slate-300/80 dark:border-secondary/30 bg-slate-100/90 dark:bg-secondary/20 text-slate-700 dark:text-secondary-foreground hover:bg-slate-200/90 dark:hover:bg-secondary/30",
         destructive:
-          "border-destructive/30 bg-destructive/20 text-destructive-foreground hover:bg-destructive/30",
-        outline: "text-foreground border-white/10 bg-transparent",
+          "border-destructive/30 bg-destructive/15 text-destructive hover:bg-destructive/25",
+        outline: "text-slate-800 dark:text-foreground border-slate-300/80 dark:border-white/10 bg-transparent",
       },
     },
     defaultVariants: {

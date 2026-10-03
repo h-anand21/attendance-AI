@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 212.7 26.8% 93.9%;
-    --foreground: 220 20% 25%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 25%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 25%;
-    --primary: 210 90% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 10% 90%;
-    --secondary-foreground: 220 20% 25%;
-    --muted: 220 10% 90%;
-    --muted-foreground: 220 15% 45%;
-    --accent: 220 10% 90%;
-    --accent-foreground: 220 20% 25%;
+    --background: 218 14% 90%; /* Muted titanium slate - zero harsh white */
+    --foreground: 222 47% 11%; /* Deep slate text */
+    --card: 218 16% 93%; /* Soft subdued slate card surface */
+    --card-foreground: 222 47% 11%;
+    --popover: 218 16% 93%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 216 16% 84%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 216 16% 85%;
+    --muted-foreground: 218 16% 38%;
+    --accent: 216 16% 84%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 85%;
-    --input: 220 10% 85%;
-    --ring: 210 90% 50%;
+    --border: 218 16% 80%; /* Defined, comfortable slate borders */
+    --input: 218 16% 80%;
+    --ring: 38 92% 50%;
     --chart-1: 221 83% 53%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -60,6 +60,21 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: linear-gradient(135deg, #DCE2EC 0%, #D0D8E4 50%, #E2E7F0 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 15%, rgba(245, 158, 11, 0.05) 0%, transparent 35%),
+                radial-gradient(circle at 90% 85%, rgba(99, 102, 241, 0.04) 0%, transparent 35%);
+    pointer-events: none;
+    z-index: -1;
   }
   .dark body {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
@@ -81,13 +96,13 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl dark:bg-black/20 dark:border-white/10;
+    @apply bg-slate-200/50 backdrop-blur-md border border-slate-300/80 shadow-md text-slate-900 dark:bg-black/20 dark:border-white/10 dark:text-slate-100;
   }
   .glass-card {
-    @apply bg-white/5 backdrop-blur-lg border border-white/20 shadow-2xl rounded-2xl dark:bg-black/40 dark:border-white/5;
+    @apply bg-slate-100/65 backdrop-blur-lg border border-slate-300/85 shadow-[0_4px_20px_rgba(15,23,42,0.06)] rounded-2xl text-slate-900 dark:bg-black/40 dark:border-white/5 dark:text-slate-100;
   }
   .glass-morphism {
-    @apply bg-opacity-10 backdrop-filter backdrop-blur-lg border border-opacity-20 border-white shadow-lg;
+    @apply bg-slate-200/40 backdrop-filter backdrop-blur-lg border border-slate-300/80 shadow-md dark:bg-opacity-10 dark:border-white/20;
   }
 }
 
